@@ -63,7 +63,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("com.google.code.gson:gson:2.10.1")
 
-    //Solid Client Library
+    //Solid Android client Module
+    implementation(project(":solid-client-android"))
+
+    //Solid Java Client Library
     implementation(platform("com.inrupt.client:inrupt-client-bom:1.2.0-SNAPSHOT"))
     implementation("com.inrupt.client:inrupt-client-api")
     implementation("com.inrupt.client:inrupt-client-solid")
