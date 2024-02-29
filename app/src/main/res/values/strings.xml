@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Android Solid Services</string>
+    <string name="login">Login</string>
+    <string name="webid_input_hint">Your Web ID</string>
+    <string name="logout">Logout</string>
+    <string name="login_with_inrupt">Login with Inrupt.com</string>
+    <string name="login_with_solidcommunity">Login with Solidcommunity</string>
 </resources>

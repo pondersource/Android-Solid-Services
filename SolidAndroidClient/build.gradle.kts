@@ -1,26 +1,22 @@
 plugins {
-    id("com.android.application")
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
 }
 
 android {
-    namespace = "com.pondersource.androidsolidservices"
-    compileSdk = 34
+    namespace = "com.pondersource.solidandroidclient"
+    compileSdk = 33
+
     defaultConfig {
-        applicationId = "com.pondersource.androidsolidservices"
         minSdk = 26
-        targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        manifestPlaceholders["appAuthRedirectScheme"] = "com.pondersource.androidsolidservices"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -31,12 +27,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
-    }
-
-    buildFeatures {
-        viewBinding = true
     }
 
     packaging {
@@ -57,19 +50,27 @@ android {
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
-    implementation(project(":SolidAndroidClient"))
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+
     implementation("com.google.code.gson:gson:2.10.1")
 
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+    //Solid Java Client Library
+    implementation(platform("com.inrupt.client:inrupt-client-bom:1.1.0"))
+    implementation("com.inrupt.client:inrupt-client-api")
+    implementation("com.inrupt.client:inrupt-client-solid")
+    implementation("com.inrupt.client:inrupt-client-core")
+    implementation("com.inrupt.client:inrupt-client-okhttp")
+    implementation("com.inrupt.client:inrupt-client-jackson")
+    implementation("com.inrupt.client:inrupt-client-jena")
+    implementation("com.inrupt.client:inrupt-client-accessgrant")
+    implementation("com.inrupt.client:inrupt-client-openid")
+    implementation("com.inrupt.client:inrupt-client-uma")
+    implementation("com.inrupt.client:inrupt-client-vocabulary")
+    implementation("com.inrupt.client:inrupt-client-webid")
 
     implementation("net.openid:appauth:0.11.1")
-
 }
