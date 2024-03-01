@@ -94,7 +94,7 @@ class Authenticator {
                             Uri.parse(redirectUri))
 
                         val authRequest = builder
-                            .setScope("openid +offline_access")
+                            .setScopes("openid", "offline_access", "webid")
                             .setPrompt("consent")
                             .setResponseMode(AuthorizationRequest.ResponseMode.QUERY)
                             .build()
