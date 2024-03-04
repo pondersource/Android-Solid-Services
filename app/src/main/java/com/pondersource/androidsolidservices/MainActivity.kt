@@ -27,6 +27,7 @@ class MainActivity: AppCompatActivity() {
 
         setContentView(binding.root)
 
+        binding.tvWebid.text = "Your WebID is: ${authViewModel.getProfile().userInfo!!.webId}"
         handleAccountManagement()
 
         binding.logoutBtn.setOnClickListener {
@@ -46,7 +47,7 @@ class MainActivity: AppCompatActivity() {
     fun handleAccountManagement() {
         val accountManager = AccountManager.get(this)
         account = Account(
-            resources.getString(R.string.solid_account_acc_type),
+            authViewModel.getProfile().userInfo!!.webId,
             resources.getString(R.string.solid_account_acc_type)
         )
 

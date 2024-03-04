@@ -2,9 +2,19 @@ package com.pondersource.solidandroidclient
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
+import com.github.jsonldjava.shaded.com.google.common.net.HttpHeaders.ACCEPT
+import com.google.gson.Gson
+import com.inrupt.client.Request
+import com.inrupt.client.Response
 import com.inrupt.client.auth.Session
+import com.inrupt.client.openid.OpenIdSession
 import com.inrupt.client.solid.SolidSyncClient
+import com.pondersource.solidandroidclient.data.Profile
+import com.pondersource.solidandroidclient.data.RefreshTokenResponse
+import com.pondersource.solidandroidclient.data.UserInfo
+import com.pondersource.solidandroidclient.data.fromJsonStringToUserInfo
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
@@ -18,173 +28,129 @@ import net.openid.appauth.RegistrationResponse
 import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.TokenResponse
 import java.net.URI
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 class Authenticator {
 
     companion object {
+
+        private const val SHARED_PREFERENCES_NAME = "solid_android_auth"
+        private const val PROFILE_STATE_KEY = "profile_state"
+        private const val PROFILE_USER_INFO_KEY = "profile_user_info"
+        private const val PROFILE_WEB_ID_DETAILS_KEY = "profile_web_id_details"
+
         @Volatile
         private lateinit var INSTANCE: Authenticator
 
-        fun getInstance(context: Context, authState: AuthState? = null): Authenticator {
+        fun getInstance(context: Context): Authenticator {
             return if (::INSTANCE.isInitialized) {
                 INSTANCE
             } else {
-                INSTANCE = if (authState == null) {
-                    Authenticator(context)
-                } else {
-                    Authenticator(context, authState)
-                }
+                INSTANCE = Authenticator(context)
                 INSTANCE
             }
         }
     }
 
+    private var sharedPreferences: SharedPreferences
     private val authService: AuthorizationService
-    private var authState: AuthState
+    private var profile: Profile
 
-    private constructor(context: Context) : this(context, AuthState())
-
-    private constructor(context: Context, authState: AuthState) {
+    private constructor(context: Context) {
+        sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+        this.profile = readProfileFromCache()
         this.authService = AuthorizationService(context)
-        this.authState = authState
     }
 
-    fun getAuthState() = authState
+    private fun readProfileFromCache(): Profile {
+        val profile = Profile()
+        val stateString = sharedPreferences.getString(PROFILE_STATE_KEY, null)
+        if (!stateString.isNullOrEmpty()) {
+            profile.authState =  AuthState.jsonDeserialize(stateString)
+        }
+        profile.userInfo = Gson().fromJson(sharedPreferences.getString(PROFILE_USER_INFO_KEY, null), UserInfo::class.java)
+        profile.webIdDetails = Gson().fromJson(sharedPreferences.getString(
+            PROFILE_WEB_ID_DETAILS_KEY, null), WebId::class.java)
 
-    fun isLoggedIn(): Boolean {
-        return authState.isAuthorized
+        return profile
+    }
+
+    private fun writeProfileToCache() {
+        sharedPreferences.edit().apply {
+            putString(PROFILE_STATE_KEY, profile.authState.jsonSerializeString())
+            putString(PROFILE_USER_INFO_KEY, Gson().toJson(profile.userInfo))
+            putString(PROFILE_WEB_ID_DETAILS_KEY, Gson().toJson(profile.webIdDetails))
+            apply()
+        }
+    }
+
+    fun getAuthState() = profile.authState
+    fun getProfile() = profile
+
+    fun isUserAuthorized(): Boolean {
+        return profile.authState.isAuthorized
     }
 
     fun needsTokenRefresh(): Boolean {
-        return authState.needsTokenRefresh
+        return profile.authState.needsTokenRefresh
     }
 
-    fun createAuthenticationIntentWithWebId(
+    suspend fun createAuthenticationIntentWithWebId(
         webId: String,
         redirectUri: String,
-        callback: (response: Intent?, errorMessage: String?) -> Unit
-    ) {
+    ) : Pair<Intent?, String?> {
         val webIdDetails = getWebIdDetails(webId)
 
-        createAuthenticationIntentWithOidcIssuer(webIdDetails.oidcIssuer.id, redirectUri, callback)
+        return createAuthenticationIntentWithOidcIssuer(webIdDetails.oidcIssuer.id, redirectUri)
     }
 
-    fun createAuthenticationIntentWithOidcIssuer(
+    suspend fun createAuthenticationIntentWithOidcIssuer(
         oidcIssuer: String,
         redirectUri: String,
-        callback: (response: Intent?, errorMessage: String?) -> Unit
-    ) {
+    ) : Pair<Intent?, String?> {
 
-        AuthorizationServiceConfiguration.fetchFromIssuer(Uri.parse(oidcIssuer)) { serviceConfiguration, exception ->
-            if (serviceConfiguration != null) {
+        val conf = getAuthorizationConf(oidcIssuer)
 
-                registerToOpenId(
-                    serviceConfiguration,
-                    redirectUri
-                ) { response, ex ->
+        return if (conf.first != null) {
 
-                    authState.update(response)
+            registerToOpenId(conf.first!!, redirectUri)
 
-                    if (response != null) {
-                        val builder = AuthorizationRequest.Builder(
-                            serviceConfiguration,
-                            response.clientId,
-                            ResponseTypeValues.CODE,
-                            Uri.parse(redirectUri))
+            if (profile.authState.lastRegistrationResponse != null) {
+                val builder = AuthorizationRequest.Builder(
+                    conf.first!!,
+                    profile.authState.lastRegistrationResponse!!.clientId,
+                    ResponseTypeValues.CODE,
+                    Uri.parse(redirectUri))
 
-                        val authRequest = builder
-                            .setScopes("openid", "offline_access", "webid")
-                            .setPrompt("consent")
-                            .setResponseMode(AuthorizationRequest.ResponseMode.QUERY)
-                            .build()
+                val authRequest = builder
+                    .setScopes( "webid", "openid", "offline_access",)
+                    .setPrompt("consent")
+                    .setResponseMode(AuthorizationRequest.ResponseMode.QUERY)
+                    .build()
 
-                        val authIntent = authService.getAuthorizationRequestIntent(authRequest)
-                        callback(authIntent, null)
-                    }
-                    else {
-                        callback(null, "can not register to OpenId")
-                    }
-                }
+                val authIntent = authService.getAuthorizationRequestIntent(authRequest)
+                Pair(authIntent, null)
             }
             else {
-               callback(null, "can not get access to web-id issuer configurations.")
-            }
-        }
-    }
-
-    fun requestToken() {
-        requestToken{ tokenResponse, authorizationException ->
-            //DO NOTHING
-        }
-    }
-
-    fun requestToken(
-        callback: (TokenResponse?, AuthorizationException?) -> (Unit)
-    ) {
-        if (authState.lastAuthorizationResponse != null) {
-            authService.performTokenRequest(
-                authState.lastAuthorizationResponse!!.createTokenExchangeRequest(),
-                ClientSecretBasic(authState.lastRegistrationResponse!!.clientSecret!!)
-            ) { tokenResponse, exception ->
-
-                updateTokenResponse(tokenResponse, exception)
-                callback(tokenResponse, exception)
+                Pair(null, "can not register to OpenId")
             }
         } else {
-            callback(null, authState.authorizationException)
+            Pair(null, "can not get access to web-id issuer configurations.")
         }
     }
 
-    fun updateAuthorizationResponse(
-        authResponse: AuthorizationResponse?,
-        authException: AuthorizationException?
-    ) {
-        authState.update(authResponse, authException)
-    }
-
-    fun updateTokenResponse(
-        tokenResponse: TokenResponse?,
-        authException: AuthorizationException?
-    ) {
-        authState.update(tokenResponse, authException)
-    }
-
-    fun getToken(
-        callback: (String?, String?, AuthorizationException?) -> (Unit)
-    ) {
-        authState.performActionWithFreshTokens(
-            authService,
-            ClientSecretBasic(authState.lastRegistrationResponse!!.clientSecret!!),
-            callback
-        )
-    }
-
-    fun terminateSession(
-        logoutRedirectUrl: String,
-        callback: (endSessionIntent: Intent?, errorMessage: String?) -> (Unit)
-    ) {
-
-        if (authState.lastAuthorizationResponse != null &&
-            authState.authorizationServiceConfiguration != null) {
-
-            getToken { accessToken, idToken, ex ->
-                if (idToken != null) {
-                    val endSessionReq = EndSessionRequest.Builder(authState.authorizationServiceConfiguration!!)
-                        .setIdTokenHint(idToken)
-                        .setPostLogoutRedirectUri(Uri.parse(logoutRedirectUrl))
-                        .build()
-                    callback(authService.getEndSessionRequestIntent(endSessionReq), null)
-                }
-                else {
-                    callback(null, ex?.message ?: "Problem with refreshing token.")
-                }
+    suspend fun refreshToken(): RefreshTokenResponse {
+        return suspendCoroutine { cont ->
+            profile.authState.performActionWithFreshTokens(
+                authService,
+                ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
+            ) { accessToken, idToken, ex ->
+                cont.resume(RefreshTokenResponse(accessToken, idToken, ex))
             }
-        } else {
-            callback(null, "There is no configuration")
         }
     }
-
 
     private fun getWebIdDetails(webId: String): WebId {
         val client = SolidSyncClient
@@ -194,18 +160,25 @@ class Authenticator {
         return client.get(URI(webId), WebId::class.java)
     }
 
-    private fun registerToOpenId(
+    private suspend fun getAuthorizationConf(
+        oidcIssuer: String
+    ): Pair<AuthorizationServiceConfiguration?, AuthorizationException?>{
+        return suspendCoroutine { cont ->
+            AuthorizationServiceConfiguration.fetchFromIssuer(Uri.parse(oidcIssuer)) { serviceConfiguration, exception ->
+                cont.resume(Pair(serviceConfiguration, exception))
+            }
+        }
+    }
+
+    private suspend fun registerToOpenId(
         conf: AuthorizationServiceConfiguration,
         redirectUri: String,
-        callback: (response: RegistrationResponse?, ex: AuthorizationException?) -> Unit
     ) {
         val regReq = RegistrationRequest.Builder(
             conf,
             listOf(Uri.parse(redirectUri))
         ).setAdditionalParameters(mapOf(
             "client_name" to "Android Solid Services",
-            //"id_token_signed_response_alg" to "ES256",
-            //"id_token_signed_response_alg" to "RS256",
             "id_token_signed_response_alg" to conf.discoveryDoc!!.idTokenSigningAlgorithmValuesSupported[0],
         ))
             .setSubjectType("public")
@@ -213,12 +186,126 @@ class Authenticator {
             .setGrantTypeValues(listOf("authorization_code", "refresh_token"))
             .build()
 
-        authService.performRegistrationRequest(regReq) { response, ex ->
-            callback(response, ex)
+        val res = suspendCoroutine { cont ->
+            authService.performRegistrationRequest(regReq) { response, ex ->
+                cont.resume(response)
+            }
+        }
+        updateRegistrationResponse(res)
+    }
+
+    suspend fun submitAuthorizationResponse(
+        authResponse: AuthorizationResponse?,
+        authException: AuthorizationException?
+    ) {
+        updateAuthorizationResponse(authResponse, authException)
+        requestToken()
+        profile.userInfo = getUserInfo()
+        profile.webIdDetails = getWebIdDetails(profile.userInfo!!.webId)
+        writeProfileToCache()
+    }
+
+    private suspend fun checkAuthenticator(): Boolean {
+        return if (isUserAuthorized()) {
+            if (!needsTokenRefresh()) {
+                true
+            } else {
+                //Need to refresh token
+                val tokenRes = refreshToken()
+                profile.authState.idToken != null
+            }
+        } else {
+            //false
+            val tokenRes = refreshToken()
+            profile.authState.idToken != null
         }
     }
 
-    fun resetAuthState() {
-        authState = AuthState()
+    private suspend fun getUserInfo(): UserInfo? {
+        val isUserAuthenticated = checkAuthenticator()
+
+        if (isUserAuthenticated){
+            val session = OpenIdSession.ofIdToken(profile.authState.idToken)
+            val client = SolidSyncClient.getClient().session(session)
+
+            val userInfoReq: Request = Request.newBuilder()
+                .header(ACCEPT, "application/json")
+                .uri(URI(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!.userinfoEndpoint.toString()))
+                .GET()
+                .build()
+            val userInfoResponse: Response<String> =
+                client.send(userInfoReq, Response.BodyHandlers.ofString())
+            return fromJsonStringToUserInfo(userInfoResponse.body())
+        } else {
+            return null
+        }
+    }
+
+    suspend fun requestToken(): Pair<TokenResponse?, AuthorizationException?> {
+
+        val result : Pair<TokenResponse?, AuthorizationException?> = if (profile.authState.lastAuthorizationResponse != null) {
+            suspendCoroutine { cont ->
+                authService.performTokenRequest(
+                    profile.authState.lastAuthorizationResponse!!.createTokenExchangeRequest(),
+                    ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
+                ) { tokenResponse, exception ->
+                    cont.resume(Pair(tokenResponse, exception))
+                }
+            }
+        } else {
+            Pair(null, profile.authState.authorizationException)
+        }
+        updateTokenResponse(result.first, result.second)
+        return result
+    }
+
+    suspend fun getTerminationSessionIntent(
+        logoutRedirectUrl: String,
+    ) : Pair<Intent?, String?>{
+
+        return if (profile.authState.lastAuthorizationResponse != null &&
+            profile.authState.authorizationServiceConfiguration != null) {
+
+            val tokenRes = refreshToken()
+
+            if (tokenRes.idToken != null) {
+                val endSessionReq = EndSessionRequest.Builder(profile.authState.authorizationServiceConfiguration!!)
+                    .setIdTokenHint(tokenRes.idToken)
+                    .setPostLogoutRedirectUri(Uri.parse(logoutRedirectUrl))
+                    .build()
+                Pair(authService.getEndSessionRequestIntent(endSessionReq), null)
+            }
+            else {
+                Pair(null, tokenRes.exception?.message ?: "Problem with refreshing token.")
+            }
+
+        } else {
+            Pair(null, "There is no configuration")
+        }
+    }
+
+    private fun updateRegistrationResponse(
+        regResponse: RegistrationResponse?
+    ) {
+        profile.authState.update(regResponse)
+    }
+
+    private fun updateAuthorizationResponse(
+        authResponse: AuthorizationResponse?,
+        authException: AuthorizationException?
+    ) {
+        profile.authState.update(authResponse, authException)
+    }
+
+    private fun updateTokenResponse(
+        tokenResponse: TokenResponse?,
+        authException: AuthorizationException?
+    ) {
+        profile.authState.update(tokenResponse, authException)
+    }
+
+    fun resetProfile() {
+        profile = Profile()
+        writeProfileToCache()
     }
 }

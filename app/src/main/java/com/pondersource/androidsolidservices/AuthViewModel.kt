@@ -2,14 +2,14 @@ package com.pondersource.androidsolidservices
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.pondersource.solidandroidclient.Authenticator
 import com.pondersource.solidandroidclient.SolidCRUD
-import net.openid.appauth.AuthState
+import kotlinx.coroutines.launch
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
-import net.openid.appauth.TokenResponse
 
 
 class AuthViewModel private constructor(context: Context): ViewModel() {
@@ -21,8 +21,6 @@ class AuthViewModel private constructor(context: Context): ViewModel() {
         private const val OIDC_ISSUER_INRUPT_COM = "https://login.inrupt.com"
         private const val OIDC_ISSUER_SOLIDCOMMIUNITY = "https://solidcommunity.net"
 
-        private const val SHARED_PREFERENCES_NAME = "android_solid_services"
-        private const val AUTH_STATE_KEY = "auth_state"
 
         @Volatile
         private lateinit var INSTANCE : AuthViewModel
@@ -35,96 +33,89 @@ class AuthViewModel private constructor(context: Context): ViewModel() {
                 INSTANCE
             }
         }
+    }
 
-        private fun getLoggedInfo(context: Context): AuthState? {
-            val sharedPreferences : SharedPreferences = context.getSharedPreferences(
-                SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            val previousState = sharedPreferences.getString(AUTH_STATE_KEY, null)
-            return if (previousState != null) {
-                AuthState.jsonDeserialize(previousState)
+    private val authenticator : Authenticator = Authenticator.getInstance(context)
+    private val solidCRUD = SolidCRUD.getInstance(context)
+
+    val loginBrowserIntent: MutableLiveData<Intent?> = MutableLiveData(null)
+    val loginBrowserIntentErrorMessage: MutableLiveData<String?> = MutableLiveData(null)
+    val loginLoading: MutableLiveData<Boolean> = MutableLiveData(false)
+    val loginResult: MutableLiveData<Boolean> = MutableLiveData(false)
+
+    fun loginWithWebId(
+        webId: String,
+    ) {
+        viewModelScope.launch {
+            loginLoading.postValue(true)
+            val intentRes = authenticator.createAuthenticationIntentWithWebId(webId, AUTH_APP_REDIRECT_URL)
+            loginBrowserIntentErrorMessage.postValue(intentRes.second)
+            loginBrowserIntent.postValue(intentRes.first)
+        }
+    }
+
+    fun loginWithInruptCom() {
+        viewModelScope.launch {
+            loginLoading.postValue(true)
+            val intentRes = authenticator.createAuthenticationIntentWithOidcIssuer(OIDC_ISSUER_INRUPT_COM, AUTH_APP_REDIRECT_URL,)
+            loginBrowserIntentErrorMessage.postValue(intentRes.second)
+            loginBrowserIntent.postValue(intentRes.first)
+        }
+    }
+
+    fun loginWithSolidcommunity() {
+        viewModelScope.launch {
+            loginLoading.postValue(true)
+            val intentRes = authenticator.createAuthenticationIntentWithOidcIssuer(
+                OIDC_ISSUER_SOLIDCOMMIUNITY, AUTH_APP_REDIRECT_URL,)
+            loginBrowserIntentErrorMessage.postValue(intentRes.second)
+            loginBrowserIntent.postValue(intentRes.first)
+        }
+    }
+
+    fun submitAuthorizationResponse(
+        authorizationResponse: AuthorizationResponse?,
+        authorizationException: AuthorizationException?
+    ) {
+        viewModelScope.launch {
+            authenticator.submitAuthorizationResponse(authorizationResponse, authorizationException)
+            loginLoading.postValue(false)
+            loginBrowserIntent.postValue(null)
+            if(isLoggedIn()) {
+                loginBrowserIntentErrorMessage.postValue(null)
+                loginResult.postValue(true)
             } else {
-                null
+                loginResult.postValue(false)
+                if (authorizationException != null) {
+                    loginBrowserIntentErrorMessage.postValue(authorizationException.errorDescription)
+                } else {
+                    loginBrowserIntentErrorMessage.postValue("A problem during login occurred!")
+                }
             }
         }
-
-    }
-
-    private val authenticator : Authenticator = Authenticator.getInstance(context, getLoggedInfo(context))
-    private val solidCRUD = SolidCRUD.getInstance(authenticator)
-    private val sharedPreferences : SharedPreferences = context.getSharedPreferences(
-        SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-
-
-    fun login(
-        webId: String,
-        callback: (response: Intent?, errorMessage: String?) -> Unit
-    ) {
-        authenticator.createAuthenticationIntentWithWebId(
-            webId,
-            AUTH_APP_REDIRECT_URL,
-            callback
-        )
-    }
-
-    fun loginWithInruptCom(
-        callback: (response: Intent?, errorMessage: String?) -> Unit
-    ) {
-        authenticator.createAuthenticationIntentWithOidcIssuer(
-            OIDC_ISSUER_INRUPT_COM,
-            AUTH_APP_REDIRECT_URL,
-            callback
-        )
-    }
-
-    fun loginWithSolidcommunity(
-        callback: (response: Intent?, errorMessage: String?) -> Unit
-    ) {
-        authenticator.createAuthenticationIntentWithOidcIssuer(
-            OIDC_ISSUER_SOLIDCOMMIUNITY,
-            AUTH_APP_REDIRECT_URL,
-            callback
-        )
-    }
-
-    fun requestToken(
-        authorizationResponse: AuthorizationResponse,
-        authorizationException: AuthorizationException?,
-        callback: (TokenResponse?, AuthorizationException?) -> (Unit)
-    ) {
-        authenticator.updateAuthorizationResponse(authorizationResponse, authorizationException)
-        authenticator.requestToken(callback)
     }
 
 
-    fun logout(callback: (endSessionIntent: Intent?, errorMessage: String?) -> (Unit)) {
-        authenticator.terminateSession(AUTH_END_REDIRECT_URL, callback)
+    fun logoutWithBrowser() {
+        viewModelScope.launch {
+            authenticator.getTerminationSessionIntent(AUTH_END_REDIRECT_URL)
+        }
     }
 
     fun logout() {
-        authenticator.resetAuthState()
-        saveLoginInfo()
+        authenticator.resetProfile()
     }
 
-    fun saveLoginInfo() {
-        val authStateString = authenticator.getAuthState().jsonSerializeString()
-        with(sharedPreferences.edit()) {
-            putString(AUTH_STATE_KEY, authStateString)
-            apply()
+    suspend fun isLoggedIn(): Boolean {
+        return if(authenticator.isUserAuthorized()) {
+            if (authenticator.needsTokenRefresh()) {
+                authenticator.refreshToken()
+            }
+            true
+        } else {
+            false
         }
     }
 
-    fun isLoggedIn(): Boolean {
-         if(authenticator.isLoggedIn()) {
-             if (authenticator.needsTokenRefresh()) {
-                 authenticator.requestToken()
-             }
-             return true
-         } else {
-             return false
-         }
-    }
-
-    fun testCRUD() {
-        solidCRUD.test()
-    }
+    fun getProfile() = authenticator.getProfile()
 }

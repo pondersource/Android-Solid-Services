@@ -3,6 +3,8 @@ package com.pondersource.androidsolidservices
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
 import com.pondersource.androidsolidservices.databinding.ActivityLoginBinding
@@ -28,20 +30,7 @@ class LoginActivity: AppCompatActivity() {
         if (intent != null) {
             val resp: AuthorizationResponse? = AuthorizationResponse.fromIntent(intent)
             val ex: AuthorizationException? = AuthorizationException.fromIntent(intent)
-            if (resp != null) {
-                authViewModel.requestToken(resp, ex) { tokenResponse, authorizationException ->
-                    if (tokenResponse != null) {
-                        authViewModel.saveLoginInfo()
-                        startActivity(Intent(this, MainActivity::class.java).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        })
-                    } else {
-
-                    }
-                }
-            } else {
-
-            }
+            authViewModel.submitAuthorizationResponse(resp, ex)
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,30 +41,39 @@ class LoginActivity: AppCompatActivity() {
 
         setContentView(binding.root)
 
-        if (authViewModel.isLoggedIn()) {
-            startActivity(Intent(this, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            })
+        authViewModel.loginLoading.observe(this) {
+            binding.loginSolidcommunityBtn.isEnabled = !it
+            binding.loginInruptBtn.isEnabled = !it
+            if (it) {
+                binding.pbLogin.visibility = VISIBLE
+            } else {
+                binding.pbLogin.visibility = GONE
+            }
+        }
+        authViewModel.loginBrowserIntentErrorMessage.observe(this) {
+            if (!it.isNullOrEmpty()) {
+                showMessage(it)
+            }
+        }
+        authViewModel.loginBrowserIntent.observe(this) {
+            if (it != null) {
+                doAuthenticationInBrowser.launch(it)
+            }
+        }
+        authViewModel.loginResult.observe(this) {
+            if(it == true) {
+                startActivity(Intent(this, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                })
+            }
         }
 
         binding.loginInruptBtn.setOnClickListener {
-            authViewModel.loginWithInruptCom { intent, errorMessage ->
-                if (intent != null) {
-                    doAuthenticationInBrowser.launch(intent)
-                } else if (!errorMessage.isNullOrEmpty()) {
-                    showMessage(errorMessage)
-                }
-            }
+            authViewModel.loginWithInruptCom()
         }
 
         binding.loginSolidcommunityBtn.setOnClickListener {
-            authViewModel.loginWithSolidcommunity { intent, errorMessage ->
-                if (intent != null) {
-                    doAuthenticationInBrowser.launch(intent)
-                } else if (!errorMessage.isNullOrEmpty()) {
-                    showMessage(errorMessage)
-                }
-            }
+            authViewModel.loginWithSolidcommunity()
         }
     }
 }

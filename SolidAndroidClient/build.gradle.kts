@@ -5,13 +5,14 @@ plugins {
 
 android {
     namespace = "com.pondersource.solidandroidclient"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        manifestPlaceholders["appAuthRedirectScheme"] = namespace.toString()
     }
 
     buildTypes {
@@ -55,6 +56,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     implementation("com.google.code.gson:gson:2.10.1")
 

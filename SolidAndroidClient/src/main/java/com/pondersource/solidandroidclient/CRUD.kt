@@ -1,42 +1,95 @@
 package com.pondersource.solidandroidclient
 
+import android.content.Context
 import android.util.Log
+import com.google.gson.Gson
+import com.inrupt.client.Client
 import com.inrupt.client.Request
 import com.inrupt.client.Response
 import com.inrupt.client.auth.Session
 import com.inrupt.client.openid.OpenIdSession
 import com.inrupt.client.solid.SolidNonRDFSource
 import com.inrupt.client.solid.SolidSyncClient
+import com.pondersource.solidandroidclient.data.UserInfo
+import com.pondersource.solidandroidclient.data.fromJsonStringToUserInfo
+import kotlinx.coroutines.delay
 import org.apache.http.HttpHeaders.ACCEPT
 import java.net.URI
 
-class SolidCRUD {
+class SolidCRUD private constructor(val context: Context) {
 
     companion object {
         private const val TAG = "SolidCRUD"
         @Volatile
         private lateinit var INSTANCE: SolidCRUD
 
-        fun getInstance(authenticator: Authenticator): SolidCRUD {
+        fun getInstance(context: Context): SolidCRUD {
             return if (::INSTANCE.isInitialized) {
                 INSTANCE
             } else {
-                INSTANCE = SolidCRUD(authenticator)
+                INSTANCE = SolidCRUD(context)
                 INSTANCE
             }
         }
     }
 
-    private val authenticator: Authenticator
     private lateinit var session: Session
     private lateinit var client: SolidSyncClient
 
-    private constructor(authenticator: Authenticator) {
-        this.authenticator = authenticator
+    init {
+        client = SolidSyncClient.getClient()
+    }
+
+    suspend fun getUserInfo(): UserInfo? {
+        val isUserAuthenticated = checkAuthenticator()
+
+        if (isUserAuthenticated){
+            session = OpenIdSession.ofIdToken(Authenticator.getInstance(context).getAuthState().idToken)
+            client = SolidSyncClient.getClient().session(session)
+
+            val anotherSession = OpenIdSession.ofClientCredentials(
+                URI("https://solidcommunity.net"),
+                Authenticator.getInstance(context).getAuthState().lastRegistrationResponse!!.clientId,
+                Authenticator.getInstance(context).getAuthState().clientSecret,
+                "client_secret_basic"
+            )
+
+            delay(5000L)
+
+            val xx = anotherSession.principal
+            println("$xx")
+
+            val userInfoReq: Request = Request.newBuilder()
+                //.header(ACCEPT, "application/json")
+                .uri(URI(Authenticator.getInstance(context).getAuthState().authorizationServiceConfiguration!!.discoveryDoc!!.userinfoEndpoint.toString()))
+                .GET()
+                .build()
+            val userInfoResponse: Response<String> =
+                client.send(userInfoReq, Response.BodyHandlers.ofString())
+            return fromJsonStringToUserInfo(userInfoResponse.body())
+        } else {
+            return null
+        }
+    }
+
+    private suspend fun checkAuthenticator(): Boolean {
+        return if (Authenticator.getInstance(context).isUserAuthorized()) {
+            if (!Authenticator.getInstance(context).needsTokenRefresh()) {
+                true
+            } else {
+                //Need to refresh token
+                val tokenRes = Authenticator.getInstance(context).refreshToken()
+                Authenticator.getInstance(context).getAuthState().idToken != null
+            }
+        } else {
+            //false
+            val tokenRes = Authenticator.getInstance(context).refreshToken()
+            Authenticator.getInstance(context).getAuthState().idToken != null
+        }
     }
 
     fun test() {
-        this.session = OpenIdSession.ofIdToken(authenticator.getAuthState().idToken)
+        this.session = OpenIdSession.ofIdToken(Authenticator.getInstance(context).getAuthState().idToken)
         this.client = SolidSyncClient.getClient().session(session)
 
         if (session.principal != null) {
