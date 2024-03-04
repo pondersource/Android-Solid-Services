@@ -199,10 +199,12 @@ class Authenticator {
         authException: AuthorizationException?
     ) {
         updateAuthorizationResponse(authResponse, authException)
-        requestToken()
-        profile.userInfo = getUserInfo()
-        profile.webIdDetails = getWebIdDetails(profile.userInfo!!.webId)
-        writeProfileToCache()
+        if (authException == null && authResponse != null) {
+            requestToken()
+            profile.userInfo = getUserInfo()
+            profile.webIdDetails = getWebIdDetails(profile.userInfo!!.webId)
+            writeProfileToCache()
+        }
     }
 
     private suspend fun checkAuthenticator(): Boolean {

@@ -4,6 +4,8 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.pondersource.androidsolidservices.databinding.ActivityMainBinding
 
@@ -28,6 +30,10 @@ class MainActivity: AppCompatActivity() {
         setContentView(binding.root)
 
         binding.tvWebid.text = "Your WebID is: ${authViewModel.getProfile().userInfo!!.webId}"
+
+        binding.spStorages.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arrayOf(authViewModel.getProfile().webIdDetails!!.storage.id))
+        binding.spStorages.visibility = View.VISIBLE
+
         handleAccountManagement()
 
         binding.logoutBtn.setOnClickListener {
