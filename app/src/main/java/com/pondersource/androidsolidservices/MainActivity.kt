@@ -31,7 +31,7 @@ class MainActivity: AppCompatActivity() {
 
         binding.tvWebid.text = "Your WebID is: ${authViewModel.getProfile().userInfo!!.webId}"
 
-        binding.spStorages.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arrayOf(authViewModel.getProfile().webIdDetails!!.storage.id))
+        //binding.spStorages.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arrayOf(authViewModel.getProfile().webIdDetails!!.storage.id))
         binding.spStorages.visibility = View.VISIBLE
 
         handleAccountManagement()

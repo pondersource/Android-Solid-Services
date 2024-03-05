@@ -4,8 +4,6 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
 data class UserInfo(
-    @SerializedName("sub")
-    val sub: String,
     @SerializedName("webid")
     val webId: String,
 )

@@ -4,17 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import com.github.jsonldjava.shaded.com.google.common.net.HttpHeaders.ACCEPT
 import com.google.gson.Gson
-import com.inrupt.client.Request
-import com.inrupt.client.Response
 import com.inrupt.client.auth.Session
-import com.inrupt.client.openid.OpenIdSession
 import com.inrupt.client.solid.SolidSyncClient
 import com.pondersource.solidandroidclient.data.Profile
 import com.pondersource.solidandroidclient.data.RefreshTokenResponse
 import com.pondersource.solidandroidclient.data.UserInfo
-import com.pondersource.solidandroidclient.data.fromJsonStringToUserInfo
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
@@ -227,17 +222,8 @@ class Authenticator {
         val isUserAuthenticated = checkAuthenticator()
 
         if (isUserAuthenticated){
-            val session = OpenIdSession.ofIdToken(profile.authState.idToken)
-            val client = SolidSyncClient.getClient().session(session)
-
-            val userInfoReq: Request = Request.newBuilder()
-                .header(ACCEPT, "application/json")
-                .uri(URI(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!.userinfoEndpoint.toString()))
-                .GET()
-                .build()
-            val userInfoResponse: Response<String> =
-                client.send(userInfoReq, Response.BodyHandlers.ofString())
-            return fromJsonStringToUserInfo(userInfoResponse.body())
+            val webId = Utils.getWebId(profile.authState.idToken)
+            return UserInfo(webId)
         } else {
             return null
         }

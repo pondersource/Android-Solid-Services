@@ -1,33 +1,67 @@
 package com.pondersource.solidandroidclient;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
+import com.inrupt.client.openid.OpenIdConfig;
 import com.inrupt.client.openid.OpenIdException;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
+import org.jose4j.jwk.HttpsJwks;
 import org.jose4j.jwt.JwtClaims;
-import org.jose4j.jwt.MalformedClaimException;
+import org.jose4j.jwt.NumericDate;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
+import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver;
+import org.jose4j.keys.resolvers.VerificationKeyResolver;
 
-import java.security.MessageDigest;
+import java.time.Instant;
 
 public class Utils {
 
-    public static String getSessionIdentifier(final JwtClaims claims) {
-        final String webid = claims.getClaimValueAsString("webid");
-        if (webid != null) {
-            return sha256(webid);
-        }
+    private static JwtClaims parseIdToken(final String idToken, final OpenIdConfig config) {
         try {
-            return sha256(String.join("|", claims.getIssuer(), claims.getSubject()));
-        } catch (final MalformedClaimException ex) {
-            // This exception will never occur because of the validation rules in parseIdToken
-            throw new OpenIdException("Malformed ID Token: unable to extract issuer and subject", ex);
+            final JwtConsumerBuilder builder = new JwtConsumerBuilder();
+
+            // Required by OpenID Connect
+            builder.setRequireExpirationTime();
+            builder.setExpectedIssuers(true, (String[]) null);
+            builder.setRequireSubject();
+            builder.setRequireIssuedAt();
+
+            // If a grace period is set, allow for some clock skew
+            if (config.getExpGracePeriodSecs() > 0) {
+                builder.setAllowedClockSkewInSeconds(config.getExpGracePeriodSecs());
+            } else {
+                builder.setEvaluationTime(NumericDate.fromSeconds(Instant.now().getEpochSecond()));
+            }
+
+            // If an expected audience is set, verify that we have the correct value
+            if (config.getExpectedAudience() != null) {
+                builder.setExpectedAudience(true, config.getExpectedAudience());
+            } else {
+                builder.setSkipDefaultAudienceValidation();
+            }
+
+            // If a JWKS location is set, perform signature validation
+            if (config.getPublicKeyLocation() != null) {
+                final HttpsJwks jwks = new HttpsJwks(config.getPublicKeyLocation().toString());
+                final VerificationKeyResolver resolver = new HttpsJwksVerificationKeyResolver(jwks);
+                builder.setVerificationKeyResolver(resolver);
+            } else {
+                builder.setSkipSignatureVerification();
+            }
+
+            final JwtConsumer consumer = builder.build();
+            return consumer.processToClaims(idToken);
+        } catch (final InvalidJwtException ex) {
+            throw new OpenIdException("Unable to parse ID token", ex);
         }
     }
 
-    public static String sha256(final String value) {
-        final MessageDigest md = DigestUtils.getDigest("SHA-256");
-        return new String(Hex.encodeHex(md.digest(value.getBytes(UTF_8))));
+    public static String getWebId(final String idToken) {
+
+        JwtClaims claims = parseIdToken(idToken, new OpenIdConfig());
+
+        String webId = claims.getClaimValueAsString("webid");
+
+        return webId != null ? webId : claims.getClaimValueAsString("sub");
     }
 }
