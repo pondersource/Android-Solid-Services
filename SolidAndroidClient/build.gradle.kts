@@ -66,7 +66,7 @@ dependencies {
     implementation("com.inrupt.client:inrupt-client-solid")
     implementation("com.inrupt.client:inrupt-client-core")
     implementation("com.inrupt.client:inrupt-client-okhttp")
-    implementation("com.inrupt.client:inrupt-client-jackson")
+    //implementation("com.inrupt.client:inrupt-client-jackson")
     implementation("com.inrupt.client:inrupt-client-jena")
     implementation("com.inrupt.client:inrupt-client-accessgrant")
     implementation("com.inrupt.client:inrupt-client-openid")
