@@ -30,10 +30,12 @@ class StartupActivity: AppCompatActivity() {
                 startActivity(Intent(this@StartupActivity, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 })
+                finish()
             } else {
                 startActivity(Intent(this@StartupActivity, LoginActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 })
+                finish()
             }
         }
     }

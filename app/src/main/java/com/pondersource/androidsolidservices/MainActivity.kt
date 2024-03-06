@@ -29,7 +29,7 @@ class MainActivity: AppCompatActivity() {
 
         setContentView(binding.root)
 
-        binding.tvWebid.text = "Your WebID is: ${authViewModel.getProfile().userInfo!!.webId}"
+        binding.tvWebid.text = "Your WebID is: ${authViewModel.getProfile().userInfo?.webId}"
 
         //binding.spStorages.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arrayOf(authViewModel.getProfile().webIdDetails!!.storage.id))
         binding.spStorages.visibility = View.VISIBLE
@@ -47,6 +47,7 @@ class MainActivity: AppCompatActivity() {
             startActivity(Intent(this, LoginActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             })
+            finish()
         }
     }
 
