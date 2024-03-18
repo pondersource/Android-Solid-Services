@@ -26,7 +26,9 @@ import java.net.URI
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-
+/**
+ * Authenticator is responsible to do the Authentication phase with the selected Identity Provider.
+ */
 class Authenticator {
 
     companion object {
@@ -39,6 +41,11 @@ class Authenticator {
         @Volatile
         private lateinit var INSTANCE: Authenticator
 
+        /**
+         *  get a single instance of the class
+         *  @param context ApplicationContext
+         *  @return Authenticator object
+         */
         fun getInstance(context: Context): Authenticator {
             return if (::INSTANCE.isInitialized) {
                 INSTANCE
@@ -81,17 +88,40 @@ class Authenticator {
         }
     }
 
+    /**
+     * @return AuthState of the user
+     */
     fun getAuthState() = profile.authState
+
+    /**
+     * @return The user's profile such as AuthState, WebId and WebIdDetails
+     */
     fun getProfile() = profile
+
+    /**
+     * Checks if the user is authorized
+     * @return bool
+     */
 
     fun isUserAuthorized(): Boolean {
         return profile.authState.isAuthorized
     }
 
+    /**
+     * Checks if the user token needs to be refreshed
+     * @return bool
+     */
     fun needsTokenRefresh(): Boolean {
         return profile.authState.needsTokenRefresh
     }
 
+    /**
+     * @param webId user's webId
+     * @param redirectUri your application's redirect URL which you declared in your app.
+     * This parameter should be set correctly to be able to return to your application after doing the authentication phase in a browser on the phone.
+     * @return A pair of intent and an error message. The intent should be used to start the authentication in a browser.
+     * In case it is null then the error message will contain the reason. in which can be showed to user.
+     */
     suspend fun createAuthenticationIntentWithWebId(
         webId: String,
         redirectUri: String,
@@ -100,6 +130,14 @@ class Authenticator {
 
         return createAuthenticationIntentWithOidcIssuer(webIdDetails.oidcIssuer!!.id!!, redirectUri)
     }
+
+    /**
+     * @param oidcIssuer Identity Issuer url
+     * @param redirectUri your application's redirect URL which you declared in your app.
+     * This parameter should be set correctly to be able to return to your application after doing the authentication phase in a browser on the phone.
+     * @return A pair of intent and an error message. The intent should be used to start the authentication in a browser.
+     * In case it is null then the error message will contain the reason. in which can be showed to user.
+     */
 
     suspend fun createAuthenticationIntentWithOidcIssuer(
         oidcIssuer: String,
@@ -136,6 +174,10 @@ class Authenticator {
         }
     }
 
+    /**
+     * Refreshes the token in case it has been expired.
+     * @return RefreshTokenResponse which contains accessToken, tokenId and exception
+     */
     suspend fun refreshToken(): RefreshTokenResponse {
         return suspendCoroutine { cont ->
             profile.authState.performActionWithFreshTokens(
@@ -196,6 +238,11 @@ class Authenticator {
         updateRegistrationResponse(res)
     }
 
+    /**
+     * After using the intent (createAuthenticationIntentWithOidcIssuer, createAuthenticationIntentWithWebId) in the browser and completing the authentication, you need to call this method with the returned data from browser.
+     * @param authResponse can be created from returned intent
+     * @param authException can be created from returned intent
+     */
     suspend fun submitAuthorizationResponse(
         authResponse: AuthorizationResponse?,
         authException: AuthorizationException?
@@ -242,7 +289,7 @@ class Authenticator {
         }
     }
 
-    suspend fun requestToken(): Pair<TokenResponse?, AuthorizationException?> {
+    private suspend fun requestToken(): Pair<TokenResponse?, AuthorizationException?> {
 
         val result : Pair<TokenResponse?, AuthorizationException?> = if (profile.authState.lastAuthorizationResponse != null) {
             suspendCoroutine { cont ->
@@ -305,6 +352,9 @@ class Authenticator {
         profile.authState.update(tokenResponse, authException)
     }
 
+    /**
+     * clears saved user's data. Can be used after logout in your application
+     */
     fun resetProfile() {
         profile = Profile()
         writeProfileToCache()

@@ -56,6 +56,10 @@ public class Utils {
         }
     }
 
+    /**
+     * @param idToken tokenId after completing the authentication process
+     * @return webId
+     */
     public static String getWebId(final String idToken) {
 
         JwtClaims claims = parseIdToken(idToken, new OpenIdConfig());
