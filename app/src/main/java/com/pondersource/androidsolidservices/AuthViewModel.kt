@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pondersource.solidandroidclient.Authenticator
-import com.pondersource.solidandroidclient.SolidCRUD
 import kotlinx.coroutines.launch
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
@@ -36,7 +35,6 @@ class AuthViewModel private constructor(context: Context): ViewModel() {
     }
 
     private val authenticator : Authenticator = Authenticator.getInstance(context)
-    private val solidCRUD = SolidCRUD.getInstance(context)
 
     val loginBrowserIntent: MutableLiveData<Intent?> = MutableLiveData(null)
     val loginBrowserIntentErrorMessage: MutableLiveData<String?> = MutableLiveData(null)
