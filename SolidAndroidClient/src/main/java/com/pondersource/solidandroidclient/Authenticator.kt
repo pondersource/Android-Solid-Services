@@ -98,7 +98,7 @@ class Authenticator {
     ) : Pair<Intent?, String?> {
         val webIdDetails = getWebIdDetails(webId)
 
-        return createAuthenticationIntentWithOidcIssuer(webIdDetails.oidcIssuer.id, redirectUri)
+        return createAuthenticationIntentWithOidcIssuer(webIdDetails.oidcIssuer!!.id!!, redirectUri)
     }
 
     suspend fun createAuthenticationIntentWithOidcIssuer(
@@ -155,6 +155,13 @@ class Authenticator {
         return client.get(URI(webId), WebId::class.java)
     }
 
+    private fun getStorage(webId: String): String {
+        if (webId.contains("solidcommunity.net")) {
+            return webId.split("profile")[0]
+        }
+        return webId
+    }
+
     private suspend fun getAuthorizationConf(
         oidcIssuer: String
     ): Pair<AuthorizationServiceConfiguration?, AuthorizationException?>{
@@ -198,6 +205,12 @@ class Authenticator {
             requestToken()
             profile.userInfo = getUserInfo()
             profile.webIdDetails = getWebIdDetails(profile.userInfo!!.webId)
+            if (profile.webIdDetails == null) {
+                profile.webIdDetails = WebId()
+            }
+            if (profile.webIdDetails!!.storage == null) {
+                profile.webIdDetails!!.storage = JObject(getStorage(profile.userInfo!!.webId))
+            }
             writeProfileToCache()
         }
     }
