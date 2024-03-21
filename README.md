@@ -15,7 +15,7 @@ In the root directory of the project run command:
 gradlew assembleDebug
 ```
 You can find the generated ```.apk``` file in the path:
-`/app/build/outputs/apk/debug`
+`./app/build/outputs/apk/debug`
 
 
 ## Library
