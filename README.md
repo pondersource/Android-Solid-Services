@@ -12,7 +12,7 @@ So in case of having any problem during the build process, it is recommended to 
 Gradle is the default build tool used in this project.
 In the root directory of the project run command: 
 ```sh
-gradlew assembleDebug
+./gradlew assembleDebug
 ```
 You can find the generated ```.apk``` file in the path:
 `/app/build/outputs/apk/debug`
