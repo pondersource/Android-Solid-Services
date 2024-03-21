@@ -4,7 +4,7 @@
 
 
 ## App
-This app allows you to do single [Solid]() sign-in in Android ecosystem. Which will be used for other apps to comunicate through this app to do CRUD functions on the users' pod.
+This app allows you to do single [Solid]() sign-in in Android ecosystem. Which will be used for other apps to communicate through this app to do CRUD functions on the users' pod.
 
 ### How to use
 This project built with an enhanced JDK (JBR v17.0.9).
@@ -17,7 +17,8 @@ gradlew assembleDebug
 You can find the generated ```.apk``` file in the path:
 `./app/build/outputs/apk/debug`
 
-
+You can open it for instance with Android Studio.
+ 
 ## Library
 This library has the functionality to do the authentication for your solid app on Android.
 
