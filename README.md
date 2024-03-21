@@ -17,7 +17,9 @@ gradlew assembleDebug
 You can find the generated ```.apk``` file in the path:
 `./app/build/outputs/apk/debug`
 
-You can open it for instance with Android Studio.
+You can open it for instance with Android Studio. It will take a while for the emulator to start up but then you'll be presented with a login screen
+and if you log in to your pod there, you should see something like this:
+![Screenshot 2024-03-21 at 12 52 00](https://github.com/pondersource/Android-Solid-Services/assets/408412/f291bd77-bb1c-4f22-b1b9-383844610fd3)
  
 ## Library
 This library has the functionality to do the authentication for your solid app on Android.
