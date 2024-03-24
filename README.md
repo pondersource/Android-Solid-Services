@@ -1,4 +1,6 @@
 # Android Solid Services
+This project is [funded](https://nlnet.nl/project/SolidDataModules/) by <img src="https://nlnet.nl/logo/banner.svg" style="width: 5%; margin: 0 1% 0 1%;">
+/ <img src="https://nlnet.nl/image/logos/NGI0Entrust_tag.svg" style="width: 5%; margin: 0 1% 0 1%;">
 
 [![Work In Progress](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeGNuZWhuaTNtbHFnN20xZzY1bDgwN2hsN2N3YjA3dmo5MndxOWVobyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/mQWABflgJsuqmllEiF/giphy.gif)]()
 
