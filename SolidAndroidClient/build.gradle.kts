@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    `maven-publish`
 }
 
 android {
@@ -17,6 +18,13 @@ android {
 
     buildTypes {
         release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        debug {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -80,4 +88,18 @@ dependencies {
     //implementation("com.inrupt.client:inrupt-client-webid")
 
     implementation("net.openid:appauth:0.11.1")
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.pondersource.solidandroidclient"
+            artifactId = "solidandroidclient"
+            version = "0.1"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
