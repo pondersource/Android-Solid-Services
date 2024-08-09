@@ -16,7 +16,7 @@ import java.time.Instant;
 
 public class Utils {
 
-    private static JwtClaims parseIdToken(final String idToken, final OpenIdConfig config) {
+    static JwtClaims parseIdToken(final String idToken, final OpenIdConfig config) {
         try {
             final JwtConsumerBuilder builder = new JwtConsumerBuilder();
 
