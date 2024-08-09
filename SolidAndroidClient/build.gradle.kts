@@ -60,19 +60,24 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.10.1")
 
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.apicatalog:titanium-json-ld-jre8:1.4.1")
+    implementation("org.glassfish:jakarta.json:2.0.1")
+
     //Solid Java Client Library
     implementation(platform("com.inrupt.client:inrupt-client-bom:1.1.0"))
-    implementation("com.inrupt.client:inrupt-client-api")
+    //implementation("com.inrupt.client:inrupt-client-api")
     implementation("com.inrupt.client:inrupt-client-solid")
     implementation("com.inrupt.client:inrupt-client-core")
     implementation("com.inrupt.client:inrupt-client-okhttp")
     //implementation("com.inrupt.client:inrupt-client-jackson")
-    implementation("com.inrupt.client:inrupt-client-jena")
-    implementation("com.inrupt.client:inrupt-client-accessgrant")
+    //implementation("com.inrupt.client:inrupt-client-jena")
+    //implementation("com.inrupt.client:inrupt-client-accessgrant")
     implementation("com.inrupt.client:inrupt-client-openid")
-    implementation("com.inrupt.client:inrupt-client-uma")
-    implementation("com.inrupt.client:inrupt-client-vocabulary")
-    implementation("com.inrupt.client:inrupt-client-webid")
+    //implementation("com.inrupt.client:inrupt-client-uma")
+    //implementation("com.inrupt.client:inrupt-client-vocabulary")
+    //implementation("com.inrupt.client:inrupt-client-webid")
 
     implementation("net.openid:appauth:0.11.1")
 }
