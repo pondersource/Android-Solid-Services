@@ -91,6 +91,7 @@ class AuthenticatorImplementation : Authenticator {
         regResponse: RegistrationResponse?
     ) {
         profile.authState.update(regResponse)
+        writeProfileToCache()
     }
 
     private fun updateAuthorizationResponse(
@@ -98,6 +99,7 @@ class AuthenticatorImplementation : Authenticator {
         authException: AuthorizationException?
     ) {
         profile.authState.update(authResponse, authException)
+        writeProfileToCache()
     }
 
     private fun updateTokenResponse(
@@ -105,6 +107,7 @@ class AuthenticatorImplementation : Authenticator {
         authException: AuthorizationException?
     ) {
         profile.authState.update(tokenResponse, authException)
+        writeProfileToCache()
     }
 
     private suspend fun getUserInfo(): UserInfo? {
@@ -305,18 +308,12 @@ class AuthenticatorImplementation : Authenticator {
         return if (profile.authState.lastAuthorizationResponse != null &&
             profile.authState.authorizationServiceConfiguration != null) {
 
-            val tokenRes = refreshToken()
-
-            if (tokenRes.first != null) {
-                val endSessionReq = EndSessionRequest.Builder(profile.authState.authorizationServiceConfiguration!!)
-                    .setIdTokenHint(tokenRes.first!!.idToken)
-                    .setPostLogoutRedirectUri(Uri.parse(logoutRedirectUrl))
-                    .build()
-                Pair(authService.getEndSessionRequestIntent(endSessionReq), null)
-            }
-            else {
-                Pair(null, tokenRes.second?.message ?: "Problem with refreshing token.")
-            }
+            val token = getLastTokenResponse()
+            val endSessionReq = EndSessionRequest.Builder(profile.authState.authorizationServiceConfiguration!!)
+                .setIdTokenHint(token!!.idToken)
+                .setPostLogoutRedirectUri(Uri.parse(logoutRedirectUrl))
+                .build()
+            Pair(authService.getEndSessionRequestIntent(endSessionReq), null)
         } else {
             Pair(null, "There is no configuration")
         }
