@@ -1,4 +1,7 @@
-package com.pondersource.solidandroidclient;
+package com.pondersource.solidandroidclient.util;
+
+import android.content.Context;
+import android.content.pm.PackageManager;
 
 import com.inrupt.client.openid.OpenIdConfig;
 import com.inrupt.client.openid.OpenIdException;
@@ -67,5 +70,19 @@ public class Utils {
         String webId = claims.getClaimValueAsString("webid");
 
         return webId != null ? webId : claims.getClaimValueAsString("sub");
+    }
+
+    public static boolean hasAndroidSolidServicesInstalled(Context context) {
+        return hasApplicationInstalled(context, "com.pondersource.androidsolidservices");
+    }
+
+    private static boolean hasApplicationInstalled(Context context, String applicationUri) {
+        PackageManager pm = context.getPackageManager();
+        try {
+            pm.getPackageInfo(applicationUri, PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 }

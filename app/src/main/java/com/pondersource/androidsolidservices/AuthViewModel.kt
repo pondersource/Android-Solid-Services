@@ -107,7 +107,7 @@ class AuthViewModel private constructor(context: Context): ViewModel() {
 
     suspend fun isLoggedIn(): Boolean {
         return if(authenticator.isUserAuthorized()) {
-            authenticator.checkTokenAndRefresh()
+            authenticator.getLastTokenResponse()
             true
         } else {
             false

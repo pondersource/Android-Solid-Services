@@ -48,11 +48,6 @@ interface Authenticator {
     suspend fun getLastTokenResponse(): TokenResponse?
 
     /**
-     * checks if the accessToken is valid or needs to be refreshed. In case of invalid token, it refreshes it.
-     */
-    suspend fun checkTokenAndRefresh()
-
-    /**
      * Checks if the user token needs to be refreshed
      * @return bool
      */

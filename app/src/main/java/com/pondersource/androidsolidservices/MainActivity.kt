@@ -8,6 +8,8 @@ import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.pondersource.androidsolidservices.databinding.ActivityMainBinding
+import com.pondersource.solidandroidclient.AuthenticatorImplementation
+import com.pondersource.solidandroidclient.CRUD
 
 
 class MainActivity: AppCompatActivity() {
@@ -31,10 +33,15 @@ class MainActivity: AppCompatActivity() {
 
         binding.tvWebid.text = "Your WebID is: ${authViewModel.getProfile().userInfo?.webId}"
 
-        binding.spStorages.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arrayOf(authViewModel.getProfile().webIdDetails!!.storage!!.id))
+        val storageList = authViewModel.getProfile().webId!!.getStorages().map {
+            it.toString()
+        }.toTypedArray()
+        binding.spStorages.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, storageList)
         binding.spStorages.visibility = View.VISIBLE
 
         handleAccountManagement()
+
+        val crud = CRUD.getInstance(AuthenticatorImplementation.getInstance(this))
 
         binding.logoutBtn.setOnClickListener {
             authViewModel.logout()

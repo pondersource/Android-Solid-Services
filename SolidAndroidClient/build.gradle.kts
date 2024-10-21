@@ -79,13 +79,8 @@ dependencies {
     implementation("com.inrupt.client:inrupt-client-solid")
     implementation("com.inrupt.client:inrupt-client-core")
     implementation("com.inrupt.client:inrupt-client-okhttp")
-    //implementation("com.inrupt.client:inrupt-client-jackson")
-    //implementation("com.inrupt.client:inrupt-client-jena")
-    //implementation("com.inrupt.client:inrupt-client-accessgrant")
     implementation("com.inrupt.client:inrupt-client-openid")
-    //implementation("com.inrupt.client:inrupt-client-uma")
-    //implementation("com.inrupt.client:inrupt-client-vocabulary")
-    //implementation("com.inrupt.client:inrupt-client-webid")
+    implementation("com.inrupt.client:inrupt-client-vocabulary")
 
     implementation("net.openid:appauth:0.11.1")
 }

@@ -1,13 +1,12 @@
 package com.pondersource.solidandroidclient.data
 
 import com.google.gson.Gson
-import com.pondersource.solidandroidclient.WebId
 import net.openid.appauth.AuthState
 
 data class Profile(
     var authState: AuthState = AuthState(),
     var userInfo: UserInfo? = null,
-    var webIdDetails: WebId? = null
+    var webId: WebIdProfile? = null
 ) {
     companion object {
         fun toGsonString(profile: Profile): String {

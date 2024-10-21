@@ -5,10 +5,12 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import com.google.gson.Gson
-import com.inrupt.client.auth.Session
-import com.inrupt.client.solid.SolidSyncClient
 import com.pondersource.solidandroidclient.data.Profile
 import com.pondersource.solidandroidclient.data.UserInfo
+import com.pondersource.solidandroidclient.data.WebIdProfile
+import com.pondersource.solidandroidclient.data.WebIdProfile.Companion.readFromString
+import com.pondersource.solidandroidclient.data.WebIdProfile.Companion.writeToString
+import com.pondersource.solidandroidclient.util.Utils
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
@@ -55,6 +57,7 @@ class AuthenticatorImplementation : Authenticator {
         }
     }
 
+    private val crud = CRUD.getInstance(this)
     private var sharedPreferences: SharedPreferences
     private val authService: AuthorizationService
     private var profile: Profile
@@ -68,13 +71,14 @@ class AuthenticatorImplementation : Authenticator {
     private fun readProfileFromCache(): Profile {
         val profile = Profile()
         val stateString = sharedPreferences.getString(PROFILE_STATE_KEY, null)
+        val webIdString = sharedPreferences.getString(PROFILE_WEB_ID_DETAILS_KEY, null)
         if (!stateString.isNullOrEmpty()) {
             profile.authState =  AuthState.jsonDeserialize(stateString)
         }
         profile.userInfo = Gson().fromJson(sharedPreferences.getString(PROFILE_USER_INFO_KEY, null), UserInfo::class.java)
-        profile.webIdDetails = Gson().fromJson(sharedPreferences.getString(
-            PROFILE_WEB_ID_DETAILS_KEY, null), WebId::class.java)
-
+        if (!webIdString.isNullOrEmpty()) {
+            profile.webId = readFromString(webIdString)
+        }
         return profile
     }
 
@@ -82,7 +86,7 @@ class AuthenticatorImplementation : Authenticator {
         sharedPreferences.edit().apply {
             putString(PROFILE_STATE_KEY, profile.authState.jsonSerializeString())
             putString(PROFILE_USER_INFO_KEY, Gson().toJson(profile.userInfo))
-            putString(PROFILE_WEB_ID_DETAILS_KEY, Gson().toJson(profile.webIdDetails))
+            putString(PROFILE_WEB_ID_DETAILS_KEY, writeToString(profile.webId))
             apply()
         }
     }
@@ -119,14 +123,6 @@ class AuthenticatorImplementation : Authenticator {
             return null
             //TODO(Not authorized user)
         }
-    }
-
-    private fun getWebIdDetails(webId: String): WebId {
-        val client = SolidSyncClient
-            .getClient()
-            .session(Session.anonymous())
-
-        return client.get(URI(webId), WebId::class.java)
     }
 
     private fun getStorage(webId: String): String {
@@ -209,14 +205,26 @@ class AuthenticatorImplementation : Authenticator {
         return Pair(result.first, result.second)
     }
 
+    private suspend fun getWebIdProfile(webId: String): WebIdProfile {
+        val webIdProfileResponse = crud.read(URI.create(webId), WebIdProfile::class.java)
+        if (webIdProfileResponse is SolidNetworkResponse.Success) {
+            return webIdProfileResponse.data
+        } else {
+            throw Exception("Could not get the webId details.")
+        }
+    }
+
 
     override suspend fun createAuthenticationIntentWithWebId(
         webId: String,
         redirectUri: String,
     ) : Pair<Intent?, String?> {
-        val webIdDetails = getWebIdDetails(webId)
+        val webIdDetails = getWebIdProfile(webId)
 
-        return createAuthenticationIntentWithOidcIssuer(webIdDetails.oidcIssuer!!.id!!, redirectUri)
+        return createAuthenticationIntentWithOidcIssuer(
+            webIdDetails.getOidcIssuers()[0].toString(),
+            redirectUri
+        )
     }
 
     override suspend fun createAuthenticationIntentWithOidcIssuer(
@@ -262,13 +270,7 @@ class AuthenticatorImplementation : Authenticator {
         if (authException == null && authResponse != null) {
             requestToken()
             profile.userInfo = getUserInfo()
-            profile.webIdDetails = getWebIdDetails(profile.userInfo!!.webId)
-            if (profile.webIdDetails == null) {
-                profile.webIdDetails = WebId()
-            }
-            if (profile.webIdDetails!!.storage == null) {
-                profile.webIdDetails!!.storage = JObject(getStorage(profile.userInfo!!.webId))
-            }
+            profile.webId = getWebIdProfile(profile.userInfo!!.webId)
             writeProfileToCache()
         }
     }
@@ -278,7 +280,7 @@ class AuthenticatorImplementation : Authenticator {
         return profile.authState.lastTokenResponse
     }
 
-    override suspend fun checkTokenAndRefresh() {
+    private suspend fun checkTokenAndRefresh() {
         if (needsTokenRefresh()){
             refreshToken()
         } else {
@@ -308,7 +310,7 @@ class AuthenticatorImplementation : Authenticator {
         return if (profile.authState.lastAuthorizationResponse != null &&
             profile.authState.authorizationServiceConfiguration != null) {
 
-            val token = getLastTokenResponse()
+            val token =  getLastTokenResponse()
             val endSessionReq = EndSessionRequest.Builder(profile.authState.authorizationServiceConfiguration!!)
                 .setIdTokenHint(token!!.idToken)
                 .setPostLogoutRedirectUri(Uri.parse(logoutRedirectUrl))
