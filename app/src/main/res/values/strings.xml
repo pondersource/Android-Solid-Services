@@ -6,6 +6,8 @@
     <string name="login_with_inrupt">Login with Inrupt.com</string>
     <string name="login_with_solidcommunity">Login with Solidcommunity</string>
     <string name="solid_account_label">@string/app_name</string>
-    <string name="solid_account_acc_type">com.pondersource.androidsolidservices.account.DEMOACCOUNT</string>
     <string name="splash_loading">Initilizing The Application...</string>
+    <string name="welcome_to_solid">Welcome to Android Solid Services</string>
+    <string name="your_webid_is">Your Webid is:</string>
+    <string name="your_storages">Your storages are:</string>
 </resources>

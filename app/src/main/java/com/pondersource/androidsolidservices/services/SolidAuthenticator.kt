@@ -1,4 +1,4 @@
-package com.pondersource.androidsolidservices
+package com.pondersource.androidsolidservices.services
 
 import android.accounts.AbstractAccountAuthenticator
 import android.accounts.Account
