@@ -1,6 +1,12 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.jetbrains.kotlin.parcelize)
+    alias(libs.plugins.jetbrains.kotlin.compose.compiler)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.google.hilt.android)
+    alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.google.protobuf)
 }
 
 android {
@@ -26,6 +32,13 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -35,8 +48,13 @@ android {
         jvmTarget = "11"
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
+    }
+
     buildFeatures {
         viewBinding = true
+        compose = true
     }
 
     packaging {
@@ -48,6 +66,7 @@ android {
                     "META-INF/DEPENDENCIES",
                     "META-INF/LICENSE.txt",
                     "META-INF/NOTICE.txt",
+                    "META-INF/NOTICE.md",
                     "META-INF/ASL2.0"
                 )
             )
@@ -55,21 +74,91 @@ android {
     }
 }
 
+
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
+    implementation(libs.jetbrains.kotlin.stdlib)
+    implementation(libs.jetbrains.kotlin.stdlib.jdk8)
+    implementation(libs.jetbrains.kotlin.reflect)
+    implementation(libs.jetbrains.kotlinx.coroutins.core)
+    implementation(libs.jetbrains.kotlinx.coroutins.android)
+    implementation(libs.jetbrains.kotlinx.serialization.json)
+
+    implementation(libs.androidx.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.startup.runtime)
+    implementation(libs.androidx.annotation)
+
+    implementation(libs.androidx.constraintLayout)
+    implementation(libs.androidx.legacy.support)
+    implementation(libs.androidx.exifInterface)
+
+
+    //DI - Hilt
+    implementation(libs.google.hilt.android)
+    ksp(libs.google.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.fragment)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+
+    //Compose
+    implementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.ui.tooling)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.compose.runtime.livedata)
+    implementation(libs.androidx.compose.ui.google.fonts)
+
+    //Lifecycle
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+
+    //Local DataBase - Datasource
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.google.protobuf.javalite)
+    implementation(libs.google.protobuf.kotlinlite)
+
+    //Navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.compose)
+
+    //Worker Manager (work in the background)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.work.rxJava2)
+    implementation(libs.androidx.work.gcm)
+    androidTestImplementation(libs.androidx.work.testing)
+    implementation(libs.androidx.work.multiProcess)
+
+    //Testing
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    testImplementation(libs.junit)
+
+
+    implementation(libs.openid.appauth)
+    implementation(libs.google.code.gson)
+
+    implementation(platform(libs.inrupt.client.bom))
+    implementation(libs.inrupt.client.solid)
+    implementation(libs.inrupt.client.core)
+    implementation(libs.inrupt.client.okhttp)
+    implementation(libs.inrupt.client.openid)
+    implementation(libs.inrupt.client.vocabulary)
+    implementation(libs.titanium.json.ld.jre8)
+    implementation(libs.glassfish.jakarta.json)
+
     implementation(project(":SolidAndroidClient"))
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("com.google.code.gson:gson:2.10.1")
-
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
-
-    implementation("net.openid:appauth:0.11.1")
 
 }

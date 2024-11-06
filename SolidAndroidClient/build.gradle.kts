@@ -1,6 +1,6 @@
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.jetbrains.kotlin.android)
     `maven-publish`
 }
 
@@ -41,6 +41,14 @@ android {
         jvmTarget = "11"
     }
 
+    viewBinding {
+        enable = true
+    }
+
+    buildFeatures {
+        aidl = true
+    }
+
     packaging {
         resources {
             excludes.addAll(
@@ -50,6 +58,7 @@ android {
                     "META-INF/DEPENDENCIES",
                     "META-INF/LICENSE.txt",
                     "META-INF/NOTICE.txt",
+                    "META-INF/NOTICE.md",
                     "META-INF/ASL2.0"
                 )
             )
@@ -59,30 +68,30 @@ android {
 
 dependencies {
 
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    //Testing
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    testImplementation(libs.junit)
 
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.google.android.material)
+    implementation(libs.jetbrains.kotlinx.coroutins.android)
 
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
+    /*implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
     implementation("com.squareup.okhttp3:okhttp")
-    implementation("com.apicatalog:titanium-json-ld-jre8:1.4.1")
-    implementation("org.glassfish:jakarta.json:2.0.1")
+    */
 
-    //Solid Java Client Library
-    implementation(platform("com.inrupt.client:inrupt-client-bom:1.1.0"))
-    //implementation("com.inrupt.client:inrupt-client-api")
-    implementation("com.inrupt.client:inrupt-client-solid")
-    implementation("com.inrupt.client:inrupt-client-core")
-    implementation("com.inrupt.client:inrupt-client-okhttp")
-    implementation("com.inrupt.client:inrupt-client-openid")
-    implementation("com.inrupt.client:inrupt-client-vocabulary")
+    implementation(libs.openid.appauth)
+    implementation(libs.google.code.gson)
 
-    implementation("net.openid:appauth:0.11.1")
+    implementation(platform(libs.inrupt.client.bom))
+    implementation(libs.inrupt.client.solid)
+    implementation(libs.inrupt.client.core)
+    implementation(libs.inrupt.client.okhttp)
+    implementation(libs.inrupt.client.openid)
+    implementation(libs.inrupt.client.vocabulary)
+    implementation(libs.titanium.json.ld.jre8)
+    implementation(libs.glassfish.jakarta.json)
 }
 
 publishing {
