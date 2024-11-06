@@ -1,17 +1,31 @@
-package com.pondersource.solidandroidclient
+package com.pondersource.androidsolidservices.base
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
-import com.google.gson.Gson
+import com.apicatalog.jsonld.JsonLd
+import com.apicatalog.jsonld.JsonLdOptions
+import com.apicatalog.jsonld.document.JsonDocument
+import com.apicatalog.jsonld.http.media.MediaType
+import com.apicatalog.rdf.RdfDataset
+import com.inrupt.client.Request
+import com.inrupt.client.Response
+import com.inrupt.client.openid.OpenIdSession
+import com.inrupt.client.solid.SolidSyncClient
+import com.pondersource.androidsolidservices.repository.UserRepository
+import com.pondersource.solidandroidclient.HTTPAcceptType.JSON_LD
+import com.pondersource.solidandroidclient.HTTPAcceptType.OCTET_STREAM
+import com.pondersource.solidandroidclient.HTTPHeaderName.ACCEPT
+import com.pondersource.solidandroidclient.HTTPHeaderName.AUTHORIZATION
+import com.pondersource.solidandroidclient.HTTPHeaderName.CONTENT_TYPE
+import com.pondersource.solidandroidclient.SolidNetworkResponse
 import com.pondersource.solidandroidclient.data.Profile
 import com.pondersource.solidandroidclient.data.UserInfo
 import com.pondersource.solidandroidclient.data.WebIdProfile
-import com.pondersource.solidandroidclient.data.WebIdProfile.Companion.readFromString
-import com.pondersource.solidandroidclient.data.WebIdProfile.Companion.writeToString
+import com.pondersource.solidandroidclient.sub.resource.RDFSource
+import com.pondersource.solidandroidclient.sub.resource.Resource
 import com.pondersource.solidandroidclient.util.Utils
-import net.openid.appauth.AuthState
+import com.pondersource.solidandroidclient.util.isSuccessful
+import com.pondersource.solidandroidclient.util.toPlainString
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationResponse
@@ -23,6 +37,7 @@ import net.openid.appauth.RegistrationRequest
 import net.openid.appauth.RegistrationResponse
 import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.TokenResponse
+import java.io.InputStream
 import java.net.URI
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -30,72 +45,22 @@ import kotlin.coroutines.suspendCoroutine
 /**
  * Authenticator is responsible to do the Authentication phase with the selected Identity Provider.
  */
-class AuthenticatorImplementation : Authenticator {
+class AuthenticatorImplementation (
+    private var userRepository: UserRepository,
+    private val authService: AuthorizationService,
+) : Authenticator {
 
-    companion object {
-
-        private const val SHARED_PREFERENCES_NAME = "solid_android_auth"
-        private const val PROFILE_STATE_KEY = "profile_state"
-        private const val PROFILE_USER_INFO_KEY = "profile_user_info"
-        private const val PROFILE_WEB_ID_DETAILS_KEY = "profile_web_id_details"
-
-        @Volatile
-        private lateinit var INSTANCE: AuthenticatorImplementation
-
-        /**
-         *  get a single instance of the class
-         *  @param context ApplicationContext
-         *  @return Authenticator object
-         */
-        fun getInstance(context: Context): AuthenticatorImplementation {
-            return if (::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = AuthenticatorImplementation(context)
-                INSTANCE
-            }
-        }
-    }
-
-    private val crud = CRUD.getInstance(this)
-    private var sharedPreferences: SharedPreferences
-    private val authService: AuthorizationService
     private var profile: Profile
 
-    private constructor(context: Context) {
-        sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-        this.profile = readProfileFromCache()
-        this.authService = AuthorizationService(context)
-    }
-
-    private fun readProfileFromCache(): Profile {
-        val profile = Profile()
-        val stateString = sharedPreferences.getString(PROFILE_STATE_KEY, null)
-        val webIdString = sharedPreferences.getString(PROFILE_WEB_ID_DETAILS_KEY, null)
-        if (!stateString.isNullOrEmpty()) {
-            profile.authState =  AuthState.jsonDeserialize(stateString)
-        }
-        profile.userInfo = Gson().fromJson(sharedPreferences.getString(PROFILE_USER_INFO_KEY, null), UserInfo::class.java)
-        if (!webIdString.isNullOrEmpty()) {
-            profile.webId = readFromString(webIdString)
-        }
-        return profile
-    }
-
-    private fun writeProfileToCache() {
-        sharedPreferences.edit().apply {
-            putString(PROFILE_STATE_KEY, profile.authState.jsonSerializeString())
-            putString(PROFILE_USER_INFO_KEY, Gson().toJson(profile.userInfo))
-            putString(PROFILE_WEB_ID_DETAILS_KEY, writeToString(profile.webId))
-            apply()
-        }
+    init {
+        this.profile = userRepository.readProfile()
     }
 
     private fun updateRegistrationResponse(
         regResponse: RegistrationResponse?
     ) {
         profile.authState.update(regResponse)
-        writeProfileToCache()
+        userRepository.writeProfile(profile)
     }
 
     private fun updateAuthorizationResponse(
@@ -103,7 +68,7 @@ class AuthenticatorImplementation : Authenticator {
         authException: AuthorizationException?
     ) {
         profile.authState.update(authResponse, authException)
-        writeProfileToCache()
+        userRepository.writeProfile(profile)
     }
 
     private fun updateTokenResponse(
@@ -111,7 +76,7 @@ class AuthenticatorImplementation : Authenticator {
         authException: AuthorizationException?
     ) {
         profile.authState.update(tokenResponse, authException)
-        writeProfileToCache()
+        userRepository.writeProfile(profile)
     }
 
     private suspend fun getUserInfo(): UserInfo? {
@@ -206,11 +171,69 @@ class AuthenticatorImplementation : Authenticator {
     }
 
     private suspend fun getWebIdProfile(webId: String): WebIdProfile {
-        val webIdProfileResponse = crud.read(URI.create(webId), WebIdProfile::class.java)
+        val webIdProfileResponse = read(URI.create(webId), WebIdProfile::class.java)
         if (webIdProfileResponse is SolidNetworkResponse.Success) {
             return webIdProfileResponse.data
         } else {
             throw Exception("Could not get the webId details.")
+        }
+    }
+
+    suspend fun <T: Resource> read(
+        resource: URI,
+        clazz: Class<T>,
+    ): SolidNetworkResponse<T> {
+
+        val client: SolidSyncClient = SolidSyncClient.getClient()
+        try {
+            val tokenResponse = if (needsTokenRefresh()) {
+                val tokenResponse = getLastTokenResponse()
+                client.session(OpenIdSession.ofIdToken(tokenResponse!!.idToken!!))
+                tokenResponse
+            } else {
+                getLastTokenResponse()
+            }
+
+            val request = Request.newBuilder()
+                .uri(resource)
+                .header(ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) JSON_LD else OCTET_STREAM)
+                .header(AUTHORIZATION, "${tokenResponse?.tokenType} ${tokenResponse?.accessToken}")
+                .GET()
+                .build()
+
+            val response: Response<InputStream> = client.send(
+                request,
+                Response.BodyHandlers.ofInputStream()
+            )
+
+            return if (response.isSuccessful()) {
+                SolidNetworkResponse.Success(constructObject(response, clazz))
+            } else {
+                SolidNetworkResponse.Error(response.statusCode(), response.body().toPlainString())
+            }
+        } catch (e: Exception) {
+            return SolidNetworkResponse.Exception(e)
+        }
+    }
+
+    private fun <T> constructObject(
+        response: Response<InputStream>,
+        clazz: Class<T>
+    ): T {
+        val type = response.headers().firstValue(CONTENT_TYPE)
+            .orElse(OCTET_STREAM)
+        val string = response.body().toPlainString()
+        if (RDFSource::class.java.isAssignableFrom(clazz)) {
+            val options = JsonLdOptions().apply {
+                isRdfStar = true
+            }
+            return clazz
+                .getConstructor(URI::class.java, MediaType::class.java, RdfDataset::class.java)
+                .newInstance(response.uri(), MediaType.of(type), JsonLd.toRdf(JsonDocument.of(string.byteInputStream())).options(options).get())
+        } else {
+            return clazz
+                .getConstructor(URI::class.java, String::class.java, InputStream::class.java)
+                .newInstance(response.uri(), type, string.byteInputStream())
         }
     }
 
@@ -271,7 +294,7 @@ class AuthenticatorImplementation : Authenticator {
             requestToken()
             profile.userInfo = getUserInfo()
             profile.webId = getWebIdProfile(profile.userInfo!!.webId)
-            writeProfileToCache()
+            userRepository.writeProfile(profile)
         }
     }
 
@@ -300,7 +323,7 @@ class AuthenticatorImplementation : Authenticator {
 
     override fun resetProfile() {
         profile = Profile()
-        writeProfileToCache()
+        userRepository.writeProfile(profile)
     }
 
     override suspend fun getTerminationSessionIntent(

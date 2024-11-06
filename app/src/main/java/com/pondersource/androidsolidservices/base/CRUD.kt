@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidclient
+package com.pondersource.androidsolidservices.base
 
 import com.apicatalog.jsonld.JsonLd
 import com.apicatalog.jsonld.JsonLdOptions
@@ -14,6 +14,7 @@ import com.pondersource.solidandroidclient.HTTPAcceptType.OCTET_STREAM
 import com.pondersource.solidandroidclient.HTTPHeaderName.ACCEPT
 import com.pondersource.solidandroidclient.HTTPHeaderName.AUTHORIZATION
 import com.pondersource.solidandroidclient.HTTPHeaderName.CONTENT_TYPE
+import com.pondersource.solidandroidclient.SolidNetworkResponse
 import com.pondersource.solidandroidclient.sub.resource.RDFSource
 import com.pondersource.solidandroidclient.sub.resource.Resource
 import com.pondersource.solidandroidclient.util.isSuccessful
@@ -23,29 +24,9 @@ import java.io.InputStream
 import java.net.URI
 
 
-class CRUD private constructor(
+class CRUD constructor(
     private val auth: Authenticator
 ) {
-
-    companion object {
-
-        @Volatile
-        private lateinit var INSTANCE: CRUD
-
-        /**
-         *  get a single instance of the class
-         *  @param auth Authenticator object
-         *  @return CRUD object
-         */
-        fun getInstance(auth: Authenticator): CRUD {
-            return if (::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = CRUD(auth)
-                INSTANCE
-            }
-        }
-    }
 
     private val client: SolidSyncClient = SolidSyncClient.getClient()
 
@@ -122,7 +103,10 @@ class CRUD private constructor(
                 if (response.isSuccessful()) {
                     return SolidNetworkResponse.Success(resource)
                 }
-                return SolidNetworkResponse.Error(response.statusCode(), response.body().toPlainString())
+                return SolidNetworkResponse.Error(
+                    response.statusCode(),
+                    response.body().toPlainString()
+                )
             } catch (e: Exception) {
                 return SolidNetworkResponse.Exception(e)
             }
@@ -166,7 +150,10 @@ class CRUD private constructor(
 
             }
             is SolidNetworkResponse.Error -> {
-                return SolidNetworkResponse.Error(existingResourceResponse.errorCode, existingResourceResponse.errorMessage)
+                return SolidNetworkResponse.Error(
+                    existingResourceResponse.errorCode,
+                    existingResourceResponse.errorMessage
+                )
             }
             is SolidNetworkResponse.Exception -> {
                 return SolidNetworkResponse.Exception(existingResourceResponse.exception)
@@ -202,7 +189,10 @@ class CRUD private constructor(
                     if (response.isSuccessful()) {
                         return SolidNetworkResponse.Success(resource)
                     } else {
-                        return SolidNetworkResponse.Error(response.statusCode(), response.body().toPlainString())
+                        return SolidNetworkResponse.Error(
+                            response.statusCode(),
+                            response.body().toPlainString()
+                        )
                     }
                 } catch (e: Exception) {
                     return SolidNetworkResponse.Exception(e)

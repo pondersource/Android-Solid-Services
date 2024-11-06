@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidclient
+package com.pondersource.androidsolidservices.base
 
 import android.content.Intent
 import com.pondersource.solidandroidclient.data.Profile
