@@ -2,29 +2,47 @@ package com.pondersource.androidsolidservices.ui.main
 
 import android.accounts.Account
 import android.accounts.AccountManager
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import com.pondersource.androidsolidservices.usecase.Authenticator
+import androidx.lifecycle.viewModelScope
 import com.pondersource.androidsolidservices.base.BaseViewModel
 import com.pondersource.androidsolidservices.base.Constants
+import com.pondersource.androidsolidservices.usecase.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class SettingViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val authenticator: Authenticator,
     @Named(Constants.ASS_ACCOUNT_NAME) private val aSSAccountName: String,
 ): BaseViewModel() {
 
-    private lateinit var account: Account
-    val webId : MutableState<String> = mutableStateOf(authenticator.getProfile().userInfo!!.webId)
+    companion object {
+        private const val AUTH_END_REDIRECT_URL = "com.pondersource.androidsolidservices:/oauth2logout"
+    }
 
-    val storages = mutableStateOf(authenticator.getProfile().webId!!.getStorages().map { it.toString() })
+    private lateinit var account: Account
+    val logoutLoading = mutableStateOf(false)
+    val logoutResult = mutableStateOf(false)
 
     init {
         handleAccountManagement()
+    }
+
+    fun logout() {
+        logoutLoading.value = true
+        authenticator.resetProfile()
+        val deleteRes = accountManager.removeAccountExplicitly(account)
+        logoutLoading.value = false
+        logoutResult.value = true
+    }
+
+    fun logoutWithBrowser() {
+        viewModelScope.launch {
+            authenticator.getTerminationSessionIntent(AUTH_END_REDIRECT_URL)
+        }
     }
 
     private fun handleAccountManagement() {

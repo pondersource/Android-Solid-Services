@@ -10,4 +10,8 @@
     <string name="welcome_to_solid">Welcome to Android Solid Services</string>
     <string name="your_webid_is">Your Webid is:</string>
     <string name="your_storages">Your storages are:</string>
+    <string name="granted_apps">Granted Apps</string>
+    <string name="setting">Settings</string>
+    <string name="access_grant">Access Grants</string>
+    <string name="main">Main</string>
 </resources>

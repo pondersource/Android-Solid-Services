@@ -14,10 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
 import com.pondersource.androidsolidservices.R
 import com.pondersource.androidsolidservices.ui.navigation.Login
-import com.pondersource.androidsolidservices.ui.navigation.Main
+import com.pondersource.androidsolidservices.ui.navigation.MainPage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -31,9 +30,17 @@ fun Startup(
     LaunchedEffect(Unit) {
         scope.launch {
             if (viewModel.isLoggedIn()) {
-                navController.navigate(Main, NavOptions.Builder().setLaunchSingleTop(true).build())
+                navController.navigate(MainPage) {
+                    popUpTo(navController.graph.id) {
+                        inclusive = true
+                    }
+                }
             } else {
-                navController.navigate(Login, NavOptions.Builder().setLaunchSingleTop(true).build())
+                navController.navigate(Login) {
+                    popUpTo(navController.graph.id) {
+                        inclusive = true
+                    }
+                }
             }
         }
     }

@@ -18,8 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
-import com.pondersource.androidsolidservices.ui.navigation.Main
+import com.pondersource.androidsolidservices.ui.navigation.MainPage
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 
@@ -54,7 +53,11 @@ fun Login(
 
     LaunchedEffect(viewModel.loginResult.value) {
         if(viewModel.loginResult.value == true) {
-            navController.navigate(Main, NavOptions.Builder().setLaunchSingleTop(true).build())
+            navController.navigate(MainPage) {
+                popUpTo(navController.graph.id) {
+                    inclusive = true
+                }
+            }
         }
     }
 
