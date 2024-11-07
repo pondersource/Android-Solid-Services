@@ -1,7 +1,10 @@
 package com.pondersource.androidsolidservices.di
 
+import com.pondersource.androidsolidservices.repository.AccessGrantRepository
+import com.pondersource.androidsolidservices.repository.AccessGrantRepositoryImplementation
 import com.pondersource.androidsolidservices.repository.UserRepository
 import com.pondersource.androidsolidservices.repository.UserRepositoryImplementation
+import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSource
 import com.pondersource.androidsolidservices.repository.datasource.local.user.UserLocalDataSource
 import dagger.Module
 import dagger.Provides
@@ -17,5 +20,12 @@ class RepositoryModule {
         userLocalDataSource: UserLocalDataSource
     ): UserRepository {
         return UserRepositoryImplementation(userLocalDataSource)
+    }
+
+    @Provides
+    fun provideAccessGrantRepository(
+        accessGrantLocalDataSource: AccessGrantLocalDataSource
+    ): AccessGrantRepository {
+        return AccessGrantRepositoryImplementation(accessGrantLocalDataSource)
     }
 }

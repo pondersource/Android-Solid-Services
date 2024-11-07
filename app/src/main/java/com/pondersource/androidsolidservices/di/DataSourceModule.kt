@@ -3,6 +3,8 @@ package com.pondersource.androidsolidservices.di
 import android.content.Context
 import android.content.SharedPreferences
 import com.pondersource.androidsolidservices.base.Constants
+import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSource
+import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSourceImplementation
 import com.pondersource.androidsolidservices.repository.datasource.local.user.UserLocalDataSource
 import com.pondersource.androidsolidservices.repository.datasource.local.user.UserLocalDataSourceImplementation
 import dagger.Module
@@ -36,5 +38,12 @@ class DataSourceModule {
         sharedPreferences: SharedPreferences
     ): UserLocalDataSource {
         return UserLocalDataSourceImplementation(sharedPreferences)
+    }
+
+    @Provides
+    fun provideAccessGrantLocalDataSource(
+        sharedPreferences: SharedPreferences,
+    ): AccessGrantLocalDataSource {
+        return AccessGrantLocalDataSourceImplementation(sharedPreferences)
     }
 }
