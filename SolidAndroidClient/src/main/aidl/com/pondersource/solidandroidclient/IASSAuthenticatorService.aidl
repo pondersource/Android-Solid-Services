@@ -1,6 +1,8 @@
 // IASSAuthenticatorService.aidl
 package com.pondersource.solidandroidclient;
 
+import com.pondersource.solidandroidclient.IASSLoginCallback;
+
 // Declare any non-default types here with import statements
 
 interface IASSAuthenticatorService {
@@ -9,5 +11,5 @@ interface IASSAuthenticatorService {
 
     boolean isAppAuthorized(String appPackageName);
 
-    void requestLogin(String appPackagename, String appName, int icon);
+    void requestLogin(String appPackagename, String appName, int icon, IASSLoginCallback callback);
 }
