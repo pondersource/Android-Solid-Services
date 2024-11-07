@@ -3,8 +3,8 @@ package com.pondersource.androidsolidservices.services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.pondersource.androidsolidservices.base.Authenticator
-import com.pondersource.androidsolidservices.base.CRUD
+import com.pondersource.androidsolidservices.usecase.Authenticator
+import com.pondersource.androidsolidservices.usecase.SolidResourceManager
 import com.pondersource.solidandroidclient.IASSCrudService
 import com.pondersource.solidandroidclient.sub.resource.NonRDFSource
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,7 +19,7 @@ class ASSCrudService: Service() {
     @Inject
     lateinit var authenticator : Authenticator
     @Inject
-    lateinit var crud : CRUD
+    lateinit var solidResourceManager : SolidResourceManager
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder
@@ -30,7 +30,7 @@ class ASSCrudService: Service() {
         @Blocking
         override fun get(resourceUrl: String?): String {
             return runBlocking {
-                val result = crud.read(URI.create(resourceUrl), NonRDFSource::class.java)
+                val result = solidResourceManager.read(URI.create(resourceUrl), NonRDFSource::class.java)
                 return@runBlocking ""
             }
 

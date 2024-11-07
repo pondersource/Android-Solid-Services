@@ -3,7 +3,7 @@ package com.pondersource.androidsolidservices.ui.login
 import android.content.Intent
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.pondersource.androidsolidservices.base.Authenticator
+import com.pondersource.androidsolidservices.usecase.Authenticator
 import com.pondersource.androidsolidservices.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

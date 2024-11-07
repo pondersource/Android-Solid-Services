@@ -4,9 +4,8 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.datastore.core.Storage
 import androidx.lifecycle.viewModelScope
-import com.pondersource.androidsolidservices.base.Authenticator
+import com.pondersource.androidsolidservices.usecase.Authenticator
 import com.pondersource.androidsolidservices.base.BaseViewModel
 import com.pondersource.androidsolidservices.base.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel

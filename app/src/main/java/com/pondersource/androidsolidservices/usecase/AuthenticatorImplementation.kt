@@ -1,4 +1,4 @@
-package com.pondersource.androidsolidservices.base
+package com.pondersource.androidsolidservices.usecase
 
 import android.content.Intent
 import android.net.Uri

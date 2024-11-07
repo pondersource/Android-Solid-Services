@@ -6,8 +6,8 @@ import android.os.IBinder
 import android.view.WindowManager
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.pondersource.androidsolidservices.base.Authenticator
-import com.pondersource.androidsolidservices.base.CRUD
+import com.pondersource.androidsolidservices.usecase.Authenticator
+import com.pondersource.androidsolidservices.usecase.SolidResourceManager
 import com.pondersource.solidandroidclient.IASSAuthenticatorService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +22,7 @@ class ASSAuthenticatorService: Service() {
     @Inject
     lateinit var authenticator : Authenticator
     @Inject
-    lateinit var crud : CRUD
+    lateinit var solidResourceManager : SolidResourceManager
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder

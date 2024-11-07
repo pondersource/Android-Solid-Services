@@ -2,11 +2,11 @@ package com.pondersource.androidsolidservices.di
 
 import android.accounts.AccountManager
 import android.content.Context
-import android.content.SharedPreferences
-import com.pondersource.androidsolidservices.base.Authenticator
-import com.pondersource.androidsolidservices.base.AuthenticatorImplementation
-import com.pondersource.androidsolidservices.base.CRUD
+import com.pondersource.androidsolidservices.usecase.Authenticator
+import com.pondersource.androidsolidservices.usecase.AuthenticatorImplementation
 import com.pondersource.androidsolidservices.base.Constants
+import com.pondersource.androidsolidservices.usecase.SolidResourceManager
+import com.pondersource.androidsolidservices.usecase.SolidResourceManagerImplementation
 import com.pondersource.androidsolidservices.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -56,10 +56,10 @@ class LocalModule {
 
     @Provides
     @Singleton
-    fun provideCRUD(
+    fun provideSolidResourceManager(
         authenticator: Authenticator,
-    ): CRUD {
-        return CRUD(
+    ): SolidResourceManager {
+        return SolidResourceManagerImplementation(
             authenticator
         )
     }

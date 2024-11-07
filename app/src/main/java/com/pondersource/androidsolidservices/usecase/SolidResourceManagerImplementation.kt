@@ -1,4 +1,4 @@
-package com.pondersource.androidsolidservices.base
+package com.pondersource.androidsolidservices.usecase
 
 import com.apicatalog.jsonld.JsonLd
 import com.apicatalog.jsonld.JsonLdOptions
@@ -24,9 +24,9 @@ import java.io.InputStream
 import java.net.URI
 
 
-class CRUD constructor(
+class SolidResourceManagerImplementation(
     private val auth: Authenticator
-) {
+) : SolidResourceManager {
 
     private val client: SolidSyncClient = SolidSyncClient.getClient()
 
@@ -44,7 +44,7 @@ class CRUD constructor(
         }
     }
 
-    suspend fun <T: Resource> read(
+    override suspend fun <T: Resource> read(
         resource: URI,
         clazz: Class<T>,
     ): SolidNetworkResponse<T> {
@@ -74,7 +74,7 @@ class CRUD constructor(
         }
     }
 
-    suspend fun <T: Resource> create(
+    override suspend fun <T: Resource> create(
         resource: T
     ): SolidNetworkResponse<T> {
 
@@ -115,7 +115,7 @@ class CRUD constructor(
         }
     }
 
-    suspend fun <T: Resource> update(
+    override suspend fun <T: Resource> update(
         newResource: T
     ): SolidNetworkResponse<T> {
 
@@ -161,7 +161,7 @@ class CRUD constructor(
         }
     }
 
-    suspend fun <T: Resource> delete(
+    override suspend fun <T: Resource> delete(
         resource: T,
     ): SolidNetworkResponse<T> {
 
