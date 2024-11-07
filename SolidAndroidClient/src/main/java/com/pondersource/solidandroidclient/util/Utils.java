@@ -1,5 +1,7 @@
 package com.pondersource.solidandroidclient.util;
 
+import static com.pondersource.solidandroidclient.ConstantsKt.ANDROID_SOLID_SERVICES_PACKAGE_NAME;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 
@@ -73,7 +75,7 @@ public class Utils {
     }
 
     public static boolean hasAndroidSolidServicesInstalled(Context context) {
-        return hasApplicationInstalled(context, "com.pondersource.androidsolidservices");
+        return hasApplicationInstalled(context, ANDROID_SOLID_SERVICES_PACKAGE_NAME);
     }
 
     private static boolean hasApplicationInstalled(Context context, String applicationUri) {

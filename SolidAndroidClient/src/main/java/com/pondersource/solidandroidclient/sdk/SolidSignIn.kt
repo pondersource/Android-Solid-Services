@@ -7,12 +7,10 @@ class SolidSignIn {
     companion object {
 
         fun getClient(context: Context): SolidSignInClient {
-            return SolidSignInClient.getInstance(context)
-        }
-
-        fun getLastSignInAccount(context: Context): SolidSignInAccount? {
-
-            return null
+            return SolidSignInClient.getInstance(context, context.applicationInfo,
+                hasInstalledAndroidSolidServices = {
+                    hasInstalledAndroidSolidServices(context)
+                })
         }
     }
 }
