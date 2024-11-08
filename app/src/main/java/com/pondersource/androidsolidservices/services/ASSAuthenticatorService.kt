@@ -1,25 +1,28 @@
 package com.pondersource.androidsolidservices.services
 
-import android.app.Service
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
 import android.view.WindowManager
-import android.widget.Toast
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleService
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
 import com.pondersource.androidsolidservices.repository.AccessGrantRepository
 import com.pondersource.androidsolidservices.usecase.Authenticator
-import com.pondersource.androidsolidservices.usecase.SolidResourceManager
 import com.pondersource.solidandroidclient.IASSAuthenticatorService
 import com.pondersource.solidandroidclient.IASSLoginCallback
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class ASSAuthenticatorService: Service() {
+class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
+
+    private val registryController = SavedStateRegistryController.create(this)
+    override val savedStateRegistry: SavedStateRegistry = registryController.savedStateRegistry
 
     @Inject
     lateinit var authenticator : Authenticator
@@ -27,12 +30,25 @@ class ASSAuthenticatorService: Service() {
     @Inject
     lateinit var accessGrantRepository: AccessGrantRepository
 
-    override fun onBind(intent: Intent?): IBinder? {
+    lateinit var alertDialog: AlertDialog.Builder
+
+    override fun onCreate() {
+        super.onCreate()
+        registryController.performAttach()
+        registryController.performRestore(null)
+        setTheme(androidx.appcompat.R.style.AlertDialog_AppCompat)
+
+        alertDialog = AlertDialog
+            .Builder(this)
+            .setCancelable(false)
+    }
+
+    override fun onBind(intent: Intent): IBinder {
+        super.onBind(intent)
         return binder
     }
 
-
-   private val binder = object : IASSAuthenticatorService.Stub() {
+    private val binder = object : IASSAuthenticatorService.Stub() {
         override fun hasLoggedIn(): Boolean {
             return authenticator.isUserAuthorized()
         }
@@ -41,27 +57,34 @@ class ASSAuthenticatorService: Service() {
             return accessGrantRepository.hasAccessGrant(appPackageName)
         }
 
-       override fun requestLogin(appPackagename: String, appName: String, icon: Int, callback: IASSLoginCallback) {
-           //TODO
-           val builder = MaterialAlertDialogBuilder(this@ASSAuthenticatorService)
-               .setIcon(icon)
-               .setTitle("Login with Solid")
-               .setMessage("$appName wants to access to your Pod. Do you allow?")
-               .setNegativeButton("DENY", { dialog, which ->
-                   accessGrantRepository.revokeAccessGrant(appPackagename)
-                   callback.onResult(false)
-                   Toast.makeText(this@ASSAuthenticatorService, "denied", Toast.LENGTH_SHORT).show()
-               })
-               .setPositiveButton("ALLOW", { dialog, which ->
-                   accessGrantRepository.addAccessGrant(appPackagename, appName, icon)
-                   callback.onResult(true)
-                   Toast.makeText(this@ASSAuthenticatorService, "allowed", Toast.LENGTH_SHORT).show()
-               })
-
-           val alert = builder.create()
-           alert.window!!.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY)
-           alert.show()
-       }
-   }
         override fun requestLogin(appPackageName: String, appName: String, callback: IASSLoginCallback) {
+            showLoginDialog(appPackageName, appName, callback)
+        }
+    }
+
+    private fun showLoginDialog(
+        appPackageName: String,
+        appName: String,
+        callback: IASSLoginCallback
+    ) {
+
+        ContextCompat.getMainExecutor(this).execute( {
+            alertDialog
+                .setTitle("Permission Request")
+                .setMessage("$appName wants to access your Solid pod. Do you allow?")
+                .setNegativeButton("Reject") { dialog, _ ->
+                    accessGrantRepository.revokeAccessGrant(appPackageName)
+                    dialog.dismiss()
+                    callback.onResult(false)
+                }
+                .setPositiveButton("Allow") { dialog, _ ->
+                    accessGrantRepository.addAccessGrant(appPackageName, appName)
+                    dialog.dismiss()
+                    callback.onResult(true)
+                }
+                .create().apply {
+                    window!!.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY)
+                }.show()
+        })
+    }
 }

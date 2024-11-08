@@ -121,6 +121,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.service)
+    implementation(libs.androidx.lifecycle.runtime)
 
     //Local DataBase - Datasource
     implementation(libs.androidx.datastore)
@@ -160,5 +162,7 @@ dependencies {
     implementation(libs.glassfish.jakarta.json)
 
     implementation(project(":SolidAndroidClient"))
+
+    implementation("androidx.appcompat:appcompat:1.7.0")
 
 }

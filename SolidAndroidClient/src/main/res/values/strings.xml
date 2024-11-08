@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sign_in_with_solid">Signin with Solid</string>
+    <string name="connect_to_solid">Connect to Solid</string>
 </resources>

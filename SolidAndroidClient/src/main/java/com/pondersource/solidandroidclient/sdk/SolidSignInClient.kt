@@ -38,6 +38,7 @@ class SolidSignInClient {
     }
 
     private var applicationInfo: ApplicationInfo
+    private var applicationName: String
     private val hasInstalledAndroidSolidServices: () -> Boolean
     private var iASSAuthService: IASSAuthenticatorService? = null
     private val serviceConnection = object : ServiceConnection {
@@ -56,6 +57,7 @@ class SolidSignInClient {
         hasInstalledAndroidSolidServices: () -> Boolean
     ) {
         this.applicationInfo = applicationInfo
+        this.applicationName = context.packageManager.getApplicationLabel(this.applicationInfo).toString()
         this.hasInstalledAndroidSolidServices = hasInstalledAndroidSolidServices
         val intent = Intent().apply {
             setClassName(
@@ -86,21 +88,51 @@ class SolidSignInClient {
         }
     }
 
-    fun requestLogin() {
+
+    @Throws(Exception::class)
+    fun getAccount() : SolidSignInAccount?{
+        if (hasInstalledAndroidSolidServices()) {
+            if (hasConnectedToService()) {
+                if(iASSAuthService!!.hasLoggedIn()) {
+                    return if(iASSAuthService!!.isAppAuthorized(applicationInfo.packageName)) {
+                        SolidSignInAccount(
+                            applicationInfo.packageName
+                        )
+                    } else {
+                        null
+                    }
+                } else {
+                    throw SolidNotLoggedInException()
+                }
+            } else {
+                throw Exception("Error while connecting to Solid Service.")
+            }
+        } else {
+            throw SolidAppNotFoundException()
+        }
+    }
+
+    fun requestLogin(callBack: (Boolean) -> Unit) {
         when(val connection = checkConnectionWithASS()) {
             is Success -> {
                 if (connection.accessIsGranted) {
-                    //Access is already granted
+                    callBack(true)
                 } else {
-                    iASSAuthService!!.requestLogin(applicationInfo.packageName, applicationInfo.name, applicationInfo.icon, object : IASSLoginCallback.Stub() {
+                    iASSAuthService!!.requestLogin(applicationInfo.packageName, applicationName, object : IASSLoginCallback.Stub() {
                         override fun onResult(granted: Boolean) {
-                            //TODO
+                            callBack(granted)
                         }
                     })
                 }
             }
-            else -> {
-
+            is ASSConnectionResponse.AppNotFound -> {
+                throw SolidAppNotFoundException()
+            }
+            is ASSConnectionResponse.SolidHasNotLoggedIn -> {
+                throw SolidNotLoggedInException()
+            }
+            is ASSConnectionResponse.Error -> {
+                throw Exception("Unknown error occurred.")
             }
         }
     }

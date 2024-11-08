@@ -4,8 +4,8 @@ appauth = "0.11.1"
 gson = "2.11.0"
 inruptClient = "1.2.0"
 ktx = "1.13.1"
-lifecucle-ktx = "2.8.6"
-lifecycleCompose = "2.8.6"
+lifecucle-ktx = "2.8.7"
+lifecycleCompose = "2.8.7"
 composeGoogleFont = "1.7.4"
 composeBom = "2024.10.00"
 composeActivity = "1.9.3"
@@ -34,6 +34,7 @@ androidxAnnotation = "1.9.0"
 googleMaterial = "1.12.0"
 titaniumJsonLdJre8 = "1.4.1"
 jakartaJson = "2.0.1"
+lifecycleRuntime = "2.8.7"
 
 [libraries]
 jetbrains-kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin"}
@@ -67,6 +68,7 @@ androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifec
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecucle-ktx" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecucle-ktx" }
 androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecucle-ktx" }
+androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecucle-ktx" }
 
 #Local Database - Datastroe
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datasource" }
@@ -118,6 +120,7 @@ inrupt-client-vocabulary = { group = "com.inrupt.client", name = "inrupt-client-
 androidx-test-ext-junit = {group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit"}
 androidx-test-espresso-core = {group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidXEspresso"}
 junit = {group = "junit", name = "junit", version.ref = "junit"}
+androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "lifecycleRuntime" }
 
 [plugins]
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin"}
