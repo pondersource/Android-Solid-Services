@@ -14,9 +14,8 @@ class AccessGrantRepositoryImplementation(
     override fun addAccessGrant(
         appPackageName: String,
         appName: String,
-        appIcon: Int
     ) {
-        accessGrantLocalDataSource.addAccessGrant(appPackageName, appName, appIcon)
+        accessGrantLocalDataSource.addAccessGrant(appPackageName, appName)
     }
 
     override fun revokeAccessGrant(appPackageName: String) {

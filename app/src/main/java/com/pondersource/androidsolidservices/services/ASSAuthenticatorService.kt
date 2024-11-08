@@ -63,4 +63,5 @@ class ASSAuthenticatorService: Service() {
            alert.show()
        }
    }
+        override fun requestLogin(appPackageName: String, appName: String, callback: IASSLoginCallback) {
 }

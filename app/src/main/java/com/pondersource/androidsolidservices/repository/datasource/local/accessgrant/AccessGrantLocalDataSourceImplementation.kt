@@ -15,19 +15,18 @@ class AccessGrantLocalDataSourceImplementation (
 
     override fun hasAccessGrant(appPackageName: String): Boolean {
         val apps = grantedApplications()
-        val app = apps.find { it.packageName != appPackageName }
+        val app = apps.find { it.packageName == appPackageName }
         return app != null
     }
 
     override fun addAccessGrant(
         appPackageName: String,
-        appName: String,
-        appIcon: Int
+        appName: String
     ) {
         val apps = grantedApplications()
-        val app = apps.find { it.packageName != appPackageName }
+        val app = apps.find { it.packageName == appPackageName }
         if (app == null) {
-            saveGrantedApps(apps + GrantedApp(appPackageName, appName, appIcon))
+            saveGrantedApps(apps + GrantedApp(appPackageName, appName))
         }
     }
 
