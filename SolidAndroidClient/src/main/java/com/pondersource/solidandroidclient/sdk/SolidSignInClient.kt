@@ -11,6 +11,8 @@ import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
 import com.pondersource.solidandroidclient.IASSAuthenticatorService
 import com.pondersource.solidandroidclient.IASSLoginCallback
 import com.pondersource.solidandroidclient.sdk.ASSConnectionResponse.Success
+import com.pondersource.solidandroidclient.sdk.SolidException.SolidAppNotFoundException
+import com.pondersource.solidandroidclient.sdk.SolidException.SolidNotLoggedInException
 
 class SolidSignInClient {
 

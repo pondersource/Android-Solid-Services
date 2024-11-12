@@ -1,11 +1,12 @@
 package com.pondersource.solidandroidclient.sub.resource
 
+import android.os.Parcelable
 import okhttp3.Headers
 import okio.IOException
 import java.io.InputStream
 import java.net.URI
 
-interface Resource : AutoCloseable {
+interface Resource : AutoCloseable, Parcelable {
 
     fun getIdentifier(): URI
 

@@ -21,7 +21,7 @@ import com.pondersource.solidandroidclient.SolidNetworkResponse
 import com.pondersource.solidandroidclient.data.Profile
 import com.pondersource.solidandroidclient.data.UserInfo
 import com.pondersource.solidandroidclient.data.WebIdProfile
-import com.pondersource.solidandroidclient.sub.resource.RDFSource
+import com.pondersource.solidandroidclient.RDFSource
 import com.pondersource.solidandroidclient.sub.resource.Resource
 import com.pondersource.solidandroidclient.util.Utils
 import com.pondersource.solidandroidclient.util.isSuccessful

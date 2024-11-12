@@ -10,7 +10,7 @@ import com.inrupt.client.vocabulary.PIM
 import com.inrupt.client.vocabulary.RDF
 import com.inrupt.client.vocabulary.RDFS
 import com.inrupt.client.vocabulary.Solid
-import com.pondersource.solidandroidclient.sub.resource.RDFSource
+import com.pondersource.solidandroidclient.RDFSource
 import com.pondersource.solidandroidclient.util.toPlainString
 import java.net.URI
 

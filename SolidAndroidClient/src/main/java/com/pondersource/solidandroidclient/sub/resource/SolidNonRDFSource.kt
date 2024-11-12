@@ -1,5 +1,6 @@
 package com.pondersource.solidandroidclient.sub.resource
 
+import com.pondersource.solidandroidclient.NonRDFSource
 import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI

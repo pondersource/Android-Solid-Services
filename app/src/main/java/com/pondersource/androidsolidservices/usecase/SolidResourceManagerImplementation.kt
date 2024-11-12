@@ -15,7 +15,7 @@ import com.pondersource.solidandroidclient.HTTPHeaderName.ACCEPT
 import com.pondersource.solidandroidclient.HTTPHeaderName.AUTHORIZATION
 import com.pondersource.solidandroidclient.HTTPHeaderName.CONTENT_TYPE
 import com.pondersource.solidandroidclient.SolidNetworkResponse
-import com.pondersource.solidandroidclient.sub.resource.RDFSource
+import com.pondersource.solidandroidclient.RDFSource
 import com.pondersource.solidandroidclient.sub.resource.Resource
 import com.pondersource.solidandroidclient.util.isSuccessful
 import com.pondersource.solidandroidclient.util.toPlainString

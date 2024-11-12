@@ -5,6 +5,7 @@ import com.apicatalog.rdf.RdfDataset
 import com.inrupt.client.vocabulary.RDF
 import com.pondersource.solidandroidclient.lang.ExtendedXsdConstants
 import com.pondersource.solidandroidclient.sub.resource.RDFSource
+import com.pondersource.solidandroidclient.RDFSource
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime

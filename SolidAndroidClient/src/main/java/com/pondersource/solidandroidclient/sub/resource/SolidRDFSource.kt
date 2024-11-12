@@ -2,6 +2,7 @@ package com.pondersource.solidandroidclient.sub.resource
 
 import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
+import com.pondersource.solidandroidclient.RDFSource
 import okhttp3.Headers
 import java.net.URI
 
