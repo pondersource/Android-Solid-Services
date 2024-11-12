@@ -2,6 +2,8 @@ package com.pondersource.androidsolidservices.di
 
 import com.pondersource.androidsolidservices.repository.AccessGrantRepository
 import com.pondersource.androidsolidservices.repository.AccessGrantRepositoryImplementation
+import com.pondersource.androidsolidservices.repository.ResourcePermissionRepository
+import com.pondersource.androidsolidservices.repository.ResourcePermissionRepositoryImplementation
 import com.pondersource.androidsolidservices.repository.UserRepository
 import com.pondersource.androidsolidservices.repository.UserRepositoryImplementation
 import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSource
@@ -27,5 +29,12 @@ class RepositoryModule {
         accessGrantLocalDataSource: AccessGrantLocalDataSource
     ): AccessGrantRepository {
         return AccessGrantRepositoryImplementation(accessGrantLocalDataSource)
+    }
+
+    @Provides
+    fun provideResourcePermissionRepository(
+        accessGrantRepository: AccessGrantRepository,
+    ): ResourcePermissionRepository {
+        return ResourcePermissionRepositoryImplementation(accessGrantRepository)
     }
 }
