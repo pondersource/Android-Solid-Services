@@ -1,9 +1,9 @@
 package com.pondersource.androidsolidservices.services
 
+import com.pondersource.androidsolidservices.R
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
@@ -39,7 +39,7 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
         setTheme(androidx.appcompat.R.style.AlertDialog_AppCompat)
 
         alertDialog = AlertDialog
-            .Builder(this)
+            .Builder(this, R.style.Theme_AndroidSolidServices)
             .setCancelable(false)
     }
 
@@ -84,6 +84,8 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
                 }
                 .create().apply {
                     window!!.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY)
+                    window!!.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
+                    window!!.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND, WindowManager.LayoutParams.FLAG_DIM_BEHIND)
                 }.show()
         })
     }
