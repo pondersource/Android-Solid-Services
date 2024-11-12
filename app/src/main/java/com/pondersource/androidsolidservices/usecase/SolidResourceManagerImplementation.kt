@@ -9,6 +9,7 @@ import com.inrupt.client.Request
 import com.inrupt.client.Response
 import com.inrupt.client.openid.OpenIdSession
 import com.inrupt.client.solid.SolidSyncClient
+import com.pondersource.solidandroidclient.HTTPAcceptType.ANY
 import com.pondersource.solidandroidclient.HTTPAcceptType.JSON_LD
 import com.pondersource.solidandroidclient.HTTPAcceptType.OCTET_STREAM
 import com.pondersource.solidandroidclient.HTTPHeaderName.ACCEPT
@@ -54,7 +55,7 @@ class SolidResourceManagerImplementation(
 
             val request = Request.newBuilder()
                 .uri(resource)
-                .header(ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) JSON_LD else OCTET_STREAM)
+                .header(ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) JSON_LD else ANY)
                 .header(AUTHORIZATION, "${tokenResponse?.tokenType} ${tokenResponse?.accessToken}")
                 .GET()
                 .build()
