@@ -1,5 +1,6 @@
 package com.pondersource.androidsolidservices.ui.main
 
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -108,8 +109,12 @@ private fun GrantedAppItem(
 ) {
     val context = LocalContext.current
     val icon = remember {
-        context.packageManager.getApplicationIcon(app.packageName)
-            .toBitmap(config = Bitmap.Config.ARGB_8888).asImageBitmap()
+        try {
+            context.packageManager.getApplicationIcon(app.packageName)
+                .toBitmap(config = Bitmap.Config.ARGB_8888).asImageBitmap()
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
+        }
     }
 
     Card (
@@ -127,7 +132,7 @@ private fun GrantedAppItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                bitmap = icon,
+                bitmap = icon ?: Bitmap.createBitmap(32.dp.value.toInt(), 32.dp.value.toInt(), Bitmap.Config.ARGB_8888).asImageBitmap(),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(8.dp)
