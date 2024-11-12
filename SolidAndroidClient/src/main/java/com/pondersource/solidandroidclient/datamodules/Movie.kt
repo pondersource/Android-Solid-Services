@@ -4,8 +4,8 @@ import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
 import com.inrupt.client.vocabulary.RDF
 import com.pondersource.solidandroidclient.lang.ExtendedXsdConstants
-import com.pondersource.solidandroidclient.sub.resource.RDFSource
 import com.pondersource.solidandroidclient.RDFSource
+import okhttp3.Headers
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -41,6 +41,13 @@ class Movie: RDFSource {
         mediaType: MediaType,
         dataset: RdfDataset,
     ) : super(identifier, mediaType, dataset)
+
+    constructor(
+        identifier: URI,
+        mediaType: MediaType,
+        dataset: RdfDataset?,
+        headers: Headers?
+    ) : super(identifier, mediaType, dataset, headers)
 
     init {
         if(dataset.size() == 0) {
