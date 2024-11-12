@@ -14,6 +14,7 @@ import com.pondersource.androidsolidservices.repository.AccessGrantRepository
 import com.pondersource.androidsolidservices.usecase.Authenticator
 import com.pondersource.solidandroidclient.IASSAuthenticatorService
 import com.pondersource.solidandroidclient.IASSLoginCallback
+import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.SOLID_NOT_LOGGED_IN
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -53,12 +54,22 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
             return authenticator.isUserAuthorized()
         }
 
-        override fun isAppAuthorized(appPackageName: String): Boolean {
-            return accessGrantRepository.hasAccessGrant(appPackageName)
+        override fun isAppAuthorized(): Boolean {
+            return accessGrantRepository.hasAccessGrant(packageManager.getNameForUid(getCallingUid())!!)
         }
 
-        override fun requestLogin(appPackageName: String, appName: String, callback: IASSLoginCallback) {
-            showLoginDialog(appPackageName, appName, callback)
+        override fun requestLogin(callback: IASSLoginCallback) {
+            val packageName = packageManager.getNameForUid(getCallingUid())!!
+            val name = packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0)).toString()
+            if(hasLoggedIn()){
+                if(isAppAuthorized()) {
+                    callback.onResult(true)
+                } else {
+                    showLoginDialog(packageManager.getNameForUid(getCallingUid())!!, name, callback)
+                }
+            } else {
+                callback.onError(SOLID_NOT_LOGGED_IN, "User has not logged in.")
+            }
         }
     }
 

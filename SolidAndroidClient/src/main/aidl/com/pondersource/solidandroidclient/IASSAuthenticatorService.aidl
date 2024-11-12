@@ -7,7 +7,7 @@ interface IASSAuthenticatorService {
 
     boolean hasLoggedIn();
 
-    boolean isAppAuthorized(String appPackageName);
+    boolean isAppAuthorized();
 
-    void requestLogin(String appPackageName, String appName, IASSLoginCallback callback);
+    void requestLogin(IASSLoginCallback callback);
 }

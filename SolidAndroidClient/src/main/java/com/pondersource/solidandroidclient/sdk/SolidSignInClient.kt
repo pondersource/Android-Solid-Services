@@ -10,9 +10,9 @@ import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_AUTH_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
 import com.pondersource.solidandroidclient.IASSAuthenticatorService
 import com.pondersource.solidandroidclient.IASSLoginCallback
-import com.pondersource.solidandroidclient.sdk.ASSConnectionResponse.Success
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidAppNotFoundException
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidNotLoggedInException
+import com.pondersource.solidandroidclient.sdk.SolidException.SolidServiceConnectionException
 
 class SolidSignInClient {
 
@@ -72,21 +72,19 @@ class SolidSignInClient {
 
     fun hasConnectedToService() = iASSAuthService != null
 
-    fun checkConnectionWithASS(): ASSConnectionResponse {
+    fun checkConnectionWithASS(onContinue: () -> Unit) {
         return if (hasInstalledAndroidSolidServices()) {
             if (hasConnectedToService()) {
                 if(iASSAuthService!!.hasLoggedIn()) {
-                    Success(iASSAuthService!!.isAppAuthorized(applicationInfo.packageName))
-                    /*val appInfo = context.applicationInfo
-                    iASSAuthService!!.requestLogin(appInfo.packageName, appInfo.name, appInfo.icon)*/
+                    onContinue()
                 } else {
-                    ASSConnectionResponse.SolidHasNotLoggedIn("Please login to your Solid account in Android Solid Services app.")
+                    throw SolidNotLoggedInException("Please login to your Solid account in Android Solid Services app.")
                 }
             } else {
-                ASSConnectionResponse.Error("Problem occurred while connecting to ASS app.")
+                throw SolidServiceConnectionException("Problem occurred while connecting to ASS app.")
             }
         } else {
-            ASSConnectionResponse.AppNotFound("Please install Android Solid Services app on your device.")
+            throw SolidAppNotFoundException("Please install Android Solid Services app on your device.")
         }
     }
 
@@ -96,7 +94,7 @@ class SolidSignInClient {
         if (hasInstalledAndroidSolidServices()) {
             if (hasConnectedToService()) {
                 if(iASSAuthService!!.hasLoggedIn()) {
-                    return if(iASSAuthService!!.isAppAuthorized(applicationInfo.packageName)) {
+                    return if(iASSAuthService!!.isAppAuthorized()) {
                         SolidSignInAccount(
                             applicationInfo.packageName
                         )
@@ -107,35 +105,24 @@ class SolidSignInClient {
                     throw SolidNotLoggedInException()
                 }
             } else {
-                throw Exception("Error while connecting to Solid Service.")
+                throw SolidServiceConnectionException()
             }
         } else {
             throw SolidAppNotFoundException()
         }
     }
 
-    fun requestLogin(callBack: (Boolean) -> Unit) {
-        when(val connection = checkConnectionWithASS()) {
-            is Success -> {
-                if (connection.accessIsGranted) {
-                    callBack(true)
-                } else {
-                    iASSAuthService!!.requestLogin(applicationInfo.packageName, applicationName, object : IASSLoginCallback.Stub() {
-                        override fun onResult(granted: Boolean) {
-                            callBack(granted)
-                        }
-                    })
+    fun requestLogin(callBack: (Boolean?, SolidException?) -> Unit) {
+        checkConnectionWithASS {
+            iASSAuthService!!.requestLogin(object : IASSLoginCallback.Stub() {
+                override fun onResult(granted: Boolean) {
+                    callBack(granted, null)
                 }
-            }
-            is ASSConnectionResponse.AppNotFound -> {
-                throw SolidAppNotFoundException()
-            }
-            is ASSConnectionResponse.SolidHasNotLoggedIn -> {
-                throw SolidNotLoggedInException()
-            }
-            is ASSConnectionResponse.Error -> {
-                throw Exception("Unknown error occurred.")
-            }
+
+                override fun onError(errorCode: Int, errorMessage: String) {
+                    callBack(null, handleSolidException(errorCode, errorMessage))
+                }
+            })
         }
     }
 }

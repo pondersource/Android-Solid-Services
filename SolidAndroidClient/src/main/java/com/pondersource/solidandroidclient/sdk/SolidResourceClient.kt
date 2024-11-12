@@ -114,7 +114,7 @@ class SolidResourceClient {
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidException(errorCode, errorMessage))
+                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
                 }
 
             })
@@ -142,7 +142,7 @@ class SolidResourceClient {
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidException(errorCode, errorMessage))
+                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
                 }
             })
         } else {
@@ -181,7 +181,7 @@ class SolidResourceClient {
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidException(errorCode, errorMessage))
+                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
                 }
 
             })
@@ -209,7 +209,7 @@ class SolidResourceClient {
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidException(errorCode, errorMessage))
+                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
                 }
             })
         } else {
@@ -247,7 +247,7 @@ class SolidResourceClient {
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidException(errorCode, errorMessage))
+                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
                 }
 
             })
@@ -275,7 +275,7 @@ class SolidResourceClient {
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidException(errorCode, errorMessage))
+                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
                 }
             })
         } else {
@@ -313,7 +313,7 @@ class SolidResourceClient {
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidException(errorCode, errorMessage))
+                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
                 }
 
             })
@@ -341,21 +341,11 @@ class SolidResourceClient {
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidException(errorCode, errorMessage))
+                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
                 }
             })
         } else {
             throw SolidResourceException.NotSupportedClassException("Objects which are RDFSource or NonRDFSource or inherited from them can be updated.")
-        }
-    }
-
-    private fun handleSolidException(errorCode: Int, errorMessage: String): SolidResourceException {
-        return when (errorCode) {
-            ExceptionsErrorCode.NOT_SUPPORTED_CLASS -> {
-                SolidResourceException.NotSupportedClassException(errorMessage)
-            } else -> {
-                SolidResourceException.UnknownException(errorMessage)
-            }
         }
     }
 }
