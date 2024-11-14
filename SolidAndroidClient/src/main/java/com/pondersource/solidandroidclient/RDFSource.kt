@@ -113,7 +113,7 @@ open class RDFSource : Resource {
             val newDateset = rdf.createDataset()
 
             all.forEach {
-                if (!it.subject.equals(triple.subject) && !it.predicate.equals(triple.predicate)) {
+                if (!it.subject.equals(triple.subject) || !it.predicate.equals(triple.predicate)) {
                     newDateset.add(it)
                 }
             }
@@ -166,8 +166,10 @@ open class RDFSource : Resource {
     override fun getHeaders(): Headers = headers
 
     override fun getEntity(): InputStream {
-        val jsonString = JsonLd.fromRdf(RdfDocument.of(dataset)).get().toString()
-        return jsonString.byteInputStream()
+        val toBeCompactDoc = JsonDocument.of(JsonLd.fromRdf(RdfDocument.of(dataset)).get().toString().byteInputStream())
+        val contextDoc = JsonDocument.of("{}".byteInputStream())
+        val compacted = JsonLd.compact(toBeCompactDoc, contextDoc).get()
+        return compacted.toString().byteInputStream()
     }
 
     override fun close() {
