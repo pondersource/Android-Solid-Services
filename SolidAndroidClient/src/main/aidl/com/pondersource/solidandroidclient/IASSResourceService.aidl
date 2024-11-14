@@ -7,6 +7,7 @@ import com.pondersource.solidandroidclient.NonRDFSource;
 import com.pondersource.solidandroidclient.RDFSource;
 
 interface IASSResourceService {
+    void getWebId(IASSRdfResourceCallback callback);
     void create(in NonRDFSource resource, IASSNonRdfResourceCallback callback);
     void createRdf(in RDFSource resource, IASSRdfResourceCallback callback);
     void read(String resourceUrl, IASSNonRdfResourceCallback callback);

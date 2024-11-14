@@ -11,6 +11,7 @@ sealed class SolidException(message: String): Exception(message) {
     sealed class SolidResourceException(message: String): SolidException(message) {
         class NotSupportedClassException(message: String): SolidResourceException(message)
         class NotPermissionException(message: String): SolidResourceException(message)
+        class NullWebIdException(message: String = "WebID is missing!"): SolidResourceException(message)
         class UnknownException(message: String): SolidResourceException(message)
     }
 }
@@ -21,7 +22,8 @@ object ExceptionsErrorCode {
 
     const val NOT_SUPPORTED_CLASS = 100
     const val NOT_PERMISSION = 101
-    const val UNKNOWN = 102
+    const val NULL_WEBID = 102
+    const val UNKNOWN = 103
 }
 
 fun handleSolidResourceException(errorCode: Int, errorMessage: String): SolidResourceException {
@@ -31,6 +33,9 @@ fun handleSolidResourceException(errorCode: Int, errorMessage: String): SolidRes
         }
         ExceptionsErrorCode.NOT_PERMISSION -> {
             SolidResourceException.NotPermissionException(errorMessage)
+        }
+        ExceptionsErrorCode.NULL_WEBID -> {
+            SolidResourceException.NullWebIdException(errorMessage)
         }
         else -> {
             SolidResourceException.UnknownException(errorMessage)

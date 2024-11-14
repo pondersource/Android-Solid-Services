@@ -16,6 +16,7 @@ import com.pondersource.solidandroidclient.IASSRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSResourceService
 import com.pondersource.solidandroidclient.NonRDFSource
 import com.pondersource.solidandroidclient.RDFSource
+import com.pondersource.solidandroidclient.data.WebIdProfile
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidResourceException
 import com.pondersource.solidandroidclient.sub.resource.Resource
 import okhttp3.Headers
@@ -82,6 +83,33 @@ class SolidResourceClient {
     private fun checkBasicConditions() {
         checkIfAppIsInstalled()
         checkServiceConnection()
+    }
+
+    fun getWebId(
+        callback: SolidResourceCallback<WebIdProfile>
+    ) {
+        checkBasicConditions()
+
+        iASSAuthService!!.getWebId(object: IASSRdfResourceCallback.Stub() {
+            override fun onResult(webIdResult: RDFSource) {
+                val returnValue = WebIdProfile::class.java
+                    .getConstructor(
+                        URI::class.java,
+                        MediaType::class.java,
+                        RdfDataset::class.java,
+                    )
+                    .newInstance(
+                        webIdResult.getIdentifier(),
+                        MediaType.of(webIdResult.getContentType()),
+                        JsonLd.toRdf(JsonDocument.of(webIdResult.getEntity())).get(),
+                    )
+                callback.onResult(returnValue)
+            }
+
+            override fun onError(errorCode: Int, errorMessage: String) {
+                callback.onError(handleSolidResourceException(errorCode, errorMessage))
+            }
+        })
     }
 
     fun <T: Resource> create(

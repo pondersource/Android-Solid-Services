@@ -15,6 +15,7 @@ import com.pondersource.solidandroidclient.NonRDFSource
 import com.pondersource.solidandroidclient.RDFSource
 import com.pondersource.solidandroidclient.SolidNetworkResponse
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.NOT_PERMISSION
+import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.NULL_WEBID
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.SOLID_NOT_LOGGED_IN
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.UNKNOWN
 import dagger.hilt.android.AndroidEntryPoint
@@ -57,6 +58,26 @@ class ASSResourceService: LifecycleService() {
                 }
             } else {
                 errorCallback(SOLID_NOT_LOGGED_IN, "Solid app has not logged in.")
+            }
+        }
+
+        override fun getWebId(callback: IASSRdfResourceCallback) {
+
+            //TODO
+            handleBasicExceptions(
+                "",
+                packageManager.getNameForUid(getCallingUid())!!,
+                PermissionType.READ,
+                { code, message ->
+                    callback.onError(code, message)
+                }
+            ) {
+                val webId = authenticator.getProfile().webId
+                if (webId != null) {
+                    callback.onResult(webId)
+                } else {
+                    callback.onError(NULL_WEBID, "WebID is null.")
+                }
             }
         }
 

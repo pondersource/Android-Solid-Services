@@ -90,13 +90,6 @@ class AuthenticatorImplementation (
         }
     }
 
-    private fun getStorage(webId: String): String {
-        if (webId.contains("solidcommunity.net")) {
-            return webId.split("profile")[0]
-        }
-        return webId
-    }
-
     private suspend fun getAuthorizationConf(
         oidcIssuer: String
     ): Pair<AuthorizationServiceConfiguration?, AuthorizationException?>{
