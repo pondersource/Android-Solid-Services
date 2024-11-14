@@ -4,6 +4,7 @@ import com.apicatalog.jsonld.JsonLd
 import com.apicatalog.jsonld.JsonLdOptions
 import com.apicatalog.jsonld.document.JsonDocument
 import com.apicatalog.jsonld.http.media.MediaType
+import com.apicatalog.jsonld.json.JsonProvider
 import com.apicatalog.rdf.RdfDataset
 import com.inrupt.client.Request
 import com.inrupt.client.Response
@@ -20,6 +21,8 @@ import com.pondersource.solidandroidclient.RDFSource
 import com.pondersource.solidandroidclient.sub.resource.Resource
 import com.pondersource.solidandroidclient.util.isSuccessful
 import com.pondersource.solidandroidclient.util.toPlainString
+import jakarta.json.JsonArray
+import jakarta.json.JsonString
 import net.openid.appauth.TokenResponse
 import java.io.InputStream
 import java.net.URI
@@ -216,9 +219,14 @@ class SolidResourceManagerImplementation(
             val options = JsonLdOptions().apply {
                 isRdfStar = true
             }
+
+            val dataSet = JsonLd
+                .toRdf(provideNormalizedDoc(string.byteInputStream()))
+                .options(options)
+                .get()
             return clazz
                 .getConstructor(URI::class.java, MediaType::class.java, RdfDataset::class.java)
-                .newInstance(response.uri(), MediaType.of(type), JsonLd.toRdf(JsonDocument.of(string.byteInputStream())).options(options).get())
+                .newInstance(response.uri(), MediaType.of(type), dataSet)
         } else {
             return clazz
                 .getConstructor(URI::class.java, String::class.java, InputStream::class.java)
@@ -226,6 +234,67 @@ class SolidResourceManagerImplementation(
         }
     }
 
+    private fun provideNormalizedDoc(input: InputStream): JsonDocument {
+        val doc = JsonDocument.of(input)
+        val newStruct = JsonProvider.instance().createObjectBuilder()
+        doc.jsonContent.get().asJsonObject().forEach {
+            if (it.key == "@graph") {
+                val graphArray = JsonProvider.instance().createArrayBuilder()
+                it.value.asJsonArray().forEach {
+                    val innerObjectBuilder = JsonProvider.instance().createObjectBuilder()
+                    it.asJsonObject().forEach {
+                        if (it.key == "@id") {
+                            if ((it.value as JsonString).string.startsWith("/")) {
+                                innerObjectBuilder.add(it.key, JsonProvider.instance().createValue("https://storage.inrupt.com${(it.value as JsonString).string}"))
+                            } else {
+                                innerObjectBuilder.add(it.key, it.value)
+                            }
+                        } else if (it.key == "ldp:contains") {
+
+                            val inArrBuil = JsonProvider.instance().createArrayBuilder()
+                            if (it.value is JsonArray) {
+                                it.value.asJsonArray().forEach {
+                                    val inObjBuilder = JsonProvider.instance().createObjectBuilder()
+                                    it.asJsonObject().forEach {
+                                        if ((it.value as JsonString).string.startsWith("/")) {
+                                            inObjBuilder.add(it.key,
+                                                JsonProvider.instance()
+                                                    .createValue("https://storage.inrupt.com${(it.value as JsonString).string}")
+                                            )
+                                        } else {
+                                            inObjBuilder.add(it.key, it.value)
+                                        }
+                                    }
+                                    inArrBuil.add(inObjBuilder.build())
+                                }
+                            } else {
+                                it.value.asJsonObject().forEach {
+                                    val inObjBuilder = JsonProvider.instance().createObjectBuilder()
+                                    if ((it.value as JsonString).string.startsWith("/")) {
+                                        inObjBuilder.add(it.key,
+                                            JsonProvider.instance()
+                                                .createValue("https://storage.inrupt.com${(it.value as JsonString).string}")
+                                        )
+                                    } else {
+                                        inObjBuilder.add(it.key, it.value)
+                                    }
+                                    inArrBuil.add(inObjBuilder.build())
+                                }
+                            }
+                            innerObjectBuilder.add(it.key, inArrBuil.build())
+                        } else {
+                            innerObjectBuilder.add(it.key, it.value)
+                        }
+                    }
+                    graphArray.add(innerObjectBuilder.build())
+                }
+                newStruct.add("@graph", graphArray.build())
+            } else {
+                newStruct.add(it.key, it.value)
+            }
+        }
+        return JsonDocument.of(newStruct.build().toString().byteInputStream())
+    }
 }
 
 
