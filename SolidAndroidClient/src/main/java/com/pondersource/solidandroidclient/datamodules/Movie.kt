@@ -3,8 +3,10 @@ package com.pondersource.solidandroidclient.datamodules
 import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
 import com.inrupt.client.vocabulary.RDF
-import com.pondersource.solidandroidclient.lang.ExtendedXsdConstants
+import com.pondersource.solidandroidclient.vocab.ExtendedXsdConstants
 import com.pondersource.solidandroidclient.RDFSource
+import com.pondersource.solidandroidclient.vocab.PurlTerms
+import com.pondersource.solidandroidclient.vocab.Schema
 import okhttp3.Headers
 import java.net.URI
 import java.text.SimpleDateFormat
@@ -16,16 +18,16 @@ import java.util.Date
 class Movie: RDFSource {
 
     companion object {
-        private const val MOVIE_OBJ = "https://schema.org/Movie"
+        private const val MOVIE_OBJ = Schema.Movie
     }
     private val rdfType = rdf.createIRI(RDF.type.toString())
-    private val created = rdf.createIRI("http://purl.org/dc/terms/created")
-    private val modified = rdf.createIRI("http://purl.org/dc/terms/modified")
-    private val datePublished = rdf.createIRI("https://schema.org/datePublished")
-    private val description = rdf.createIRI("https://schema.org/description")
-    private val image = rdf.createIRI("https://schema.org/image")
-    private val name = rdf.createIRI("https://schema.org/name")
-    private val sameAs = rdf.createIRI("https://schema.org/sameAs")
+    private val created = rdf.createIRI(PurlTerms.created)
+    private val modified = rdf.createIRI(PurlTerms.modified)
+    private val datePublished = rdf.createIRI(Schema.datePublished)
+    private val description = rdf.createIRI(Schema.description)
+    private val image = rdf.createIRI(Schema.image)
+    private val name = rdf.createIRI(Schema.name)
+    private val sameAs = rdf.createIRI(Schema.sameAs)
 
     constructor(
         identifier: URI,
@@ -50,9 +52,7 @@ class Movie: RDFSource {
     ) : super(identifier, mediaType, dataset, headers)
 
     init {
-        if(dataset.size() == 0) {
-            setType()
-        }
+        setType()
     }
 
     fun getType(): URI {
