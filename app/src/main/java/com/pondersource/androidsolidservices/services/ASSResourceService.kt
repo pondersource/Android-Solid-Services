@@ -6,8 +6,7 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.pondersource.androidsolidservices.model.PermissionType
 import com.pondersource.androidsolidservices.repository.ResourcePermissionRepository
-import com.pondersource.androidsolidservices.usecase.Authenticator
-import com.pondersource.androidsolidservices.usecase.SolidResourceManager
+import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidclient.IASSNonRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSResourceService
@@ -31,7 +30,7 @@ class ASSResourceService: LifecycleService() {
     @Inject
     lateinit var authenticator : Authenticator
     @Inject
-    lateinit var solidResourceManager : SolidResourceManager
+    lateinit var solidResourceManager : com.pondersource.solidandroidapi.SolidResourceManager
 
     @Inject
     lateinit var resourcePermissionRepository: ResourcePermissionRepository
@@ -91,7 +90,8 @@ class ASSResourceService: LifecycleService() {
                 }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val result = solidResourceManager.create(resource)
+                    val result =
+                        solidResourceManager.create(resource)
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -117,7 +117,8 @@ class ASSResourceService: LifecycleService() {
                 }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val result = solidResourceManager.create(resource)
+                    val result =
+                        solidResourceManager.create(resource)
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -146,7 +147,9 @@ class ASSResourceService: LifecycleService() {
                 }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val result = solidResourceManager.read(URI.create(resourceUrl), NonRDFSource::class.java)
+                    val result = solidResourceManager.read(
+                        URI.create(resourceUrl), NonRDFSource::class.java
+                    )
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(result.data)
@@ -175,7 +178,9 @@ class ASSResourceService: LifecycleService() {
                 }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val result = solidResourceManager.read(URI.create(resourceUrl), RDFSource::class.java)
+                    val result = solidResourceManager.read(
+                        URI.create(resourceUrl), RDFSource::class.java
+                    )
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(result.data)
@@ -201,7 +206,8 @@ class ASSResourceService: LifecycleService() {
                 }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val result = solidResourceManager.update(resource)
+                    val result =
+                        solidResourceManager.update(resource)
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -227,7 +233,8 @@ class ASSResourceService: LifecycleService() {
                 }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val result = solidResourceManager.update(resource)
+                    val result =
+                        solidResourceManager.update(resource)
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -253,7 +260,8 @@ class ASSResourceService: LifecycleService() {
                 }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val result = solidResourceManager.delete(resource)
+                    val result =
+                        solidResourceManager.delete(resource)
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -279,7 +287,8 @@ class ASSResourceService: LifecycleService() {
                 }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val result = solidResourceManager.delete(resource)
+                    val result =
+                        solidResourceManager.delete(resource)
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)

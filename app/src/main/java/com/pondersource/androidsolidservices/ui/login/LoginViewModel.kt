@@ -3,8 +3,8 @@ package com.pondersource.androidsolidservices.ui.login
 import android.content.Intent
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.pondersource.androidsolidservices.usecase.Authenticator
 import com.pondersource.androidsolidservices.base.BaseViewModel
+import com.pondersource.solidandroidapi.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import net.openid.appauth.AuthorizationException
@@ -32,9 +32,11 @@ class LoginViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             loginLoading.value = true
-            val intentRes = authenticator.createAuthenticationIntentWithWebId(webId,
-                AUTH_APP_REDIRECT_URL
-            )
+            val intentRes =
+                authenticator.createAuthenticationIntentWithWebId(
+                    webId,
+                    AUTH_APP_REDIRECT_URL
+                )
             loginBrowserIntentErrorMessage.value = intentRes.second
             loginBrowserIntent.value = intentRes.first
         }
@@ -43,9 +45,11 @@ class LoginViewModel @Inject constructor(
     fun loginWithInruptCom() {
         viewModelScope.launch {
             loginLoading.value = true
-            val intentRes = authenticator.createAuthenticationIntentWithOidcIssuer(
-                OIDC_ISSUER_INRUPT_COM,
-                AUTH_APP_REDIRECT_URL,)
+            val intentRes =
+                authenticator.createAuthenticationIntentWithOidcIssuer(
+                    OIDC_ISSUER_INRUPT_COM,
+                    AUTH_APP_REDIRECT_URL,
+                )
             loginBrowserIntentErrorMessage.value = intentRes.second
             loginBrowserIntent.value = intentRes.first
         }
@@ -54,9 +58,11 @@ class LoginViewModel @Inject constructor(
     fun loginWithSolidcommunity() {
         viewModelScope.launch {
             loginLoading.value = true
-            val intentRes = authenticator.createAuthenticationIntentWithOidcIssuer(
-                OIDC_ISSUER_SOLIDCOMMIUNITY,
-                AUTH_APP_REDIRECT_URL,)
+            val intentRes =
+                authenticator.createAuthenticationIntentWithOidcIssuer(
+                    OIDC_ISSUER_SOLIDCOMMIUNITY,
+                    AUTH_APP_REDIRECT_URL,
+                )
             loginBrowserIntentErrorMessage.value = intentRes.second
             loginBrowserIntent.value = intentRes.first
         }
@@ -67,7 +73,10 @@ class LoginViewModel @Inject constructor(
         authorizationException: AuthorizationException?
     ) {
         viewModelScope.launch {
-            authenticator.submitAuthorizationResponse(authorizationResponse, authorizationException)
+            authenticator.submitAuthorizationResponse(
+                authorizationResponse,
+                authorizationException
+            )
             loginLoading.value = false
             loginBrowserIntent.value = null
             if(isLoggedIn()) {

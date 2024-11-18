@@ -2,12 +2,8 @@ package com.pondersource.androidsolidservices.di
 
 import android.accounts.AccountManager
 import android.content.Context
-import com.pondersource.androidsolidservices.usecase.Authenticator
-import com.pondersource.androidsolidservices.usecase.AuthenticatorImplementation
 import com.pondersource.androidsolidservices.base.Constants
-import com.pondersource.androidsolidservices.usecase.SolidResourceManager
-import com.pondersource.androidsolidservices.usecase.SolidResourceManagerImplementation
-import com.pondersource.androidsolidservices.repository.UserRepository
+import com.pondersource.solidandroidapi.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -47,8 +43,8 @@ class LocalModule {
     fun provideAuthenticator(
         userRepository: UserRepository,
         authService: AuthorizationService,
-    ): Authenticator {
-        return AuthenticatorImplementation(
+    ): com.pondersource.solidandroidapi.Authenticator {
+        return com.pondersource.solidandroidapi.AuthenticatorImplementation(
             userRepository,
             authService,
         )
@@ -57,9 +53,9 @@ class LocalModule {
     @Provides
     @Singleton
     fun provideSolidResourceManager(
-        authenticator: Authenticator,
-    ): SolidResourceManager {
-        return SolidResourceManagerImplementation(
+        authenticator: com.pondersource.solidandroidapi.Authenticator,
+    ): com.pondersource.solidandroidapi.SolidResourceManager {
+        return com.pondersource.solidandroidapi.SolidResourceManagerImplementation(
             authenticator
         )
     }

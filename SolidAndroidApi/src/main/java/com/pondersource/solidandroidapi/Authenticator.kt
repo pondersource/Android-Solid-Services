@@ -1,10 +1,6 @@
-package com.pondersource.androidsolidservices.usecase
+package com.pondersource.solidandroidapi
 
 import android.content.Intent
-import com.pondersource.solidandroidclient.data.Profile
-import net.openid.appauth.AuthorizationException
-import net.openid.appauth.AuthorizationResponse
-import net.openid.appauth.TokenResponse
 
 interface Authenticator {
 
@@ -38,14 +34,14 @@ interface Authenticator {
      * @param authException can be created from returned intent
      */
     suspend fun submitAuthorizationResponse(
-        authResponse: AuthorizationResponse?,
-        authException: AuthorizationException?
+        authResponse: net.openid.appauth.AuthorizationResponse?,
+        authException: net.openid.appauth.AuthorizationException?
     )
 
     /**
      * @return TokenResponse of the user which can be used to make authenticated requests
      */
-    suspend fun getLastTokenResponse(): TokenResponse?
+    suspend fun getLastTokenResponse(): net.openid.appauth.TokenResponse?
 
     /**
      * Checks if the user token needs to be refreshed
@@ -62,7 +58,7 @@ interface Authenticator {
     /**
      * @return The user's profile such as AuthState, WebId and WebIdDetails
      */
-    fun getProfile(): Profile
+    fun getProfile(): com.pondersource.solidandroidclient.data.Profile
 
     /**
      * clears saved user's data. Can be used after logout in your application

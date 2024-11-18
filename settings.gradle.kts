@@ -18,3 +18,4 @@ dependencyResolutionManagement {
 rootProject.name = "Android Solid Services"
 include(":app")
 include(":SolidAndroidClient")
+include(":SolidAndroidApi")

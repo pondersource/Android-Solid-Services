@@ -148,7 +148,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
     testImplementation(libs.junit)
 
-    implementation(project(":SolidAndroidClient"))
+    implementation(project(":SolidAndroidApi"))
 
     implementation("androidx.appcompat:appcompat:1.7.0")
 

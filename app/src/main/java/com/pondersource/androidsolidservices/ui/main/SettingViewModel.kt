@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.pondersource.androidsolidservices.base.BaseViewModel
 import com.pondersource.androidsolidservices.base.Constants
-import com.pondersource.androidsolidservices.usecase.Authenticator
+import com.pondersource.solidandroidapi.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,7 +41,9 @@ class SettingViewModel @Inject constructor(
 
     fun logoutWithBrowser() {
         viewModelScope.launch {
-            authenticator.getTerminationSessionIntent(AUTH_END_REDIRECT_URL)
+            authenticator.getTerminationSessionIntent(
+                AUTH_END_REDIRECT_URL
+            )
         }
     }
 

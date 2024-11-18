@@ -1,4 +1,4 @@
-package com.pondersource.androidsolidservices.repository
+package com.pondersource.solidandroidapi.repository
 
 import com.pondersource.solidandroidclient.data.Profile
 

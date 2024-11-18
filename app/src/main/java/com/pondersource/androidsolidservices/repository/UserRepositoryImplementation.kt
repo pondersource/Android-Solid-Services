@@ -1,6 +1,7 @@
 package com.pondersource.androidsolidservices.repository
 
 import com.pondersource.androidsolidservices.repository.datasource.local.user.UserLocalDataSource
+import com.pondersource.solidandroidapi.repository.UserRepository
 import com.pondersource.solidandroidclient.data.Profile
 
 class UserRepositoryImplementation(

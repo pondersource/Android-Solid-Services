@@ -12,7 +12,7 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import com.pondersource.androidsolidservices.repository.AccessGrantRepository
-import com.pondersource.androidsolidservices.usecase.Authenticator
+import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidclient.IASSAuthenticatorService
 import com.pondersource.solidandroidclient.IASSLoginCallback
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.DRAW_OVERLAY_NOT_PERMITTED
