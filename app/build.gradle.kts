@@ -148,19 +148,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
     testImplementation(libs.junit)
 
-
-    implementation(libs.openid.appauth)
-    implementation(libs.google.code.gson)
-
-    implementation(platform(libs.inrupt.client.bom))
-    implementation(libs.inrupt.client.solid)
-    implementation(libs.inrupt.client.core)
-    implementation(libs.inrupt.client.okhttp)
-    implementation(libs.inrupt.client.openid)
-    implementation(libs.inrupt.client.vocabulary)
-    implementation(libs.titanium.json.ld.jre8)
-    implementation(libs.glassfish.jakarta.json)
-
     implementation(project(":SolidAndroidClient"))
 
     implementation("androidx.appcompat:appcompat:1.7.0")

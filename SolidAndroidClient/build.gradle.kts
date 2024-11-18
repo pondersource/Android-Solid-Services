@@ -81,17 +81,17 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp")
     */
 
-    implementation(libs.openid.appauth)
-    implementation(libs.google.code.gson)
+    api(libs.openid.appauth)
+    api(libs.google.code.gson)
 
-    implementation(platform(libs.inrupt.client.bom))
-    implementation(libs.inrupt.client.solid)
-    implementation(libs.inrupt.client.core)
-    implementation(libs.inrupt.client.okhttp)
-    implementation(libs.inrupt.client.openid)
-    implementation(libs.inrupt.client.vocabulary)
-    implementation(libs.titanium.json.ld.jre8)
-    implementation(libs.glassfish.jakarta.json)
+    api(platform(libs.inrupt.client.bom))
+    api(libs.inrupt.client.solid)
+    api(libs.inrupt.client.core)
+    api(libs.inrupt.client.okhttp)
+    api(libs.inrupt.client.openid)
+    api(libs.inrupt.client.vocabulary)
+    api(libs.titanium.json.ld.jre8)
+    api(libs.glassfish.jakarta.json)
 }
 
 publishing {
