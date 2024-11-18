@@ -4,6 +4,7 @@ import com.pondersource.androidsolidservices.R
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.IBinder
+import android.provider.Settings
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
@@ -14,6 +15,7 @@ import com.pondersource.androidsolidservices.repository.AccessGrantRepository
 import com.pondersource.androidsolidservices.usecase.Authenticator
 import com.pondersource.solidandroidclient.IASSAuthenticatorService
 import com.pondersource.solidandroidclient.IASSLoginCallback
+import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.DRAW_OVERLAY_NOT_PERMITTED
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.SOLID_NOT_LOGGED_IN
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -59,16 +61,29 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
         }
 
         override fun requestLogin(callback: IASSLoginCallback) {
-            val packageName = packageManager.getNameForUid(getCallingUid())!!
-            val name = packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0)).toString()
-            if(hasLoggedIn()){
-                if(isAppAuthorized()) {
-                    callback.onResult(true)
+            if (Settings.canDrawOverlays(this@ASSAuthenticatorService)) {
+                val packageName = packageManager.getNameForUid(getCallingUid())!!
+                val name = packageManager.getApplicationLabel(
+                    packageManager.getApplicationInfo(
+                        packageName,
+                        0
+                    )
+                ).toString()
+                if (hasLoggedIn()) {
+                    if (isAppAuthorized()) {
+                        callback.onResult(true)
+                    } else {
+                        showLoginDialog(
+                            packageManager.getNameForUid(getCallingUid())!!,
+                            name,
+                            callback
+                        )
+                    }
                 } else {
-                    showLoginDialog(packageManager.getNameForUid(getCallingUid())!!, name, callback)
+                    callback.onError(SOLID_NOT_LOGGED_IN, "User has not logged in.")
                 }
             } else {
-                callback.onError(SOLID_NOT_LOGGED_IN, "User has not logged in.")
+                callback.onError(DRAW_OVERLAY_NOT_PERMITTED, "Android Solid Services doesn't have permission to draw overlay. Please ask user to enable overlay drawing for Android Solid Services in app settings.")
             }
         }
     }
