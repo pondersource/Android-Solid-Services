@@ -15,7 +15,14 @@ import com.apicatalog.rdf.impl.DefaultRdfProvider
 import com.apicatalog.rdf.spi.RdfProvider
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.inrupt.client.vocabulary.RDF
 import com.pondersource.solidandroidclient.sub.resource.Resource
+import com.pondersource.solidandroidclient.vocab.ExtendedXsdConstants
+import com.pondersource.solidandroidclient.vocab.LDP
+import com.pondersource.solidandroidclient.vocab.OWL
+import com.pondersource.solidandroidclient.vocab.PurlTerms
+import com.pondersource.solidandroidclient.vocab.RDFSchema
+import jakarta.json.spi.JsonProvider
 import okhttp3.Headers
 import okio.IOException
 import java.io.InputStream
@@ -32,6 +39,18 @@ open class RDFSource : Resource {
     protected var dataset: RdfDataset
     
     private val itselfSubject : String
+
+    protected val contextDocument = JsonDocument.of(
+        MediaType.JSON,
+        JsonProvider.provider().createObjectBuilder().apply {
+            add("rdf", RDF.getNamespace().toString())
+            add("owl", OWL.namespace)
+            add("xsd", ExtendedXsdConstants.XSD)
+            add("ldp", LDP.namespace.toString())
+            add("rfds", RDFSchema.namespace)
+            add("dc", PurlTerms.elementNameSpace)
+        }.build()
+    )
 
     companion object {
         @JvmField
@@ -167,8 +186,7 @@ open class RDFSource : Resource {
 
     override fun getEntity(): InputStream {
         val toBeCompactDoc = JsonDocument.of(JsonLd.fromRdf(RdfDocument.of(dataset)).get().toString().byteInputStream())
-        val contextDoc = JsonDocument.of("{}".byteInputStream())
-        val compacted = JsonLd.compact(toBeCompactDoc, contextDoc).get()
+        val compacted = JsonLd.compact(toBeCompactDoc, contextDocument).get()
         return compacted.toString().byteInputStream()
     }
 
