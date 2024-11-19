@@ -1,6 +1,6 @@
 package com.pondersource.solidandroidapi.repository
 
-import com.pondersource.solidandroidclient.data.Profile
+import com.pondersource.shared.data.Profile
 
 interface UserRepository {
 

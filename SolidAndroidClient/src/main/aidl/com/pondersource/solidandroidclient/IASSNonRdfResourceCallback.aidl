@@ -1,7 +1,7 @@
 // IASSRdfResourceCallback.aidl
 package com.pondersource.solidandroidclient;
 
-import com.pondersource.solidandroidclient.NonRDFSource;
+import com.pondersource.shared.NonRDFSource;
 
 interface IASSNonRdfResourceCallback  {
     void onResult(in NonRDFSource result);

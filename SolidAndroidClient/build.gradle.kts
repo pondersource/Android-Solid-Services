@@ -77,21 +77,7 @@ dependencies {
     implementation(libs.google.android.material)
     implementation(libs.jetbrains.kotlinx.coroutins.android)
 
-    /*implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
-    implementation("com.squareup.okhttp3:okhttp")
-    */
-
-    api(libs.openid.appauth)
-    api(libs.google.code.gson)
-
-    api(platform(libs.inrupt.client.bom))
-    api(libs.inrupt.client.solid)
-    api(libs.inrupt.client.core)
-    api(libs.inrupt.client.okhttp)
-    api(libs.inrupt.client.openid)
-    api(libs.inrupt.client.vocabulary)
-    api(libs.titanium.json.ld.jre8)
-    api(libs.glassfish.jakarta.json)
+    api(project(":Shared"))
 }
 
 publishing {

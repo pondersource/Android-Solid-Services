@@ -1,7 +1,7 @@
 package com.pondersource.solidandroidclient.sdk
 
+import com.pondersource.shared.resource.Resource
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidResourceException
-import com.pondersource.solidandroidclient.sub.resource.Resource
 
 interface SolidResourceCallback <T: Resource> {
 

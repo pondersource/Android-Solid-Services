@@ -149,6 +149,7 @@ dependencies {
     testImplementation(libs.junit)
 
     implementation(project(":SolidAndroidApi"))
+    implementation(project(":SolidAndroidClient"))
 
     implementation("androidx.appcompat:appcompat:1.7.0")
 

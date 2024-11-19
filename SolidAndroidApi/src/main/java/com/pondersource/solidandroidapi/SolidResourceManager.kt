@@ -1,23 +1,25 @@
 package com.pondersource.solidandroidapi
 
+import com.pondersource.shared.SolidNetworkResponse
+import com.pondersource.shared.resource.Resource
 import java.net.URI
 
 interface SolidResourceManager {
 
-    suspend fun <T: com.pondersource.solidandroidclient.sub.resource.Resource> read(
+    suspend fun <T: Resource> read(
         resource: URI,
         clazz: Class<T>,
-    ): com.pondersource.solidandroidclient.SolidNetworkResponse<T>
+    ): SolidNetworkResponse<T>
 
-    suspend fun <T: com.pondersource.solidandroidclient.sub.resource.Resource> create(
+    suspend fun <T: Resource> create(
         resource: T
-    ): com.pondersource.solidandroidclient.SolidNetworkResponse<T>
+    ): SolidNetworkResponse<T>
 
-    suspend fun <T: com.pondersource.solidandroidclient.sub.resource.Resource> update(
+    suspend fun <T: Resource> update(
         newResource: T
-    ): com.pondersource.solidandroidclient.SolidNetworkResponse<T>
+    ): SolidNetworkResponse<T>
 
-    suspend fun <T: com.pondersource.solidandroidclient.sub.resource.Resource> delete(
+    suspend fun <T: Resource> delete(
         resource: T,
-    ): com.pondersource.solidandroidclient.SolidNetworkResponse<T>
+    ): SolidNetworkResponse<T>
 }

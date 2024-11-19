@@ -3,8 +3,8 @@ package com.pondersource.solidandroidclient;
 
 import com.pondersource.solidandroidclient.IASSNonRdfResourceCallback;
 import com.pondersource.solidandroidclient.IASSRdfResourceCallback;
-import com.pondersource.solidandroidclient.NonRDFSource;
-import com.pondersource.solidandroidclient.RDFSource;
+import com.pondersource.shared.NonRDFSource;
+import com.pondersource.shared.RDFSource;
 
 interface IASSResourceService {
     void getWebId(IASSRdfResourceCallback callback);

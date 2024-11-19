@@ -6,13 +6,14 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.pondersource.androidsolidservices.model.PermissionType
 import com.pondersource.androidsolidservices.repository.ResourcePermissionRepository
+import com.pondersource.shared.NonRDFSource
+import com.pondersource.shared.RDFSource
 import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidclient.IASSNonRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSResourceService
-import com.pondersource.solidandroidclient.NonRDFSource
-import com.pondersource.solidandroidclient.RDFSource
-import com.pondersource.solidandroidclient.SolidNetworkResponse
+import com.pondersource.shared.SolidNetworkResponse
+import com.pondersource.solidandroidapi.SolidResourceManager
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.NOT_PERMISSION
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.NULL_WEBID
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.SOLID_NOT_LOGGED_IN
@@ -30,7 +31,7 @@ class ASSResourceService: LifecycleService() {
     @Inject
     lateinit var authenticator : Authenticator
     @Inject
-    lateinit var solidResourceManager : com.pondersource.solidandroidapi.SolidResourceManager
+    lateinit var solidResourceManager : SolidResourceManager
 
     @Inject
     lateinit var resourcePermissionRepository: ResourcePermissionRepository

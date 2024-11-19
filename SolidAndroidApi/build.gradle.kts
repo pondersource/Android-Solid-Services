@@ -15,6 +15,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        manifestPlaceholders["appAuthRedirectScheme"] = namespace.toString()
     }
 
     buildTypes {
@@ -51,7 +52,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
 
-    api(project(":SolidAndroidClient"))
+    api(project(":Shared"))
 }
 
 publishing {

@@ -1,6 +1,6 @@
 package com.pondersource.androidsolidservices.repository.datasource.local.user
 
-import com.pondersource.solidandroidclient.data.Profile
+import com.pondersource.shared.data.Profile
 
 interface UserLocalDataSource {
 

@@ -2,9 +2,36 @@ package com.pondersource.solidandroidapi
 
 import android.content.Intent
 import android.net.Uri
+import com.apicatalog.jsonld.JsonLd
+import com.apicatalog.jsonld.JsonLdOptions
+import com.apicatalog.jsonld.document.JsonDocument
+import com.apicatalog.jsonld.http.media.MediaType
+import com.apicatalog.rdf.RdfDataset
+import com.inrupt.client.Request
+import com.inrupt.client.Response
+import com.inrupt.client.openid.OpenIdSession
+import com.inrupt.client.solid.SolidSyncClient
+import com.pondersource.shared.HTTPAcceptType
+import com.pondersource.shared.HTTPHeaderName
+import com.pondersource.shared.RDFSource
+import com.pondersource.shared.SolidNetworkResponse
+import com.pondersource.shared.data.Profile
+import com.pondersource.shared.data.UserInfo
+import com.pondersource.shared.data.WebIdProfile
+import com.pondersource.shared.resource.Resource
+import com.pondersource.shared.util.Utils
+import com.pondersource.shared.util.isSuccessful
+import com.pondersource.shared.util.toPlainString
 import com.pondersource.solidandroidapi.repository.UserRepository
-import com.pondersource.solidandroidclient.util.isSuccessful
-import com.pondersource.solidandroidclient.util.toPlainString
+import net.openid.appauth.AuthorizationException
+import net.openid.appauth.AuthorizationRequest
+import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.AuthorizationServiceConfiguration
+import net.openid.appauth.ClientSecretBasic
+import net.openid.appauth.EndSessionRequest
+import net.openid.appauth.RegistrationRequest
+import net.openid.appauth.ResponseTypeValues
+import net.openid.appauth.TokenResponse
 import java.io.InputStream
 import java.net.URI
 import kotlin.coroutines.resume
@@ -18,7 +45,7 @@ class AuthenticatorImplementation (
     private val authService: net.openid.appauth.AuthorizationService,
 ) : Authenticator {
 
-    private var profile: com.pondersource.solidandroidclient.data.Profile
+    private var profile: Profile
 
     init {
         this.profile = userRepository.readProfile()
@@ -32,26 +59,26 @@ class AuthenticatorImplementation (
     }
 
     private fun updateAuthorizationResponse(
-        authResponse: net.openid.appauth.AuthorizationResponse?,
-        authException: net.openid.appauth.AuthorizationException?
+        authResponse: AuthorizationResponse?,
+        authException: AuthorizationException?
     ) {
         profile.authState.update(authResponse, authException)
         userRepository.writeProfile(profile)
     }
 
     private fun updateTokenResponse(
-        tokenResponse: net.openid.appauth.TokenResponse?,
-        authException: net.openid.appauth.AuthorizationException?
+        tokenResponse: TokenResponse?,
+        authException: AuthorizationException?
     ) {
         profile.authState.update(tokenResponse, authException)
         userRepository.writeProfile(profile)
     }
 
-    private suspend fun getUserInfo(): com.pondersource.solidandroidclient.data.UserInfo? {
+    private suspend fun getUserInfo(): UserInfo? {
         if (isUserAuthorized()) {
             checkTokenAndRefresh()
-            val webId = com.pondersource.solidandroidclient.util.Utils.getWebId(profile.authState.idToken)
-            return com.pondersource.solidandroidclient.data.UserInfo(webId)
+            val webId = Utils.getWebId(profile.authState.idToken)
+            return UserInfo(webId)
         } else {
             return null
             //TODO(Not authorized user)
@@ -60,19 +87,19 @@ class AuthenticatorImplementation (
 
     private suspend fun getAuthorizationConf(
         oidcIssuer: String
-    ): Pair<net.openid.appauth.AuthorizationServiceConfiguration?, net.openid.appauth.AuthorizationException?>{
+    ): Pair<AuthorizationServiceConfiguration?, AuthorizationException?>{
         return suspendCoroutine { cont ->
-            net.openid.appauth.AuthorizationServiceConfiguration.fetchFromIssuer(Uri.parse(oidcIssuer)) { serviceConfiguration, exception ->
+            AuthorizationServiceConfiguration.fetchFromIssuer(Uri.parse(oidcIssuer)) { serviceConfiguration, exception ->
                 cont.resume(Pair(serviceConfiguration, exception))
             }
         }
     }
 
     private suspend fun registerToOpenId(
-        conf: net.openid.appauth.AuthorizationServiceConfiguration,
+        conf: AuthorizationServiceConfiguration,
         redirectUri: String,
     ) {
-        val regReq = net.openid.appauth.RegistrationRequest.Builder(
+        val regReq = RegistrationRequest.Builder(
             conf,
             listOf(Uri.parse(redirectUri))
         ).setAdditionalParameters(mapOf(
@@ -92,13 +119,13 @@ class AuthenticatorImplementation (
         updateRegistrationResponse(res)
     }
 
-    private suspend fun requestToken(): Pair<net.openid.appauth.TokenResponse?, net.openid.appauth.AuthorizationException?> {
+    private suspend fun requestToken(): Pair<TokenResponse?, AuthorizationException?> {
 
-        val result : Pair<net.openid.appauth.TokenResponse?, net.openid.appauth.AuthorizationException?> = if (profile.authState.lastAuthorizationResponse != null) {
+        val result : Pair<TokenResponse?, AuthorizationException?> = if (profile.authState.lastAuthorizationResponse != null) {
             suspendCoroutine { cont ->
                 authService.performTokenRequest(
                     profile.authState.lastAuthorizationResponse!!.createTokenExchangeRequest(),
-                    net.openid.appauth.ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
+                    ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
                 ) { tokenResponse, exception ->
                     cont.resume(Pair(tokenResponse, exception))
                 }
@@ -114,12 +141,12 @@ class AuthenticatorImplementation (
      * Refreshes the token in case it has been expired.
      * @return RefreshTokenResponse which contains accessToken, tokenId and exception
      */
-    private suspend fun refreshToken(): Pair<net.openid.appauth.TokenResponse?, net.openid.appauth.AuthorizationException?> {
-        val result : Pair<net.openid.appauth.TokenResponse?, net.openid.appauth.AuthorizationException?> = if (profile.authState.lastAuthorizationResponse != null) {
+    private suspend fun refreshToken(): Pair<TokenResponse?, AuthorizationException?> {
+        val result : Pair<TokenResponse?, AuthorizationException?> = if (profile.authState.lastAuthorizationResponse != null) {
             suspendCoroutine { cont ->
                 authService.performTokenRequest(
                     profile.authState.createTokenRefreshRequest(),
-                    net.openid.appauth.ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
+                    ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
                 ) { tokenResponse, exception ->
                     cont.resume(Pair(tokenResponse, exception))
                 }
@@ -131,67 +158,67 @@ class AuthenticatorImplementation (
         return Pair(result.first, result.second)
     }
 
-    private suspend fun getWebIdProfile(webId: String): com.pondersource.solidandroidclient.data.WebIdProfile {
-        val webIdProfileResponse = read(URI.create(webId), com.pondersource.solidandroidclient.data.WebIdProfile::class.java)
-        if (webIdProfileResponse is com.pondersource.solidandroidclient.SolidNetworkResponse.Success) {
+    private suspend fun getWebIdProfile(webId: String): WebIdProfile {
+        val webIdProfileResponse = read(URI.create(webId), WebIdProfile::class.java)
+        if (webIdProfileResponse is SolidNetworkResponse.Success) {
             return webIdProfileResponse.data
         } else {
             throw Exception("Could not get the webId details.")
         }
     }
 
-    suspend fun <T: com.pondersource.solidandroidclient.sub.resource.Resource> read(
+    suspend fun <T: Resource> read(
         resource: URI,
         clazz: Class<T>,
-    ): com.pondersource.solidandroidclient.SolidNetworkResponse<T> {
+    ): SolidNetworkResponse<T> {
 
-        val client: com.inrupt.client.solid.SolidSyncClient = com.inrupt.client.solid.SolidSyncClient.getClient()
+        val client: SolidSyncClient = SolidSyncClient.getClient()
         try {
             val tokenResponse = if (needsTokenRefresh()) {
                 val tokenResponse = getLastTokenResponse()
-                client.session(com.inrupt.client.openid.OpenIdSession.ofIdToken(tokenResponse!!.idToken!!))
+                client.session(OpenIdSession.ofIdToken(tokenResponse!!.idToken!!))
                 tokenResponse
             } else {
                 getLastTokenResponse()
             }
 
-            val request = com.inrupt.client.Request.newBuilder()
+            val request = Request.newBuilder()
                 .uri(resource)
-                .header(com.pondersource.solidandroidclient.HTTPHeaderName.ACCEPT, if (com.pondersource.solidandroidclient.RDFSource::class.java.isAssignableFrom(clazz)) com.pondersource.solidandroidclient.HTTPAcceptType.JSON_LD else com.pondersource.solidandroidclient.HTTPAcceptType.OCTET_STREAM)
-                .header(com.pondersource.solidandroidclient.HTTPHeaderName.AUTHORIZATION, "${tokenResponse?.tokenType} ${tokenResponse?.accessToken}")
+                .header(HTTPHeaderName.ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.OCTET_STREAM)
+                .header(HTTPHeaderName.AUTHORIZATION, "${tokenResponse?.tokenType} ${tokenResponse?.accessToken}")
                 .GET()
                 .build()
 
-            val response: com.inrupt.client.Response<InputStream> = client.send(
+            val response: Response<InputStream> = client.send(
                 request,
-                com.inrupt.client.Response.BodyHandlers.ofInputStream()
+                Response.BodyHandlers.ofInputStream()
             )
 
             return if (response.isSuccessful()) {
-                com.pondersource.solidandroidclient.SolidNetworkResponse.Success(constructObject(response, clazz))
+                SolidNetworkResponse.Success(constructObject(response, clazz))
             } else {
-                com.pondersource.solidandroidclient.SolidNetworkResponse.Error(response.statusCode(), response.body().toPlainString())
+                SolidNetworkResponse.Error(response.statusCode(), response.body().toPlainString())
             }
         } catch (e: Exception) {
-            return com.pondersource.solidandroidclient.SolidNetworkResponse.Exception(e)
+            return SolidNetworkResponse.Exception(e)
         }
     }
 
     private fun <T> constructObject(
-        response: com.inrupt.client.Response<InputStream>,
+        response: Response<InputStream>,
         clazz: Class<T>
     ): T {
-        val type = response.headers().firstValue(com.pondersource.solidandroidclient.HTTPHeaderName.CONTENT_TYPE)
-            .orElse(com.pondersource.solidandroidclient.HTTPAcceptType.OCTET_STREAM)
+        val type = response.headers().firstValue(HTTPHeaderName.CONTENT_TYPE)
+            .orElse(HTTPAcceptType.OCTET_STREAM)
         val string = response.body().toPlainString()
-        if (com.pondersource.solidandroidclient.RDFSource::class.java.isAssignableFrom(clazz)) {
-            val options = com.apicatalog.jsonld.JsonLdOptions().apply {
+        if (RDFSource::class.java.isAssignableFrom(clazz)) {
+            val options = JsonLdOptions().apply {
                 isRdfStar = true
             }
             return clazz
-                .getConstructor(URI::class.java, com.apicatalog.jsonld.http.media.MediaType::class.java, com.apicatalog.rdf.RdfDataset::class.java)
-                .newInstance(response.uri(), com.apicatalog.jsonld.http.media.MediaType.of(type), com.apicatalog.jsonld.JsonLd.toRdf(
-                    com.apicatalog.jsonld.document.JsonDocument.of(string.byteInputStream())).options(options).get())
+                .getConstructor(URI::class.java, MediaType::class.java, RdfDataset::class.java)
+                .newInstance(response.uri(), MediaType.of(type), JsonLd.toRdf(
+                    JsonDocument.of(string.byteInputStream())).options(options).get())
         } else {
             return clazz
                 .getConstructor(URI::class.java, String::class.java, InputStream::class.java)
@@ -224,16 +251,16 @@ class AuthenticatorImplementation (
             registerToOpenId(conf.first!!, redirectUri)
 
             if (profile.authState.lastRegistrationResponse != null) {
-                val builder = net.openid.appauth.AuthorizationRequest.Builder(
+                val builder = AuthorizationRequest.Builder(
                     conf.first!!,
                     profile.authState.lastRegistrationResponse!!.clientId,
-                    net.openid.appauth.ResponseTypeValues.CODE,
+                    ResponseTypeValues.CODE,
                     Uri.parse(redirectUri))
 
                 val authRequest = builder
                     .setScopes( "webid", "openid", "offline_access",)
                     .setPrompt("consent")
-                    .setResponseMode(net.openid.appauth.AuthorizationRequest.ResponseMode.QUERY)
+                    .setResponseMode(AuthorizationRequest.ResponseMode.QUERY)
                     .build()
 
                 val authIntent = authService.getAuthorizationRequestIntent(authRequest)
@@ -248,8 +275,8 @@ class AuthenticatorImplementation (
     }
 
     override suspend fun submitAuthorizationResponse(
-        authResponse: net.openid.appauth.AuthorizationResponse?,
-        authException: net.openid.appauth.AuthorizationException?
+        authResponse: AuthorizationResponse?,
+        authException: AuthorizationException?
     ) {
         updateAuthorizationResponse(authResponse, authException)
         if (authException == null && authResponse != null) {
@@ -260,7 +287,7 @@ class AuthenticatorImplementation (
         }
     }
 
-    override suspend fun getLastTokenResponse(): net.openid.appauth.TokenResponse? {
+    override suspend fun getLastTokenResponse(): TokenResponse? {
         checkTokenAndRefresh()
         return profile.authState.lastTokenResponse
     }
@@ -284,7 +311,7 @@ class AuthenticatorImplementation (
     override fun getProfile() = profile
 
     override fun resetProfile() {
-        profile = com.pondersource.solidandroidclient.data.Profile()
+        profile = Profile()
         userRepository.writeProfile(profile)
     }
 
@@ -296,7 +323,7 @@ class AuthenticatorImplementation (
             profile.authState.authorizationServiceConfiguration != null) {
 
             val token =  getLastTokenResponse()
-            val endSessionReq = net.openid.appauth.EndSessionRequest.Builder(profile.authState.authorizationServiceConfiguration!!)
+            val endSessionReq = EndSessionRequest.Builder(profile.authState.authorizationServiceConfiguration!!)
                 .setIdTokenHint(token!!.idToken)
                 .setPostLogoutRedirectUri(Uri.parse(logoutRedirectUrl))
                 .build()

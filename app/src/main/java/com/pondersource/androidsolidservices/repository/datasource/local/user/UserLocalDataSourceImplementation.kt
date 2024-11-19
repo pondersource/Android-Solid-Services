@@ -2,10 +2,10 @@ package com.pondersource.androidsolidservices.repository.datasource.local.user
 
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.pondersource.solidandroidclient.data.Profile
-import com.pondersource.solidandroidclient.data.UserInfo
-import com.pondersource.solidandroidclient.data.WebIdProfile.Companion.readFromString
-import com.pondersource.solidandroidclient.data.WebIdProfile.Companion.writeToString
+import com.pondersource.shared.data.Profile
+import com.pondersource.shared.data.UserInfo
+import com.pondersource.shared.data.WebIdProfile.Companion.readFromString
+import com.pondersource.shared.data.WebIdProfile.Companion.writeToString
 import net.openid.appauth.AuthState
 
 class UserLocalDataSourceImplementation(

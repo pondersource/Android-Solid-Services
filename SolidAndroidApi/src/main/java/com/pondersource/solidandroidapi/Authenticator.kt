@@ -1,6 +1,7 @@
 package com.pondersource.solidandroidapi
 
 import android.content.Intent
+import com.pondersource.shared.data.Profile
 
 interface Authenticator {
 
@@ -58,7 +59,7 @@ interface Authenticator {
     /**
      * @return The user's profile such as AuthState, WebId and WebIdDetails
      */
-    fun getProfile(): com.pondersource.solidandroidclient.data.Profile
+    fun getProfile(): Profile
 
     /**
      * clears saved user's data. Can be used after logout in your application
