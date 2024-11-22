@@ -4,8 +4,8 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.pondersource.shared.data.Profile
 import com.pondersource.shared.data.UserInfo
-import com.pondersource.shared.data.WebIdProfile.Companion.readFromString
-import com.pondersource.shared.data.WebIdProfile.Companion.writeToString
+import com.pondersource.shared.data.WebId.Companion.readFromString
+import com.pondersource.shared.data.WebId.Companion.writeToString
 import net.openid.appauth.AuthState
 
 class UserLocalDataSourceImplementation(

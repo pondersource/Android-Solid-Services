@@ -19,6 +19,7 @@ import com.pondersource.shared.util.isSuccessful
 import com.pondersource.shared.util.toPlainString
 import jakarta.json.JsonString
 import net.openid.appauth.TokenResponse
+import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
 
@@ -220,8 +221,9 @@ class SolidResourceManagerImplementation(
                 .options(options)
                 .get()
             return clazz
-                .getConstructor(URI::class.java, MediaType::class.java, RdfDataset::class.java)
-                .newInstance(response.uri(), MediaType.of(type), dataSet)
+                .getConstructor(URI::class.java, MediaType::class.java, RdfDataset::class.java,
+                    Headers::class.java)
+                .newInstance(response.uri(), MediaType.of(type), dataSet, null)
         } else {
             return clazz
                 .getConstructor(URI::class.java, String::class.java, InputStream::class.java)

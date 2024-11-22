@@ -11,6 +11,7 @@ import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
 import com.pondersource.shared.NonRDFSource
 import com.pondersource.shared.RDFSource
+import com.pondersource.shared.data.WebId
 import com.pondersource.shared.resource.Resource
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_CRUD_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
@@ -85,13 +86,13 @@ class SolidResourceClient {
     }
 
     fun getWebId(
-        callback: SolidResourceCallback<com.pondersource.shared.data.WebIdProfile>
+        callback: SolidResourceCallback<WebId>
     ) {
         checkBasicConditions()
 
         iASSAuthService!!.getWebId(object: IASSRdfResourceCallback.Stub() {
             override fun onResult(webIdResult: RDFSource) {
-                val returnValue = com.pondersource.shared.data.WebIdProfile::class.java
+                val returnValue = WebId::class.java
                     .getConstructor(
                         URI::class.java,
                         MediaType::class.java,

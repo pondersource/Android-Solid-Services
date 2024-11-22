@@ -17,7 +17,7 @@ import com.pondersource.shared.RDFSource
 import com.pondersource.shared.SolidNetworkResponse
 import com.pondersource.shared.data.Profile
 import com.pondersource.shared.data.UserInfo
-import com.pondersource.shared.data.WebIdProfile
+import com.pondersource.shared.data.WebId
 import com.pondersource.shared.resource.Resource
 import com.pondersource.shared.util.Utils
 import com.pondersource.shared.util.isSuccessful
@@ -158,10 +158,10 @@ class AuthenticatorImplementation (
         return Pair(result.first, result.second)
     }
 
-    private suspend fun getWebIdProfile(webId: String): WebIdProfile {
-        val webIdProfileResponse = read(URI.create(webId), WebIdProfile::class.java)
-        if (webIdProfileResponse is SolidNetworkResponse.Success) {
-            return webIdProfileResponse.data
+    private suspend fun getWebIdProfile(webId: String): WebId {
+        val webIdResponse = read(URI.create(webId), WebId::class.java)
+        if (webIdResponse is SolidNetworkResponse.Success) {
+            return webIdResponse.data
         } else {
             throw Exception("Could not get the webId details.")
         }

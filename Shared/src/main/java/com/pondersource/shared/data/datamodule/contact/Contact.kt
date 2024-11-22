@@ -21,12 +21,10 @@ data class FullContact(
 )
 
 data class Email(
-    val uri: URI,
     val value: String,
 )
 
 data class PhoneNumber(
-    val uri: URI,
     val value: String,
 )
 

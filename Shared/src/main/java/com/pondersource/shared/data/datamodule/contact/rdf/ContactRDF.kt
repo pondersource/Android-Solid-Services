@@ -8,6 +8,7 @@ import com.pondersource.shared.data.datamodule.contact.Email
 import com.pondersource.shared.data.datamodule.contact.Name
 import com.pondersource.shared.data.datamodule.contact.PhoneNumber
 import com.pondersource.shared.data.datamodule.contact.URLType
+import com.pondersource.shared.vocab.ExtendedXsdConstants
 import com.pondersource.shared.vocab.OWL
 import com.pondersource.shared.vocab.VCARD
 import okhttp3.Headers
@@ -16,6 +17,7 @@ import java.net.URI
 class ContactRDF: RDFSource {
 
     private val rdfKey = rdf.createIRI(RDF.type.toString())
+    private val rdfValue = rdf.createIRI(VCARD.Individual)
     private val fullNameKey = rdf.createIRI(VCARD.fn)
     private val hasUIDKey = rdf.createIRI(VCARD.hasUID)
     private val hasNameKey = rdf.createIRI(VCARD.hasName)
@@ -26,6 +28,7 @@ class ContactRDF: RDFSource {
     private val bdayKey = rdf.createIRI(VCARD.bday)
     private val anniversaryKey = rdf.createIRI(VCARD.anniverary)
     private val hasEmailKey = rdf.createIRI(VCARD.hasEmail)
+    private val valueKey = rdf.createIRI(VCARD.value)
     private val hasTelephoneKey = rdf.createIRI(VCARD.hasTelephone)
     private val organizationNameKey = rdf.createIRI(VCARD.organizationName)
     private val roleKey = rdf.createIRI(VCARD.role)
@@ -51,13 +54,29 @@ class ContactRDF: RDFSource {
     }
 
     private fun setType() {
-        addTriple(createTriple(rdfKey, VCARD.Individual))
+        addTriple(
+            rdf.createTriple(
+                rdf.createIRI(getIdentifier().toString()),
+                rdfKey,
+                rdfValue
+            )
+        )
     }
 
     fun getFullName(): String {
         return dataset.defaultGraph.toList()
             .find { it.subject.value == getIdentifier().toString() && it.predicate.equals(fullNameKey) }!!
             .`object`.value
+    }
+
+    fun setFullName(name: String) {
+        addTriple(
+            rdf.createTriple(
+                rdf.createIRI(getIdentifier().toString()),
+                fullNameKey,
+                rdf.createTypedString(name, ExtendedXsdConstants.string)
+            )
+        )
     }
 
     fun getPhotoUrl(): String? {
@@ -114,19 +133,45 @@ class ContactRDF: RDFSource {
         }
     }
 
-    fun getTelephones(): List<PhoneNumber> {
+    fun getPhoneNumbers(): List<PhoneNumber> {
         val returnList = arrayListOf<PhoneNumber>()
         val list = dataset.defaultGraph.toList()
         list.filter { it.subject.value == getIdentifier().toString() && it.predicate.equals(hasTelephoneKey) }
             .forEach { triple ->
-                /*returnList.add(
+                returnList.add(
                     PhoneNumber(
-                        list.find { it.subject.equals(triple.`object`) && it.predicate.equals(VCARD.value) }!!.`object`.value
+                        list.find { it.subject.equals(triple.`object`) && it.predicate.equals(valueKey) }!!.`object`.value
                     )
-                )*/
+                )
             }
 
         return returnList
+    }
+
+    fun addPhoneNumber(newPhoneNumber: String): Boolean {
+        val alreadyExistPhoneNumber = dataset.defaultGraph.toList().find { it.predicate.equals(valueKey) && it.`object`.value == "tel:${newPhoneNumber}" }
+
+        if (alreadyExistPhoneNumber != null) {
+            return false
+        } else {
+            val namedNode = rdf.createBlankNode(newPhoneNumber)
+            addTriple(
+                rdf.createTriple(
+                    rdf.createIRI(getIdentifier().toString()),
+                    hasTelephoneKey,
+                    namedNode
+                ),
+                Int.MAX_VALUE
+            )
+            addTriple(
+                rdf.createTriple(
+                    namedNode,
+                    valueKey,
+                    rdf.createTypedString("tel:${newPhoneNumber}", null)
+                )
+            )
+            return true
+        }
     }
 
     fun getEmails(): List<Email> {
@@ -134,13 +179,73 @@ class ContactRDF: RDFSource {
         val list = dataset.defaultGraph.toList()
         list.filter { it.subject.value == getIdentifier().toString() && it.predicate.equals(hasEmailKey) }
             .forEach { triple ->
-                /*returnList.add(
+                returnList.add(
                     Email(
-                        list.find { it.subject.equals(triple.`object`) && it.predicate.equals(VCARD.value) }!!.`object`.value
+                        list.find { it.subject.equals(triple.`object`) && it.predicate.equals(valueKey) }!!.`object`.value
                     )
-                )*/
+                )
             }
 
         return returnList
+    }
+
+    fun addEmailAddress(newEmailAddress: String): Boolean {
+        val alreadyExistEmailAddress = dataset.defaultGraph.toList().find { it.predicate.equals(valueKey) && it.`object`.value == "mailto:${newEmailAddress}" }
+
+        return if (alreadyExistEmailAddress != null) {
+            false
+        } else {
+            val namedNode = rdf.createBlankNode(newEmailAddress)
+            addTriple(
+                rdf.createTriple(
+                    rdf.createIRI(getIdentifier().toString()),
+                    hasEmailKey,
+                    namedNode
+                ),
+                Int.MAX_VALUE
+            )
+            addTriple(
+                rdf.createTriple(
+                    namedNode,
+                    valueKey,
+                    rdf.createTypedString("mailto:${newEmailAddress}", null)
+                )
+            )
+            true
+        }
+    }
+
+    fun removePhoneNumber(phoneNumber: String): Boolean {
+        val list = dataset.defaultGraph.toList()
+        val existingPhoneNumber = list.find { it.predicate.equals(valueKey) && it.`object`.value == "tel:${phoneNumber}" }
+
+        if (existingPhoneNumber != null) {
+            val hasTelephoneTripe = list.find { it.`object`.equals(existingPhoneNumber.subject) && it.predicate.equals(hasTelephoneKey) }
+            dataset = rdf.createDataset().apply {
+                list.filter { it != existingPhoneNumber && it != hasTelephoneTripe }.forEach {
+                    add(it)
+                }
+            }
+            return true
+        } else {
+            return false
+        }
+    }
+
+    fun removeEmailAddress(emailAddress: String): Boolean {
+        val list = dataset.defaultGraph.toList()
+        val existingEmailAddress = list.find { it.predicate.equals(valueKey) && it.`object`.value == "mailto:${emailAddress}" }
+
+        if (existingEmailAddress != null) {
+            val hasEmailTriple = list.find { it.`object`.equals(existingEmailAddress.subject) && it.predicate.equals(hasEmailKey) }
+            dataset = rdf.createDataset().apply {
+                list.filter { it != existingEmailAddress && it != hasEmailTriple }.forEach {
+                    add(it)
+                }
+            }
+            return true
+        } else {
+            return false
+        }
     }
 }

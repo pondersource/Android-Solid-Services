@@ -4,6 +4,8 @@ import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
 import com.inrupt.client.vocabulary.RDF
 import com.pondersource.shared.RDFSource
+import com.pondersource.shared.data.datamodule.contact.Contact
+import com.pondersource.shared.vocab.OWL
 import com.pondersource.shared.vocab.VCARD
 import okhttp3.Headers
 import java.net.URI
@@ -11,9 +13,11 @@ import java.net.URI
 class GroupRDF: RDFSource {
 
     private val typeKey = rdf.createIRI(RDF.type.toString())
+    private val typeValue = rdf.createIRI(VCARD.Group)
     private val fullNameKey = rdf.createIRI(VCARD.fn)
     private val hasMemberKey = rdf.createIRI(VCARD.hasMember)
     private val includesGroupKey = rdf.createIRI(VCARD.includesGroup)
+    private val sameAsKey = rdf.createIRI(OWL.sameAs)
 
     constructor(
         identifier: URI,
@@ -27,36 +31,101 @@ class GroupRDF: RDFSource {
     }
 
     private fun setType() {
-        addTriple(createTriple(typeKey, VCARD.Group))
+        addTriple(
+            rdf.createTriple(
+                rdf.createIRI(getIdentifier().toString()),
+                typeKey,
+                typeValue
+            )
+        )
     }
 
-    fun getTitle() : String? {
+    fun getTitle() : String {
         return dataset.defaultGraph.toList().find {
             it.subject.value == getIdentifier().toString() && it.predicate.equals(fullNameKey)
-        }?.`object`?.value
+        }!!.`object`!!.value
     }
 
-    fun getContacts(): List<Pair<String, String>> {
-        val returnList = arrayListOf<Pair<String, String>>()
+    fun setTitle(title: String) {
+        addTriple(
+            rdf.createTriple(
+                rdf.createIRI(getIdentifier().toString()),
+                fullNameKey,
+                rdf.createTypedString(title, null)
+            )
+        )
+    }
+
+    fun setIncludesInAddressBook(addressBookUri: String) {
+        addTriple(
+            rdf.createTriple(
+                rdf.createIRI(addressBookUri),
+                includesGroupKey,
+                rdf.createIRI(getIdentifier().toString())
+            )
+        )
+    }
+
+    fun getContacts(): List<Contact> {
+        val returnList = arrayListOf<Contact>()
         val list = dataset.defaultGraph.toList()
         val members = list.filter { it.predicate.equals(hasMemberKey) }.map { triple ->
-            val sameAs = list.find { it.subject.equals(triple.`object`) }
-            if (sameAs == null ) {
+            val sameAs = list.find { it.predicate.equals(sameAsKey) && it.subject.equals(triple.`object`) }
+            return@map if (sameAs == null ) {
                 triple.`object`.value
             } else {
                 sameAs.`object`.value
             }
         }
         members.forEach { member ->
-            returnList.add(Pair(member, list.find { it.subject.value == member && it.predicate.equals(fullNameKey) }!!.`object`.value))
+            returnList.add(
+                Contact(
+                    URI.create(member),
+                    list.find { it.subject.value == member && it.predicate.equals(fullNameKey) }!!.`object`.value
+                )
+            )
         }
 
         return returnList
     }
 
-    fun includesInAddressBooks(): List<String> {
-        return dataset.defaultGraph.toList().filter {
-            it.predicate.equals(includesGroupKey)
-        }.map { it.subject.value }
+    fun addMember(contact: ContactRDF) {
+        addTriple(
+            rdf.createTriple(
+                rdf.createIRI(getIdentifier().toString()),
+                hasMemberKey,
+                rdf.createIRI(contact.getIdentifier().toString())
+            ),
+            Int.MAX_VALUE
+        )
+
+        addTriple(
+            rdf.createTriple(
+                rdf.createIRI(contact.getIdentifier().toString()),
+                fullNameKey,
+                rdf.createTypedString(contact.getFullName(), null)
+            )
+        )
+    }
+
+    /**
+     * @param contactURI of which we want to remove from the group
+     * @return true if dataset has changed
+     */
+    fun removeMember(contactURI: URI): Boolean {
+        val list = dataset.defaultGraph.toList()
+        val member = list.find { it.subject.value == getIdentifier().toString() && it.predicate.equals(hasMemberKey) && it.`object`.value == contactURI.toString() }
+        if (member != null) {
+            val memberName = list.filter { it.subject.equals(member.`object`) && it.predicate.equals(fullNameKey) }
+            val newList = list.filter { it != member && it != memberName }
+            dataset = rdf.createDataset().apply {
+                newList.forEach {
+                    add(it)
+                }
+            }
+            return true
+        } else {
+            return false
+        }
     }
 }
