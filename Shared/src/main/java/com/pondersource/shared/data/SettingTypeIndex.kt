@@ -56,12 +56,10 @@ class SettingTypeIndex: RDFSource {
         }
     }
 
-    fun getAddressBooks(): List<URI> {
+    fun getAddressBooks(): List<String> {
         val list = dataset.defaultGraph.toList()
         return list.filter { it.predicate.equals(forClass) && it.`object`.equals(AddressBook) }.map { triple ->
             list.find { it.predicate.equals(instance) && it.subject.equals(triple.subject) }!!.`object`.value
-        }.map {
-            URI.create(it)
         }
     }
 

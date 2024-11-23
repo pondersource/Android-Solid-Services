@@ -38,6 +38,9 @@
         <service
             android:name=".services.ASSResourceService"
             android:exported="true"></service>
+        <service
+            android:name=".services.SolidContactsModuleService"
+            android:exported="true"></service>
 
         <activity
             android:name=".ui.MainActivity"

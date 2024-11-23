@@ -24,5 +24,11 @@ class Solid {
                 }
             )
         }
+
+        fun getContactsDataModule(context: Context): SolidContactsDataModule {
+            return SolidContactsDataModule.getInstance(
+                context,
+            )
+        }
     }
 }

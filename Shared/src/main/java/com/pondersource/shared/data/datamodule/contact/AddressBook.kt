@@ -2,11 +2,10 @@ package com.pondersource.shared.data.datamodule.contact
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import java.net.URI
 
 @Parcelize
 data class AddressBook(
-    val uri: URI,
+    val uri: String,
     var title: String,
     var contacts: List<Contact>,
     var groups: List<Group>,
@@ -14,6 +13,6 @@ data class AddressBook(
 
 @Parcelize
 data class AddressBookList(
-    val publicAddressBookUris: List<URI>,
-    val privateAddressBookUris: List<URI>,
+    val publicAddressBookUris: List<String>,
+    val privateAddressBookUris: List<String>,
 ): Parcelable

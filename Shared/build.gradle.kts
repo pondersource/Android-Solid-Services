@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-parcelize")
+    `maven-publish`
 }
 
 android {
@@ -57,4 +58,18 @@ dependencies {
     api(libs.inrupt.client.vocabulary)
     api(libs.titanium.json.ld.jre8)
     api(libs.glassfish.jakarta.json)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.pondersource.solidandroidshared"
+            artifactId = "shared"
+            version = "0.1"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }

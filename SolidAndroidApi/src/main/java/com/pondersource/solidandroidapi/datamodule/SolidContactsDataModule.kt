@@ -5,80 +5,86 @@ import com.pondersource.shared.data.datamodule.contact.AddressBookList
 import com.pondersource.shared.data.datamodule.contact.FullContact
 import com.pondersource.shared.data.datamodule.contact.FullGroup
 import com.pondersource.shared.data.datamodule.contact.NewContact
-import java.net.URI
 
 interface SolidContactsDataModule {
 
 
-    suspend fun getAddressBooks(webId: String): AddressBookList
+    suspend fun getAddressBooks(
+        webId: String
+    ): AddressBookList
 
     suspend fun createAddressBook(
         title: String,
         storage: String,
         ownerWebId: String,// TODO: we need default value
         container: String? = null,
-    ) : URI
+    ) : String
 
     suspend fun getAddressBook(
-        uri: URI,
+        addressBookUri: String,
     ): AddressBook
 
+    suspend fun renameAddressBook(
+        addressBookUri: String,
+        newName: String,
+    )
+
     suspend fun createNewContact(
-        addressBookUri: URI,
+        addressBookString: String,
         newContact: NewContact,
-        groupUris: List<URI> = emptyList(),
-    ) : URI
+        groupStrings: List<String> = emptyList(),
+    ) : String
 
     suspend fun getContact(
-        contactUri: URI
-): FullContact
+        contactString: String
+    ): FullContact
 
     suspend fun renameContact(
-        contactUri: URI,
+        contactString: String,
         newName: String,
     )
 
     suspend fun addNewPhoneNumber(
-        contactUri: URI,
+        contactString: String,
         newPhoneNumber: String,
     ): FullContact
 
     suspend fun addNewEmailAddress(
-        contactUri: URI,
+        contactString: String,
         newEmailAddress: String,
     ): FullContact
 
     suspend fun removePhoneNumber(
-        contactUri: URI,
+        contactString: String,
         phoneNumber: String,
     ): Boolean
 
     suspend fun removeEmailAddress(
-        contactUri: URI,
+        contactString: String,
         emailAddress: String,
     ): Boolean
 
     suspend fun createNewGroup(
-        addressBookUri: URI,
+        addressBookString: String,
         title: String,
-    ): URI
+    ): String
 
     suspend fun getGroup(
-        groupUri: URI,
+        groupString: String,
     ): FullGroup
 
     suspend fun removeGroup(
-        addressBookUri: URI,
-        groupUri: URI
+        addressBookString: String,
+        groupString: String
     ): Boolean
 
     suspend fun addContactToGroup(
-        contactUri: URI,
-        groupUri: URI,
+        contactString: String,
+        groupString: String,
     )
 
     suspend fun removeContactFromGroup(
-        contactUri: URI,
-        groupUri: URI,
+        contactString: String,
+        groupString: String,
     ): Boolean
 }

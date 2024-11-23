@@ -80,7 +80,7 @@ class GroupRDF: RDFSource {
         members.forEach { member ->
             returnList.add(
                 Contact(
-                    URI.create(member),
+                    member,
                     list.find { it.subject.value == member && it.predicate.equals(fullNameKey) }!!.`object`.value
                 )
             )

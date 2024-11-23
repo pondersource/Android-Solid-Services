@@ -83,6 +83,15 @@ class SolidContactsDataModuleHelper(
         return solidResourceManager.read(uri, AddressBookRDF::class.java).handleResponse()
     }
 
+    suspend fun renameAddressBook(addressBookUri: String, newName: String) {
+        val addressBookRdf = getAddressBook(URI.create(addressBookUri))
+        if (addressBookRdf.getTitle() != newName) {
+            addressBookRdf.setTitle(newName)
+            solidResourceManager.update(addressBookRdf)
+        }
+
+    }
+
     suspend fun getAddressBookContacts(nameEmailIndexUri: URI): NameEmailIndexRDF {
         return solidResourceManager.read(nameEmailIndexUri, NameEmailIndexRDF::class.java).handleResponse()
     }
@@ -241,7 +250,7 @@ class SolidContactsDataModuleHelper(
             solidResourceManager.update(nameEmailIndexRDF)
             val groupsIndexRDF = getAddressBookGroups(URI.create(addressBookRDF.getGroupsIndex()))
             groupsIndexRDF.getGroups(addressBookUri.toString()).forEach {
-                removeContactFromGroup(it.uri, contactUri)
+                removeContactFromGroup(URI.create(it.uri), contactUri)
             }
         } else {
             //contact is not in this address book, so no need for search in groups
@@ -253,11 +262,11 @@ class SolidContactsDataModuleHelper(
         solidResourceManager.delete(container)
     }
 
-    suspend fun getPrivateAddressBooks(webId: String): List<URI> {
+    suspend fun getPrivateAddressBooks(webId: String): List<String> {
         return getPrivateTypeIndex(webId).getAddressBooks()
     }
 
-    suspend fun getPublicAddressBooks(webId: String): List<URI> {
+    suspend fun getPublicAddressBooks(webId: String): List<String> {
         return getPublicTypeIndex(webId).getAddressBooks()
     }
 
@@ -285,5 +294,13 @@ class SolidContactsDataModuleHelper(
         }
 
        return solidResourceManager.read(URI.create(publicTypeIndexUri), SettingTypeIndex::class.java).handleResponse()
+    }
+
+    suspend fun renameContact(contactUri: String, newName: String) {
+        val contactRdf = getContact(URI.create(contactUri))
+        if(contactRdf.getFullName() != newName) {
+            contactRdf.setFullName(newName)
+            solidResourceManager.update(contactRdf)
+        }
     }
 }

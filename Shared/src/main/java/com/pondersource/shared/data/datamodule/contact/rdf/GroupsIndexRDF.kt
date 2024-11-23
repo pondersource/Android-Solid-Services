@@ -28,9 +28,8 @@ class GroupsIndexRDF: RDFSource {
         val returnList = arrayListOf<Group>()
         val list = dataset.defaultGraph.toList()
         list.filter { it.predicate.equals(includesGroupKey) && it.subject.value == addressBookUri } .forEach { triple ->
-            val groupUri = URI.create(triple.`object`.value)
             val groupName = list.find { it.subject.equals(triple.`object`) && it.predicate.equals(fullNameKey) }!!.`object`.value
-            returnList.add(Group(groupUri, groupName))
+            returnList.add(Group(triple.`object`.value, groupName))
         }
         return returnList
     }

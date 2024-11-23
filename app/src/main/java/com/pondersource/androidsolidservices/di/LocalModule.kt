@@ -3,6 +3,13 @@ package com.pondersource.androidsolidservices.di
 import android.accounts.AccountManager
 import android.content.Context
 import com.pondersource.androidsolidservices.base.Constants
+import com.pondersource.solidandroidapi.Authenticator
+import com.pondersource.solidandroidapi.AuthenticatorImplementation
+import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
+import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModuleImplementation
+import com.pondersource.solidandroidapi.SolidResourceManager
+import com.pondersource.solidandroidapi.SolidResourceManagerImplementation
+import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModuleHelper
 import com.pondersource.solidandroidapi.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -43,8 +50,8 @@ class LocalModule {
     fun provideAuthenticator(
         userRepository: UserRepository,
         authService: AuthorizationService,
-    ): com.pondersource.solidandroidapi.Authenticator {
-        return com.pondersource.solidandroidapi.AuthenticatorImplementation(
+    ): Authenticator {
+        return AuthenticatorImplementation(
             userRepository,
             authService,
         )
@@ -53,10 +60,30 @@ class LocalModule {
     @Provides
     @Singleton
     fun provideSolidResourceManager(
-        authenticator: com.pondersource.solidandroidapi.Authenticator,
-    ): com.pondersource.solidandroidapi.SolidResourceManager {
-        return com.pondersource.solidandroidapi.SolidResourceManagerImplementation(
+        authenticator: Authenticator,
+    ): SolidResourceManager {
+        return SolidResourceManagerImplementation(
             authenticator
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideSolidContactsDataModuleHelper(
+        solidResourceManager: SolidResourceManager,
+    ): SolidContactsDataModuleHelper {
+        return SolidContactsDataModuleHelper(
+            solidResourceManager
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideSolidContactsDataModule(
+        helper : SolidContactsDataModuleHelper,
+    ): SolidContactsDataModule {
+        return SolidContactsDataModuleImplementation(
+            helper
         )
     }
 }

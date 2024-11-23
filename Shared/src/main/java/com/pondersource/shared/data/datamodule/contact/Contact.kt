@@ -2,11 +2,10 @@ package com.pondersource.shared.data.datamodule.contact
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import java.net.URI
 
 @Parcelize
 data class Contact(
-    val uri: URI,
+    val uri: String,
     val name: String,
 ): Parcelable
 
@@ -19,7 +18,7 @@ data class NewContact(
 
 @Parcelize
 data class FullContact(
-    val uri: URI,
+    val uri: String,
     val fullName: String,
     val emailAddresses: List<Email>,
     val phoneNumbers: List<PhoneNumber>,

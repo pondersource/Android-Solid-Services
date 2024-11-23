@@ -27,9 +27,8 @@ class NameEmailIndexRDF: RDFSource {
         val returnList = arrayListOf<Contact>()
         val list = dataset.defaultGraph.toList()
         list.filter { it.predicate.equals(inAddressBookKey) && it.subject.value == addressBookUri } .forEach { triple ->
-            val contactUri = URI.create(triple.`object`.value)
             val contactName = list.find { it.subject.equals(triple.`object`) && it.predicate.equals(fullNameKey) }!!.`object`.value
-            returnList.add(Contact(contactUri, contactName))
+            returnList.add(Contact(triple.`object`.value, contactName))
         }
         return returnList
     }
