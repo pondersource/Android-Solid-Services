@@ -10,4 +10,5 @@ object Solid {
     const val instanceContainer = "${namespace}instanceContainer"
     const val TypeIndex = "${namespace}TypeIndex"
     const val UnlistedDocument = "${namespace}UnlistedDocument"
+    const val ListedDocument = "${namespace}ListedDocument"
 }

@@ -19,12 +19,32 @@ class WebIdProfile: RDFSource {
         headers: Headers?
     ): super(identifier, mediaType, dataset, headers)
 
-    fun getPrivateTypeIndex(): String {
-        return dataset.defaultGraph.toList().find { it.predicate.equals(privateTypeIndexKey) }!!.`object`!!.value
+    fun getPrivateTypeIndex(): String? {
+        return dataset.defaultGraph.toList().find { it.predicate.equals(privateTypeIndexKey) }?.`object`?.value
     }
 
-    fun getPublicTypeIndex(): String {
-        return dataset.defaultGraph.toList().find { it.predicate.equals(publicTypeIndexKey) }!!.`object`!!.value
+    fun setPrivateTypeIndex(webId: String, storage: String) {
+        addTriple(
+            rdf.createTriple(
+                rdf.createIRI(webId),
+                privateTypeIndexKey,
+                rdf.createIRI("${storage}/settings/privateTypeIndex")
+            )
+        )
+    }
+
+    fun getPublicTypeIndex(): String? {
+        return dataset.defaultGraph.toList().find { it.predicate.equals(publicTypeIndexKey) }?.`object`?.value
+    }
+
+    fun setPublicTypeIndex(webId: String, storage: String) {
+        addTriple(
+            rdf.createTriple(
+                rdf.createIRI(webId),
+                publicTypeIndexKey,
+                rdf.createIRI("${storage}/settings/publicTypeIndex")
+            )
+        )
     }
 
 }

@@ -10,15 +10,14 @@ import okhttp3.Headers
 import java.net.URI
 import java.util.UUID
 
-class SettingTypeIndex: RDFSource {
+abstract class SettingTypeIndex: RDFSource {
 
-    private val typeKey = rdf.createIRI(RDF.type.toString())
-    private val typeRegistration = rdf.createIRI(Solid.typeRegistration)
-    private val forClass = rdf.createIRI(Solid.forClass)
-    private val instance = rdf.createIRI(Solid.instance)
-    private val AddressBook = rdf.createIRI(VCARD.AddressBook)
-    private val TypeIndex = rdf.createIRI(Solid.TypeIndex)
-    private val UnlistedDocument = rdf.createIRI(Solid.UnlistedDocument)
+    protected val typeKey = rdf.createIRI(RDF.type.toString())
+    protected val typeRegistration = rdf.createIRI(Solid.typeRegistration)
+    protected val forClass = rdf.createIRI(Solid.forClass)
+    protected val instance = rdf.createIRI(Solid.instance)
+    protected val AddressBook = rdf.createIRI(VCARD.AddressBook)
+    protected val TypeIndex = rdf.createIRI(Solid.TypeIndex)
 
     constructor(
         identifier: URI,
@@ -31,30 +30,9 @@ class SettingTypeIndex: RDFSource {
         setTypes()
     }
 
-    private fun setTypes() {
-        val types = dataset.defaultGraph.toList().filter {
-            it.subject.value == getIdentifier().toString() && it.predicate.equals(typeKey)
-        }
+    abstract fun setTypes()
 
-        if(types.isEmpty()) {
-            addTriple(
-                rdf.createTriple(
-                    rdf.createIRI(getIdentifier().toString()),
-                    typeKey,
-                    TypeIndex
-                ),
-                Int.MAX_VALUE
-            )
-            addTriple(
-                rdf.createTriple(
-                    rdf.createIRI(getIdentifier().toString()),
-                    typeKey,
-                    UnlistedDocument
-                ),
-                Int.MAX_VALUE
-            )
-        }
-    }
+    fun getDataSet() = dataset
 
     fun getAddressBooks(): List<String> {
         val list = dataset.defaultGraph.toList()
@@ -65,13 +43,13 @@ class SettingTypeIndex: RDFSource {
 
     fun addAddressBook(addressBook: String) {
         val id = UUID.randomUUID().toString()
-        val subject = rdf.createIRI("${getIdentifier().toString()}#${id}")
+        val subject = rdf.createIRI("${getIdentifier()}#${id}")
         addTriple(
             rdf.createTriple(
                 subject,
                 typeKey,
                 typeRegistration
-            )
+            ),
         )
         addTriple(
             rdf.createTriple(
@@ -87,15 +65,5 @@ class SettingTypeIndex: RDFSource {
                 rdf.createIRI(addressBook)
             )
         )
-    }
-
-    fun removeExtra(){
-        val subject = rdf.createIRI("https://storage.inrupt.com/4a1ea008-8f12-4451-8cce-1f6f0be6b2ce/settings/privateTypeIndexfc37af7c-561c-42f6-8d59-a7c37e8094fe")
-        val list = dataset.defaultGraph.toList()
-        dataset = rdf.createDataset().apply {
-            list.filter { !it.subject.equals(subject) }.forEach {
-                add(it)
-            }
-        }
     }
 }
