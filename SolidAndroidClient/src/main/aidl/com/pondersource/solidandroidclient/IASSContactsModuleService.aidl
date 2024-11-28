@@ -14,7 +14,7 @@ import com.pondersource.shared.data.datamodule.contact.FullGroup;
 
 interface IASSContactsModuleService {
 
-    AddressBookList getAddressBooks(String webId);
+    AddressBookList getAddressBooks();
 
     String createAddressBook(
             String title,

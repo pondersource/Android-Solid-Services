@@ -13,7 +13,6 @@ import com.pondersource.shared.data.datamodule.contact.NewContact
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_CONTACTS_MODULE_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
 import com.pondersource.solidandroidclient.IASSContactsModuleService
-import java.net.URI
 
 class SolidContactsDataModule {
 
@@ -62,9 +61,9 @@ class SolidContactsDataModule {
         }
     }
 
-    fun getAddressBooks(webId: String): AddressBookList {
+    fun getAddressBooks(): AddressBookList {
         checkService()
-        return iASSContactsModuleService!!.getAddressBooks(webId)
+        return iASSContactsModuleService!!.getAddressBooks()
     }
 
     fun createAddressBook(

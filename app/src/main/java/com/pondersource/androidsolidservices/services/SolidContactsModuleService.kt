@@ -8,6 +8,7 @@ import com.pondersource.shared.data.datamodule.contact.AddressBookList
 import com.pondersource.shared.data.datamodule.contact.FullContact
 import com.pondersource.shared.data.datamodule.contact.FullGroup
 import com.pondersource.shared.data.datamodule.contact.NewContact
+import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
 import com.pondersource.solidandroidclient.IASSContactsModuleService
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,6 +21,9 @@ class SolidContactsModuleService : LifecycleService() {
 
     @Inject
     lateinit var solidContactsDataModule : SolidContactsDataModule
+
+    @Inject
+    lateinit var auth : Authenticator
 
     override fun onBind(intent: Intent): IBinder? {
         super.onBind(intent)
@@ -43,11 +47,9 @@ class SolidContactsModuleService : LifecycleService() {
             }
         }
 
-        override fun getAddressBooks(
-            webId: String
-        ): AddressBookList {
+        override fun getAddressBooks(): AddressBookList {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.getAddressBooks(webId)
+                solidContactsDataModule.getAddressBooks(auth.getProfile().userInfo!!.webId)
             }
         }
 
