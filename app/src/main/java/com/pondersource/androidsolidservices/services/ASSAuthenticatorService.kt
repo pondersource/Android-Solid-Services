@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
@@ -15,9 +16,11 @@ import com.pondersource.androidsolidservices.repository.AccessGrantRepository
 import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidclient.IASSAuthenticatorService
 import com.pondersource.solidandroidclient.IASSLoginCallback
+import com.pondersource.solidandroidclient.IASSLogoutCallback
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.DRAW_OVERLAY_NOT_PERMITTED
 import com.pondersource.solidandroidclient.sdk.ExceptionsErrorCode.SOLID_NOT_LOGGED_IN
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -84,6 +87,14 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
                 }
             } else {
                 callback.onError(DRAW_OVERLAY_NOT_PERMITTED, "Android Solid Services doesn't have permission to draw overlay. Please ask user to enable overlay drawing for Android Solid Services in app settings.")
+            }
+        }
+
+        override fun disconnectFromSolid(callback: IASSLogoutCallback) {
+            val packageName = packageManager.getNameForUid(getCallingUid())!!
+            lifecycleScope.launch {
+                accessGrantRepository.revokeAccessGrant(packageName)
+                callback.onResult(true)
             }
         }
     }
