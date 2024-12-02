@@ -1,4 +1,4 @@
-package com.pondersource.shared.data
+package com.pondersource.shared.data.webid
 
 import com.apicatalog.jsonld.JsonLd
 import com.apicatalog.jsonld.document.JsonDocument

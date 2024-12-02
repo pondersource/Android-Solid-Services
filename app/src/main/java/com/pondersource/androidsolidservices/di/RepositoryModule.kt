@@ -1,16 +1,17 @@
 package com.pondersource.androidsolidservices.di
 
+import android.content.Context
 import com.pondersource.androidsolidservices.repository.AccessGrantRepository
 import com.pondersource.androidsolidservices.repository.AccessGrantRepositoryImplementation
 import com.pondersource.androidsolidservices.repository.ResourcePermissionRepository
 import com.pondersource.androidsolidservices.repository.ResourcePermissionRepositoryImplementation
 import com.pondersource.solidandroidapi.repository.UserRepository
-import com.pondersource.androidsolidservices.repository.UserRepositoryImplementation
+import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSource
-import com.pondersource.androidsolidservices.repository.datasource.local.user.UserLocalDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 
 @Module
@@ -19,9 +20,9 @@ class RepositoryModule {
 
     @Provides
     fun provideUserRepository(
-        userLocalDataSource: UserLocalDataSource
+        @ApplicationContext context: Context,
     ): UserRepository {
-        return UserRepositoryImplementation(userLocalDataSource)
+        return UserRepositoryImplementation.getInstance(context)
     }
 
     @Provides

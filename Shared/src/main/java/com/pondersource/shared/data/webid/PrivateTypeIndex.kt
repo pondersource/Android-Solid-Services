@@ -1,14 +1,11 @@
-package com.pondersource.shared.data
+package com.pondersource.shared.data.webid
 
 import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
-import com.pondersource.shared.vocab.Solid
 import okhttp3.Headers
 import java.net.URI
 
 class PrivateTypeIndex: SettingTypeIndex {
-
-    private val UnlistedDocument = rdf.createIRI(Solid.UnlistedDocument)
 
     constructor(
         identifier: URI,

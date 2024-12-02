@@ -1,4 +1,4 @@
-package com.pondersource.shared.data
+package com.pondersource.shared.data.webid
 
 import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset

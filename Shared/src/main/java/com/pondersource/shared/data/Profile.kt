@@ -1,5 +1,6 @@
 package com.pondersource.shared.data
 
+import com.pondersource.shared.data.webid.WebId
 import net.openid.appauth.AuthState
 
 data class Profile(

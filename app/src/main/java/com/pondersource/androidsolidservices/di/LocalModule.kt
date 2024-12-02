@@ -9,14 +9,11 @@ import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
 import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModuleImplementation
 import com.pondersource.solidandroidapi.SolidResourceManager
 import com.pondersource.solidandroidapi.SolidResourceManagerImplementation
-import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModuleHelper
-import com.pondersource.solidandroidapi.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import net.openid.appauth.AuthorizationService
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -39,51 +36,29 @@ class LocalModule {
 
     @Provides
     @Singleton
-    fun provideAuthorizationService(
-        @ApplicationContext context: Context
-    ): AuthorizationService {
-        return AuthorizationService(context)
-    }
-
-    @Provides
-    @Singleton
     fun provideAuthenticator(
-        userRepository: UserRepository,
-        authService: AuthorizationService,
+        @ApplicationContext context: Context,
     ): Authenticator {
-        return AuthenticatorImplementation(
-            userRepository,
-            authService,
-        )
+        return AuthenticatorImplementation.getInstance(context)
     }
 
     @Provides
     @Singleton
     fun provideSolidResourceManager(
-        authenticator: Authenticator,
+        @ApplicationContext context: Context,
     ): SolidResourceManager {
-        return SolidResourceManagerImplementation(
-            authenticator
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideSolidContactsDataModuleHelper(
-        solidResourceManager: SolidResourceManager,
-    ): SolidContactsDataModuleHelper {
-        return SolidContactsDataModuleHelper(
-            solidResourceManager
+        return SolidResourceManagerImplementation.getInstance(
+            context
         )
     }
 
     @Provides
     @Singleton
     fun provideSolidContactsDataModule(
-        helper : SolidContactsDataModuleHelper,
+        @ApplicationContext context: Context,
     ): SolidContactsDataModule {
-        return SolidContactsDataModuleImplementation(
-            helper
+        return SolidContactsDataModuleImplementation.getInstance(
+            context
         )
     }
 }

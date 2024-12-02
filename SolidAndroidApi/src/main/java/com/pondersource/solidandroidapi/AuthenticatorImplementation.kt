@@ -1,5 +1,6 @@
 package com.pondersource.solidandroidapi
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.apicatalog.jsonld.JsonLd
@@ -17,15 +18,17 @@ import com.pondersource.shared.RDFSource
 import com.pondersource.shared.SolidNetworkResponse
 import com.pondersource.shared.data.Profile
 import com.pondersource.shared.data.UserInfo
-import com.pondersource.shared.data.WebId
+import com.pondersource.shared.data.webid.WebId
 import com.pondersource.shared.resource.Resource
 import com.pondersource.shared.util.Utils
 import com.pondersource.shared.util.isSuccessful
 import com.pondersource.shared.util.toPlainString
 import com.pondersource.solidandroidapi.repository.UserRepository
+import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ClientSecretBasic
 import net.openid.appauth.EndSessionRequest
@@ -40,14 +43,33 @@ import kotlin.coroutines.suspendCoroutine
 /**
  * Authenticator is responsible to do the Authentication phase with the selected Identity Provider.
  */
-class AuthenticatorImplementation (
-    private var userRepository: UserRepository,
-    private val authService: net.openid.appauth.AuthorizationService,
-) : Authenticator {
+class AuthenticatorImplementation : Authenticator {
 
+    companion object {
+        @Volatile
+        private lateinit var INSTANCE: Authenticator
+
+        fun getInstance(
+            context: Context,
+        ): Authenticator {
+            return if (Companion::INSTANCE.isInitialized) {
+                INSTANCE
+            } else {
+                INSTANCE = AuthenticatorImplementation(context)
+                INSTANCE
+            }
+        }
+    }
+
+    private val userRepository: UserRepository
+    private val authService: AuthorizationService
     private var profile: Profile
 
-    init {
+    private constructor(
+        context: Context,
+    ) {
+        this.userRepository = UserRepositoryImplementation.getInstance(context)
+        this.authService = AuthorizationService(context)
         this.profile = userRepository.readProfile()
     }
 

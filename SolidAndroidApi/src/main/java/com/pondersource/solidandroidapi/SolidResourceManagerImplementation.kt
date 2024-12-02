@@ -1,7 +1,9 @@
 package com.pondersource.solidandroidapi
 
+import android.content.Context
 import com.apicatalog.jsonld.JsonLd
 import com.apicatalog.jsonld.JsonLdOptions
+import com.apicatalog.jsonld.JsonLdVersion
 import com.apicatalog.jsonld.document.JsonDocument
 import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.jsonld.json.JsonProvider
@@ -15,8 +17,10 @@ import com.pondersource.shared.HTTPHeaderName
 import com.pondersource.shared.RDFSource
 import com.pondersource.shared.SolidNetworkResponse
 import com.pondersource.shared.resource.Resource
+import com.pondersource.shared.resource.SolidContainer
 import com.pondersource.shared.util.isSuccessful
 import com.pondersource.shared.util.toPlainString
+import com.pondersource.shared.vocab.LDP
 import jakarta.json.JsonString
 import net.openid.appauth.TokenResponse
 import okhttp3.Headers
@@ -24,17 +28,41 @@ import java.io.InputStream
 import java.net.URI
 
 
-class SolidResourceManagerImplementation(
-    private val auth: Authenticator
-) : SolidResourceManager {
+class SolidResourceManagerImplementation: SolidResourceManager {
 
+    companion object {
+        @Volatile
+        private lateinit var INSTANCE: SolidResourceManager
+
+        fun getInstance(
+            context: Context,
+        ): SolidResourceManager {
+            return if (Companion::INSTANCE.isInitialized) {
+                INSTANCE
+            } else {
+                INSTANCE = SolidResourceManagerImplementation(context)
+                INSTANCE
+            }
+        }
+    }
+
+    private val auth: Authenticator
     private val client: SolidSyncClient = SolidSyncClient.getClient()
+
+    private constructor(context: Context) {
+        this.auth = AuthenticatorImplementation.getInstance(context)
+    }
 
     private fun updateClientWithNewToken(newTokenId: String) {
         client.session(OpenIdSession.ofIdToken(newTokenId))
     }
 
     private suspend fun handleTokenRefreshAndReturn(): TokenResponse? {
+
+        if (auth.getProfile().userInfo == null) {
+            throw IllegalArgumentException("Auth object should be authenticated before interacting with resources.")
+        }
+
         return if (auth.needsTokenRefresh()) {
             val tokenResponse = auth.getLastTokenResponse()
             updateClientWithNewToken(tokenResponse!!.idToken!!)
@@ -136,14 +164,14 @@ class SolidResourceManagerImplementation(
                         .PUT(Request.BodyPublishers.ofInputStream(newResource.getEntity()))
                         .build()
 
-                    val response: Response<String> = client.send(
+                    val response: Response<InputStream> = client.send(
                         request,
-                        Response.BodyHandlers.ofString()
+                        Response.BodyHandlers.ofInputStream()
                     )
                     if (response.isSuccessful()) {
                         return SolidNetworkResponse.Success(newResource)
                     }
-                    return SolidNetworkResponse.Error(response.statusCode(), response.body())
+                    return SolidNetworkResponse.Error(response.statusCode(), response.body().toPlainString())
                 } catch (e: Exception) {
                     return SolidNetworkResponse.Exception(e)
                 }

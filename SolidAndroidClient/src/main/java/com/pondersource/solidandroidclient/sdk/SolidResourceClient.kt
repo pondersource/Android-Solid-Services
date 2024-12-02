@@ -11,7 +11,7 @@ import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
 import com.pondersource.shared.NonRDFSource
 import com.pondersource.shared.RDFSource
-import com.pondersource.shared.data.WebId
+import com.pondersource.shared.data.webid.WebId
 import com.pondersource.shared.resource.Resource
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_CRUD_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME

@@ -1,4 +1,4 @@
-package com.pondersource.shared.data
+package com.pondersource.shared.data.webid
 
 import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
@@ -18,6 +18,8 @@ abstract class SettingTypeIndex: RDFSource {
     protected val instance = rdf.createIRI(Solid.instance)
     protected val AddressBook = rdf.createIRI(VCARD.AddressBook)
     protected val TypeIndex = rdf.createIRI(Solid.TypeIndex)
+    protected val UnlistedDocument = rdf.createIRI(Solid.UnlistedDocument)
+    protected val ListedDocument = rdf.createIRI(Solid.ListedDocument)
 
     constructor(
         identifier: URI,

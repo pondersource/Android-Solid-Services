@@ -1,21 +1,43 @@
-package com.pondersource.androidsolidservices.repository.datasource.local.user
+package com.pondersource.solidandroidapi.repository
 
+import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.pondersource.shared.data.Profile
 import com.pondersource.shared.data.UserInfo
-import com.pondersource.shared.data.WebId.Companion.readFromString
-import com.pondersource.shared.data.WebId.Companion.writeToString
+import com.pondersource.shared.data.webid.WebId.Companion.readFromString
+import com.pondersource.shared.data.webid.WebId.Companion.writeToString
 import net.openid.appauth.AuthState
 
-class UserLocalDataSourceImplementation(
-    private val sharedPreferences: SharedPreferences
-): UserLocalDataSource {
+class UserRepositoryImplementation: UserRepository {
 
     companion object {
+
+        private const val SHARED_PREFS_NAME = "solid_android_api_shared_prefs"
         private const val PROFILE_STATE_KEY = "profile_state"
         private const val PROFILE_USER_INFO_KEY = "profile_user_info"
         private const val PROFILE_WEB_ID_DETAILS_KEY = "profile_web_id_details"
+
+        @Volatile
+        private lateinit var INSTANCE: UserRepository
+
+        fun getInstance(
+            context: Context,
+        ): UserRepository {
+            return if (Companion::INSTANCE.isInitialized) {
+                INSTANCE
+            } else {
+                INSTANCE = UserRepositoryImplementation(context)
+                INSTANCE
+            }
+        }
+    }
+
+    private val sharedPreferences: SharedPreferences
+
+    private constructor(context: Context) {
+        this.sharedPreferences = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
     }
 
     override fun readProfile(): Profile {
@@ -40,4 +62,5 @@ class UserLocalDataSourceImplementation(
             apply()
         }
     }
+
 }
