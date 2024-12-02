@@ -10,9 +10,13 @@ import com.pondersource.shared.data.datamodule.contact.AddressBookList
 import com.pondersource.shared.data.datamodule.contact.FullContact
 import com.pondersource.shared.data.datamodule.contact.FullGroup
 import com.pondersource.shared.data.datamodule.contact.NewContact
-import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_CONTACTS_MODULE_SERVICE
+import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_DATA_MODULES_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
-import com.pondersource.solidandroidclient.IASSContactsModuleService
+import com.pondersource.solidandroidclient.IASSContactsModuleInterface
+import com.pondersource.solidandroidclient.IASSDataModulesService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 
 class SolidContactsDataModule {
 
@@ -32,14 +36,18 @@ class SolidContactsDataModule {
         }
     }
 
-    private var iASSContactsModuleService: IASSContactsModuleService? = null
+    private var iASSDataModulesService: IASSDataModulesService? = null
+    private var iASSContactsModuleInterface: IASSContactsModuleInterface? = null
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            iASSContactsModuleService = IASSContactsModuleService.Stub.asInterface(service)
+            iASSDataModulesService = IASSDataModulesService.Stub.asInterface(service)
+            iASSContactsModuleInterface = iASSDataModulesService!!.contactsDataModuleInterface
+
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-            iASSContactsModuleService = null
+            iASSDataModulesService = null
+            iASSContactsModuleInterface = null
         }
     }
 
@@ -49,21 +57,24 @@ class SolidContactsDataModule {
         val intent = Intent().apply {
             setClassName(
                 ANDROID_SOLID_SERVICES_PACKAGE_NAME,
-                ANDROID_SOLID_SERVICES_CONTACTS_MODULE_SERVICE
+                ANDROID_SOLID_SERVICES_DATA_MODULES_SERVICE
             )
         }
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
     private fun checkService() {
-        if (iASSContactsModuleService == null) {
+        if (iASSContactsModuleInterface == null) {
             throw IllegalStateException("Service not connected")
         }
     }
 
-    fun getAddressBooks(): AddressBookList {
-        checkService()
-        return iASSContactsModuleService!!.getAddressBooks()
+    fun getAddressBooks(): AddressBookList? {
+        return runBlocking(Dispatchers.IO) {
+            delay(2000L)
+            checkService()
+            iASSContactsModuleInterface!!.getAddressBooks()
+        }
     }
 
     fun createAddressBook(
@@ -71,109 +82,146 @@ class SolidContactsDataModule {
         storage: String,
         ownerWebId: String,
         container: String? = null,
-    ) : String {
-        checkService()
-        return iASSContactsModuleService!!.createAddressBook(title, storage, ownerWebId, container)
+    ) : AddressBook? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.createAddressBook(
+                title,
+                storage,
+                ownerWebId,
+                container
+            )
+        }
     }
 
     fun getAddressBook(
         uri: String,
-    ): AddressBook {
-        checkService()
-        return iASSContactsModuleService!!.getAddressBook(uri)!!
+    ): AddressBook? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.getAddressBook(uri)
+        }
     }
 
     fun createNewContact(
         addressBookUri: String,
         newContact: NewContact,
         groupUris: List<String> = emptyList(),
-    ) : String {
-        checkService()
-        return iASSContactsModuleService!!.createNewContact(addressBookUri, newContact, groupUris)
+    ) : FullContact? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.createNewContact(
+                addressBookUri,
+                newContact,
+                groupUris
+            )
+        }
     }
 
     fun getContact(
         contactUri: String
-    ): FullContact {
-        checkService()
-        return iASSContactsModuleService!!.getContact(contactUri)!!
+    ): FullContact? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.getContact(contactUri)!!
+        }
     }
 
     fun renameContact(
         contactUri: String,
         newName: String,
-    ) {
-        checkService()
-        iASSContactsModuleService!!.renameContact(contactUri, newName)
+    ): FullContact? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.renameContact(contactUri, newName)
+        }
     }
 
     fun addNewPhoneNumber(
         contactUri: String,
         newPhoneNumber: String,
-    ): FullContact {
-        checkService()
-        return iASSContactsModuleService!!.addNewPhoneNumber(contactUri, newPhoneNumber)
+    ): FullContact? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.addNewPhoneNumber(contactUri, newPhoneNumber)
+        }
     }
 
     fun addNewEmailAddress(
         contactUri: String,
         newEmailAddress: String,
-    ): FullContact {
-        checkService()
-        return iASSContactsModuleService!!.addNewEmailAddress(contactUri, newEmailAddress)
+    ): FullContact? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.addNewEmailAddress(contactUri, newEmailAddress)
+        }
     }
 
     fun removePhoneNumber(
         contactUri: String,
         phoneNumber: String,
-    ): Boolean {
-        checkService()
-        return iASSContactsModuleService!!.removePhoneNumber(contactUri, phoneNumber)
+    ): FullContact? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.removePhoneNumber(contactUri, phoneNumber)
+        }
     }
 
     fun removeEmailAddress(
         contactUri: String,
         emailAddress: String,
-    ): Boolean {
-        checkService()
-        return iASSContactsModuleService!!.removeEmailAddress(contactUri, emailAddress)
+    ): FullContact? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.removeEmailAddress(contactUri, emailAddress)
+        }
     }
 
     fun createNewGroup(
         addressBookUri: String,
         title: String,
-    ): String {
-        checkService()
-        return iASSContactsModuleService!!.createNewGroup(addressBookUri, title)
+    ): FullGroup? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.createNewGroup(addressBookUri, title)
+        }
     }
 
     fun getGroup(
         groupUri: String,
-    ): FullGroup {
-        checkService()
-        return iASSContactsModuleService!!.getGroup(groupUri)
+    ): FullGroup? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.getGroup(groupUri)
+        }
     }
     fun removeGroup(
         addressBookUri: String,
         groupUri: String
-    ): Boolean {
-        checkService()
-        return iASSContactsModuleService!!.removeGroup(addressBookUri, groupUri)
+    ): FullGroup? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.removeGroup(addressBookUri, groupUri)
+        }
     }
 
     fun addContactToGroup(
         contactUri: String,
         groupUri: String,
-    ) {
-        checkService()
-        return iASSContactsModuleService!!.addContactToGroup(contactUri, groupUri)
+    ): FullGroup? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.addContactToGroup(contactUri, groupUri)
+        }
     }
 
     fun removeContactFromGroup(
         contactUri: String,
         groupUri: String,
-    ): Boolean {
-        checkService()
-        return iASSContactsModuleService!!.removeContactFromGroup(contactUri, groupUri)
+    ): FullGroup? {
+        return runBlocking(Dispatchers.IO) {
+            checkService()
+            iASSContactsModuleInterface!!.removeContactFromGroup(contactUri, groupUri)
+        }
     }
 }

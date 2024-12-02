@@ -3,4 +3,4 @@ package com.pondersource.solidandroidclient
 const val ANDROID_SOLID_SERVICES_PACKAGE_NAME = "com.pondersource.androidsolidservices"
 const val ANDROID_SOLID_SERVICES_AUTH_SERVICE = "com.pondersource.androidsolidservices.services.ASSAuthenticatorService"
 const val ANDROID_SOLID_SERVICES_CRUD_SERVICE = "com.pondersource.androidsolidservices.services.ASSResourceService"
-const val ANDROID_SOLID_SERVICES_CONTACTS_MODULE_SERVICE = "com.pondersource.androidsolidservices.services.SolidContactsModuleService"
+const val ANDROID_SOLID_SERVICES_DATA_MODULES_SERVICE = "com.pondersource.androidsolidservices.services.SolidDataModulesService"

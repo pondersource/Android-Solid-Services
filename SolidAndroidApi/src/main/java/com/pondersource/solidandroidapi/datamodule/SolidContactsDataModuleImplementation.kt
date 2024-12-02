@@ -1,140 +1,244 @@
 package com.pondersource.solidandroidapi.datamodule
 
+import android.content.Context
+import com.pondersource.shared.data.datamodule.DataModuleResult
 import com.pondersource.shared.data.datamodule.contact.AddressBook
 import com.pondersource.shared.data.datamodule.contact.AddressBookList
 import com.pondersource.shared.data.datamodule.contact.FullContact
 import com.pondersource.shared.data.datamodule.contact.FullGroup
 import com.pondersource.shared.data.datamodule.contact.NewContact
-import com.pondersource.solidandroidapi.CONTACTS_DIRECTORY_SUFFIX
+import com.pondersource.shared.data.datamodule.contact.CONTACTS_DIRECTORY_SUFFIX
 import java.net.URI
 
-class SolidContactsDataModuleImplementation (
-     val helper: SolidContactsDataModuleHelper,
-) : SolidContactsDataModule {
+class SolidContactsDataModuleImplementation: SolidContactsDataModule {
+
+     companion object {
+          @Volatile
+          private lateinit var INSTANCE: SolidContactsDataModule
+
+          fun getInstance(
+               context: Context,
+          ): SolidContactsDataModule {
+               return if (Companion::INSTANCE.isInitialized) {
+                    INSTANCE
+               } else {
+                    INSTANCE = SolidContactsDataModuleImplementation(context)
+                    INSTANCE
+               }
+          }
+     }
+
+     val helper: SolidContactsDataModuleHelper
+
+     private constructor(context: Context) {
+          this.helper = SolidContactsDataModuleHelper.getInstance(context)
+     }
 
      override suspend fun getAddressBooks(
           webId: String
-     ): AddressBookList {
-          val privates = helper.getPrivateAddressBooks(webId)
-          val public = helper.getPublicAddressBooks(webId)
-          return AddressBookList(
-               publicAddressBookUris = public,
-               privateAddressBookUris = privates
-          )
+     ): DataModuleResult<AddressBookList> {
+          return try {
+               val privates = helper.getPrivateAddressBooks(webId)
+               val public = helper.getPublicAddressBooks(webId)
+               DataModuleResult.Success(AddressBookList(
+                    publicAddressBookUris = public,
+                    privateAddressBookUris = privates
+               ))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
      override suspend fun createAddressBook(
           title: String,
           storage: String,
+          isPrivate: Boolean,
           ownerWebId: String,
           container: String?,
-     ): String {
+     ): DataModuleResult<AddressBook> {
           val newContainer = container ?: "${storage}${CONTACTS_DIRECTORY_SUFFIX}"
-          return helper.createAddressBook(title, newContainer, ownerWebId).getIdentifier().toString()
+          return try {
+               val createdAddressBookUri = helper.createAddressBook(
+                    title,
+                    newContainer,
+                    isPrivate,
+                    ownerWebId,
+               ).getIdentifier().toString()
+               getAddressBook(createdAddressBookUri)
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
      override suspend fun getAddressBook(
           uri: String,
-     ): AddressBook {
-          val addressBookRdf = helper.getAddressBook(URI.create(uri))
-          val addressBookContactsRdf = helper.getAddressBookContacts(URI.create(addressBookRdf.getNameEmailIndex()))
-          val addressBookGroupsRdf = helper.getAddressBookGroups(URI.create(addressBookRdf.getGroupsIndex()))
-          return AddressBook(
-               uri = addressBookRdf.getIdentifier().toString(),
-               title = addressBookRdf.getTitle(),
-               contacts = addressBookContactsRdf.getContacts(addressBookRdf.getIdentifier().toString()),
-               groups = addressBookGroupsRdf.getGroups(addressBookRdf.getIdentifier().toString())
-          )
+     ): DataModuleResult<AddressBook> {
+          return try {
+               val addressBookRdf = helper.getAddressBook(URI.create(uri))
+               val addressBookContactsRdf = helper.getAddressBookContacts(URI.create(addressBookRdf.getNameEmailIndex()))
+               val addressBookGroupsRdf = helper.getAddressBookGroups(URI.create(addressBookRdf.getGroupsIndex()))
+               DataModuleResult.Success(AddressBook.createFromRdf(addressBookRdf, addressBookContactsRdf, addressBookGroupsRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
-     override suspend fun renameAddressBook(addressBookUri: String, newName: String) {
-          helper.renameAddressBook(addressBookUri, newName)
+     override suspend fun renameAddressBook(
+          addressBookUri: String,
+          newName: String
+     ): DataModuleResult<AddressBook> {
+          return try {
+               helper.renameAddressBook(addressBookUri, newName)
+               return getAddressBook(addressBookUri)
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
      override suspend fun createNewContact(
           addressBookUri: String,
           newContact: NewContact,
           groupUris: List<String>
-     ): String {
-          val newContact = helper.createContact(URI.create(addressBookUri), newContact)
+     ): DataModuleResult<FullContact> {
+          return try {
+               val newContact = helper.createContact(URI.create(addressBookUri), newContact)
 
-          groupUris.forEach {
-               helper.addContactToGroup(newContact, URI.create(it))
+               groupUris.forEach {
+                    helper.addContactToGroup(newContact, URI.create(it))
+               }
+               return DataModuleResult.Success(FullContact.createFromRdf(newContact))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
           }
-          return newContact.getIdentifier().toString()
      }
 
-     override suspend fun getContact(contactUri: String): FullContact {
-          val contactRdf = helper.getContact(URI.create(contactUri))
-          return FullContact(
-               uri = contactRdf.getIdentifier().toString(),
-               fullName = contactRdf.getFullName(),
-               emailAddresses = contactRdf.getEmails(),
-               phoneNumbers = contactRdf.getPhoneNumbers()
-          )
+     override suspend fun getContact(
+          contactUri: String
+     ): DataModuleResult<FullContact> {
+          return try {
+               val contactRdf = helper.getContact(URI.create(contactUri))
+               DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
-     override suspend fun renameContact(contactUri: String, newName: String) {
-          helper.renameContact(contactUri, newName)
+     override suspend fun renameContact(
+          contactUri: String,
+          newName: String
+     ): DataModuleResult<FullContact> {
+          return try {
+               val contactRdf = helper.renameContact(contactUri, newName)
+               return DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
      override suspend fun addNewPhoneNumber(
           contactUri: String,
           newPhoneNumber: String
-     ): FullContact {
-          val contactRdf = helper.addNewPhoneNumber(URI.create(contactUri), newPhoneNumber)
-          return FullContact(
-               uri = contactRdf.getIdentifier().toString(),
-               fullName = contactRdf.getFullName(),
-               emailAddresses = contactRdf.getEmails(),
-               phoneNumbers = contactRdf.getPhoneNumbers()
-          )
+     ): DataModuleResult<FullContact> {
+          return try {
+               val contactRdf = helper.addNewPhoneNumber(URI.create(contactUri), newPhoneNumber)
+               DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
      override suspend fun addNewEmailAddress(
           contactUri: String,
           newEmailAddress: String
-     ): FullContact {
-          val contactRdf = helper.addNewEmailAddress(URI.create(contactUri), newEmailAddress)
-          return FullContact(
-               uri = contactRdf.getIdentifier().toString(),
-               fullName = contactRdf.getFullName(),
-               emailAddresses = contactRdf.getEmails(),
-               phoneNumbers = contactRdf.getPhoneNumbers()
-          )
+     ): DataModuleResult<FullContact> {
+          return try {
+               val contactRdf = helper.addNewEmailAddress(URI.create(contactUri), newEmailAddress)
+               DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
-     override suspend fun removePhoneNumber(contactUri: String, phoneNumber: String): Boolean {
-          return helper.removePhoneNumberFromContact(URI.create(contactUri), phoneNumber)
+     override suspend fun removePhoneNumber(
+          contactUri: String,
+          phoneNumber: String
+     ): DataModuleResult<FullContact> {
+          return try {
+               val contactRdf = helper.removePhoneNumberFromContact(URI.create(contactUri), phoneNumber)
+               DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
-     override suspend fun removeEmailAddress(contactUri: String, emailAddress: String): Boolean {
-          return helper.removeEmailAddressFromContact(URI.create(contactUri), emailAddress)
+     override suspend fun removeEmailAddress(
+          contactUri: String,
+          emailAddress: String
+     ): DataModuleResult<FullContact> {
+          return try {
+               val contactRdf = helper.removeEmailAddressFromContact(URI.create(contactUri), emailAddress)
+               DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
-     override suspend fun createNewGroup(addressBookUri: String, title: String): String {
-          val groupRDF = helper.createGroup(URI.create(addressBookUri), title)
-          return groupRDF.getIdentifier().toString()
+     override suspend fun createNewGroup(
+          addressBookUri: String,
+          title: String
+     ): DataModuleResult<FullGroup> {
+          return try {
+               val groupRDF = helper.createGroup(URI.create(addressBookUri), title)
+               DataModuleResult.Success(FullGroup.createFromRdf(groupRDF))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
-     override suspend fun getGroup(groupUri: String): FullGroup {
-          val groupRdf = helper.getGroup(URI.create(groupUri))
-          return FullGroup(
-               uri = groupRdf.getIdentifier().toString(),
-               name = groupRdf.getTitle(),
-               contacts = groupRdf.getContacts()
-          )
+     override suspend fun getGroup(
+          groupUri: String
+     ): DataModuleResult<FullGroup> {
+          return try {
+               val groupRdf = helper.getGroup(URI.create(groupUri))
+               DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
-     override suspend fun removeGroup(addressBookUri: String, groupUri: String): Boolean {
-          return helper.removeGroup(URI.create(addressBookUri), URI.create(groupUri))
+     override suspend fun removeGroup(
+          addressBookUri: String,
+          groupUri: String
+     ): DataModuleResult<FullGroup> {
+          return try {
+               val groupRdf = helper.removeGroup(URI.create(addressBookUri), URI.create(groupUri))
+               DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
-     override suspend fun addContactToGroup(contactUri: String, groupUri: String) {
-          helper.addContactToGroup(URI.create(contactUri), URI.create(groupUri))
+     override suspend fun addContactToGroup(
+          contactUri: String,
+          groupUri: String
+     ): DataModuleResult<FullGroup> {
+          return try {
+               val groupRdf = helper.addContactToGroup(URI.create(contactUri), URI.create(groupUri))
+               DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 
-     override suspend fun removeContactFromGroup(contactUri: String, groupUri: String): Boolean {
-          return helper.removeContactFromGroup(URI.create(contactUri), URI.create(groupUri))
+     override suspend fun removeContactFromGroup(
+          contactUri: String,
+          groupUri: String
+     ): DataModuleResult<FullGroup> {
+          return try {
+               val groupRdf = helper.removeContactFromGroup(URI.create(contactUri), URI.create(groupUri))
+               DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
+          }catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
      }
 }

@@ -1,6 +1,7 @@
 package com.pondersource.shared.data.datamodule.contact
 
 import android.os.Parcelable
+import com.pondersource.shared.data.datamodule.contact.rdf.ContactRDF
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -22,7 +23,18 @@ data class FullContact(
     val fullName: String,
     val emailAddresses: List<Email>,
     val phoneNumbers: List<PhoneNumber>,
-): Parcelable
+): Parcelable {
+    companion object {
+        fun createFromRdf(contactRdf: ContactRDF): FullContact {
+            return FullContact(
+                uri = contactRdf.getIdentifier().toString(),
+                fullName = contactRdf.getFullName(),
+                emailAddresses = contactRdf.getEmails(),
+                phoneNumbers = contactRdf.getPhoneNumbers()
+            )
+        }
+    }
+}
 
 @Parcelize
 data class Email(

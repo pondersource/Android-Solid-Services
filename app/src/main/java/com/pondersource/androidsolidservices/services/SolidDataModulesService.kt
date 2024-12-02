@@ -8,16 +8,18 @@ import com.pondersource.shared.data.datamodule.contact.AddressBookList
 import com.pondersource.shared.data.datamodule.contact.FullContact
 import com.pondersource.shared.data.datamodule.contact.FullGroup
 import com.pondersource.shared.data.datamodule.contact.NewContact
+import com.pondersource.shared.data.datamodule.extractResult
 import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
-import com.pondersource.solidandroidclient.IASSContactsModuleService
+import com.pondersource.solidandroidclient.IASSContactsModuleInterface
+import com.pondersource.solidandroidclient.IASSDataModulesService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SolidContactsModuleService : LifecycleService() {
+class SolidDataModulesService : LifecycleService() {
 
     @Inject
     lateinit var solidContactsDataModule : SolidContactsDataModule
@@ -30,34 +32,44 @@ class SolidContactsModuleService : LifecycleService() {
         return binder
     }
 
-    private val binder = object : IASSContactsModuleService.Stub() {
+    //One service for all data modules
+    private val binder = object : IASSDataModulesService.Stub() {
+        override fun getContactsDataModuleInterface(): IASSContactsModuleInterface? {
+           return contactsModuleInterface
+        }
+
+    }
+
+    private val contactsModuleInterface = object : IASSContactsModuleInterface.Stub() {
+
+        override fun getAddressBooks(): AddressBookList? {
+            return runBlocking(Dispatchers.IO) {
+                solidContactsDataModule.getAddressBooks(auth.getProfile().userInfo!!.webId).extractResult()
+            }
+        }
+
         override fun createAddressBook(
             title: String,
             storage: String,
             ownerWebId: String,
             container: String?
-        ): String {
+        ): AddressBook? {
             return runBlocking(Dispatchers.IO) {
                 solidContactsDataModule.createAddressBook(
                     title,
                     storage,
+                    true,
                     ownerWebId,
                     container
-                ).toString()
-            }
-        }
-
-        override fun getAddressBooks(): AddressBookList {
-            return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.getAddressBooks(auth.getProfile().userInfo!!.webId)
+                ).extractResult()
             }
         }
 
         override fun getAddressBook(
             uri: String
-        ): AddressBook {
+        ): AddressBook? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.getAddressBook(uri)
+                solidContactsDataModule.getAddressBook(uri).extractResult()
             }
         }
 
@@ -65,110 +77,110 @@ class SolidContactsModuleService : LifecycleService() {
             addressBookUri: String,
             newContact: NewContact,
             groupUris: List<String>
-        ): String {
+        ): FullContact? {
             return runBlocking(Dispatchers.IO) {
                 solidContactsDataModule.createNewContact(
                     addressBookUri,
                     newContact,
                     groupUris
-                ).toString()
+                ).extractResult()
             }
         }
 
         override fun getContact(
             contactUri: String
-        ): FullContact {
+        ): FullContact? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.getContact(contactUri)
+                solidContactsDataModule.getContact(contactUri).extractResult()
             }
         }
 
         override fun renameContact(
             contactUri: String,
             newName: String
-        ) {
-            runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.renameContact(contactUri, newName)
+        ): FullContact? {
+            return runBlocking(Dispatchers.IO) {
+                solidContactsDataModule.renameContact(contactUri, newName).extractResult()
             }
         }
 
         override fun addNewPhoneNumber(
             contactUri: String,
             newPhoneNumber: String
-        ): FullContact {
+        ): FullContact? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.addNewPhoneNumber(contactUri, newPhoneNumber)
+                solidContactsDataModule.addNewPhoneNumber(contactUri, newPhoneNumber).extractResult()
             }
         }
 
         override fun addNewEmailAddress(
             contactUri: String,
             newEmailAddress: String
-        ): FullContact {
+        ): FullContact? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.addNewEmailAddress(contactUri, newEmailAddress)
+                solidContactsDataModule.addNewEmailAddress(contactUri, newEmailAddress).extractResult()
             }
         }
 
         override fun removePhoneNumber(
             contactUri: String,
             phoneNumber: String
-        ): Boolean {
+        ): FullContact? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.removePhoneNumber(contactUri, phoneNumber)
+                solidContactsDataModule.removePhoneNumber(contactUri, phoneNumber).extractResult()
             }
         }
 
         override fun removeEmailAddress(
             contactUri: String,
             emailAddress: String
-        ): Boolean {
+        ): FullContact? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.removeEmailAddress(contactUri, emailAddress)
+                solidContactsDataModule.removeEmailAddress(contactUri, emailAddress).extractResult()
             }
         }
 
         override fun createNewGroup(
             addressBookUri: String,
             title: String
-        ): String {
+        ): FullGroup? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.createNewGroup(addressBookUri, title).toString()
+                solidContactsDataModule.createNewGroup(addressBookUri, title).extractResult()
             }
         }
 
         override fun getGroup(
             groupUri: String
-        ): FullGroup {
+        ): FullGroup? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.getGroup(groupUri)
+                solidContactsDataModule.getGroup(groupUri).extractResult()
             }
         }
 
         override fun removeGroup(
             addressBookUri: String,
             groupUri: String
-        ): Boolean {
+        ): FullGroup? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.removeGroup(addressBookUri, groupUri)
+                solidContactsDataModule.removeGroup(addressBookUri, groupUri).extractResult()
             }
         }
 
         override fun addContactToGroup(
             contactUri: String,
             groupUri: String
-        ) {
+        ): FullGroup? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.addContactToGroup(contactUri, groupUri)
+                solidContactsDataModule.addContactToGroup(contactUri, groupUri).extractResult()
             }
         }
 
         override fun removeContactFromGroup(
             contactUri: String,
             groupUri: String
-        ): Boolean {
+        ): FullGroup? {
             return runBlocking(Dispatchers.IO) {
-                solidContactsDataModule.removeContactFromGroup(contactUri, groupUri)
+                solidContactsDataModule.removeContactFromGroup(contactUri, groupUri).extractResult()
             }
         }
     }

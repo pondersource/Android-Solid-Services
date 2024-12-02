@@ -39,7 +39,7 @@
             android:name=".services.ASSResourceService"
             android:exported="true"></service>
         <service
-            android:name=".services.SolidContactsModuleService"
+            android:name=".services.SolidDataModulesService"
             android:exported="true"></service>
 
         <activity

@@ -1,4 +1,4 @@
-// IASSContactsModuleService.aidl
+// IASSContactsModuleInterface.aidl
 package com.pondersource.solidandroidclient;
 
 import com.pondersource.shared.data.datamodule.contact.AddressBook;
@@ -12,75 +12,89 @@ import com.pondersource.shared.data.datamodule.contact.Name;
 import com.pondersource.shared.data.datamodule.contact.Group;
 import com.pondersource.shared.data.datamodule.contact.FullGroup;
 
-interface IASSContactsModuleService {
+interface IASSContactsModuleInterface {
 
+    @nullable
     AddressBookList getAddressBooks();
 
-    String createAddressBook(
+    @nullable
+    AddressBook createAddressBook(
             String title,
             String storage,
             String ownerWebId,
             String container
     );
 
+    @nullable
     AddressBook getAddressBook(String uri);
 
-
-    String createNewContact(
+    @nullable
+    FullContact createNewContact(
         String addressBookUri,
         in NewContact newContact,
         in List<String> groupUris
     );
 
+    @nullable
     FullContact getContact(
         String contactUri
     );
 
-    void renameContact(
+    @nullable
+    FullContact renameContact(
         String contactUri,
          String newName
     );
 
+    @nullable
     FullContact addNewPhoneNumber(
         String contactUri,
         String newPhoneNumber
     );
 
+    @nullable
     FullContact addNewEmailAddress(
         String contactUri,
         String newEmailAddress
     );
 
-    boolean removePhoneNumber(
+    @nullable
+    FullContact removePhoneNumber(
         String contactUri,
         String phoneNumber
     );
 
-    boolean removeEmailAddress(
+    @nullable
+    FullContact removeEmailAddress(
         String contactUri,
         String emailAddress
     );
 
-    String createNewGroup(
+    @nullable
+    FullGroup createNewGroup(
         String addressBookUri,
          String title
     );
 
+    @nullable
     FullGroup getGroup(
         String groupUri
     );
 
-    boolean removeGroup(
+    @nullable
+    FullGroup removeGroup(
         String addressBookUri,
         String groupUri
     );
 
-    void addContactToGroup(
+    @nullable
+    FullGroup addContactToGroup(
         String contactUri,
         String groupUri
     );
 
-    boolean removeContactFromGroup(
+    @nullable
+    FullGroup removeContactFromGroup(
         String contactUri,
         String groupUri
     );

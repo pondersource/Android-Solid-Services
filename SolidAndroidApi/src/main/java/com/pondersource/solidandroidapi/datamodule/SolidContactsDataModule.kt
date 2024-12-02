@@ -1,5 +1,6 @@
 package com.pondersource.solidandroidapi.datamodule
 
+import com.pondersource.shared.data.datamodule.DataModuleResult
 import com.pondersource.shared.data.datamodule.contact.AddressBook
 import com.pondersource.shared.data.datamodule.contact.AddressBookList
 import com.pondersource.shared.data.datamodule.contact.FullContact
@@ -8,83 +9,83 @@ import com.pondersource.shared.data.datamodule.contact.NewContact
 
 interface SolidContactsDataModule {
 
-
     suspend fun getAddressBooks(
         webId: String
-    ): AddressBookList
+    ): DataModuleResult<AddressBookList>
 
     suspend fun createAddressBook(
         title: String,
         storage: String,
+        isPrivate: Boolean = true,
         ownerWebId: String,// TODO: we need default value
         container: String? = null,
-    ) : String
+    ) : DataModuleResult<AddressBook>
 
     suspend fun getAddressBook(
         addressBookUri: String,
-    ): AddressBook
+    ): DataModuleResult<AddressBook>
 
     suspend fun renameAddressBook(
         addressBookUri: String,
         newName: String,
-    )
+    ): DataModuleResult<AddressBook>
 
     suspend fun createNewContact(
         addressBookString: String,
         newContact: NewContact,
         groupStrings: List<String> = emptyList(),
-    ) : String
+    ) : DataModuleResult<FullContact>
 
     suspend fun getContact(
         contactString: String
-    ): FullContact
+    ): DataModuleResult<FullContact>
 
     suspend fun renameContact(
         contactString: String,
         newName: String,
-    )
+    ): DataModuleResult<FullContact>
 
     suspend fun addNewPhoneNumber(
         contactString: String,
         newPhoneNumber: String,
-    ): FullContact
+    ): DataModuleResult<FullContact>
 
     suspend fun addNewEmailAddress(
         contactString: String,
         newEmailAddress: String,
-    ): FullContact
+    ): DataModuleResult<FullContact>
 
     suspend fun removePhoneNumber(
         contactString: String,
         phoneNumber: String,
-    ): Boolean
+    ): DataModuleResult<FullContact>
 
     suspend fun removeEmailAddress(
         contactString: String,
         emailAddress: String,
-    ): Boolean
+    ): DataModuleResult<FullContact>
 
     suspend fun createNewGroup(
         addressBookString: String,
         title: String,
-    ): String
+    ): DataModuleResult<FullGroup>
 
     suspend fun getGroup(
         groupString: String,
-    ): FullGroup
+    ): DataModuleResult<FullGroup>
 
     suspend fun removeGroup(
         addressBookString: String,
         groupString: String
-    ): Boolean
+    ): DataModuleResult<FullGroup>
 
     suspend fun addContactToGroup(
         contactString: String,
         groupString: String,
-    )
+    ): DataModuleResult<FullGroup>
 
     suspend fun removeContactFromGroup(
         contactString: String,
         groupString: String,
-    ): Boolean
+    ): DataModuleResult<FullGroup>
 }
