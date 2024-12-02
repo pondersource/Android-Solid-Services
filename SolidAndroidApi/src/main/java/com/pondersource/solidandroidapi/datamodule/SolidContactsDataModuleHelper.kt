@@ -91,23 +91,19 @@ class SolidContactsDataModuleHelper {
         solidResourceManager.create(nemEmailIndex).handleResponse()
         solidResourceManager.create(groupsIndexRDF).handleResponse()
         val newCreatedAddressBook = solidResourceManager.create(addressBook).handleResponse()
-        //updateTypeIndex(ownerWebId, newCreatedAddressBook.getIdentifier(), isPrivate)
+        updateTypeIndex(ownerWebId, newCreatedAddressBook.getIdentifier(), isPrivate)
         return newCreatedAddressBook
     }
 
     private suspend fun updateTypeIndex(ownerWebId: String, addressBookUri: URI, isPrivate: Boolean = true) {
         if (isPrivate) {
             val privateTypeIndex = getPrivateTypeIndex(ownerWebId)
-            if (privateTypeIndex != null) {
-                privateTypeIndex.addAddressBook(addressBookUri.toString())
-                solidResourceManager.update(privateTypeIndex).handleResponse()
-            }
+            privateTypeIndex.addAddressBook(addressBookUri.toString())
+            solidResourceManager.update(privateTypeIndex).handleResponse()
         } else {
             val publicTypeIndex = getPublicTypeIndex(ownerWebId)
-            if (publicTypeIndex != null) {
-                publicTypeIndex.addAddressBook(addressBookUri.toString())
-                solidResourceManager.update(publicTypeIndex).handleResponse()
-            }
+            publicTypeIndex.addAddressBook(addressBookUri.toString())
+            solidResourceManager.update(publicTypeIndex).handleResponse()
         }
     }
 
@@ -291,80 +287,11 @@ class SolidContactsDataModuleHelper {
     }
 
     suspend fun getPrivateAddressBooks(webId: String): List<String> {
-        return getPrivateTypeIndex(webId)?.getAddressBooks() ?: arrayListOf()
+        return getPrivateTypeIndex(webId).getAddressBooks()
     }
 
     suspend fun getPublicAddressBooks(webId: String): List<String> {
-        return getPublicTypeIndex(webId)?.getAddressBooks() ?: arrayListOf()
-    }
-
-    private suspend fun getPrivateTypeIndex(webIdString: String): PrivateTypeIndex? {
-        val webId = solidResourceManager.read(URI.create(webIdString), WebId::class.java).handleResponse()
-        var privateTypeIndexUri = webId.getPrivateTypeIndex()
-
-        if (privateTypeIndexUri == null) {
-            val webIdProfile = solidResourceManager.read(URI.create(webId.getProfileUrl()),
-                WebIdProfile::class.java).handleResponse()
-            privateTypeIndexUri = webIdProfile.getPrivateTypeIndex()
-        }
-
-        if (privateTypeIndexUri != null) {
-            var currentPrivateTypeIndex: PrivateTypeIndex? = null
-            try {
-                return solidResourceManager.read(
-                    URI.create(privateTypeIndexUri),
-                    PrivateTypeIndex::class.java
-                ).handleResponse()
-                //solidResourceManager.delete(currentPrivateTypeIndex).handleResponse()
-            } catch (e: Exception) {
-                /*return solidResourceManager.create(
-                    PrivateTypeIndex(
-                        URI.create(privateTypeIndexUri),
-                        MediaType.JSON_LD,
-                        null,
-                        null
-                    )
-                ).handleResponse()*/
-                return null
-            }
-        } else {
-            return null
-        }
-    }
-
-    private suspend fun getPublicTypeIndex(webIdString: String): PublicTypeIndex? {
-        val webId = solidResourceManager.read(URI.create(webIdString), WebId::class.java).handleResponse()
-        var publicTypeIndexUri = webId.getPublicTypeIndex()
-
-        if (publicTypeIndexUri == null) {
-            val webIdProfile = solidResourceManager.read(URI.create(webId.getProfileUrl()),
-                WebIdProfile::class.java).handleResponse()
-            publicTypeIndexUri = webIdProfile.getPublicTypeIndex()
-        }
-
-        if (publicTypeIndexUri != null) {
-            var currentPublicTypeIndex: PublicTypeIndex? = null
-            try {
-                currentPublicTypeIndex = solidResourceManager.read(
-                    URI.create(publicTypeIndexUri),
-                    PublicTypeIndex::class.java
-                ).handleResponse()
-                return currentPublicTypeIndex
-                //solidResourceManager.delete(currentPublicTypeIndex).handleResponse()
-            } catch (e: Exception) {
-                /*return solidResourceManager.create(
-                    PublicTypeIndex(
-                        URI.create(publicTypeIndexUri),
-                        MediaType.JSON_LD,
-                        currentPublicTypeIndex?.getDataSet(),
-                        null
-                    )
-                ).handleResponse()*/
-                return null
-            }
-        } else {
-            return null
-        }
+        return getPublicTypeIndex(webId).getAddressBooks()
     }
 
     suspend fun renameContact(contactUri: String, newName: String): ContactRDF {
@@ -374,5 +301,66 @@ class SolidContactsDataModuleHelper {
             solidResourceManager.update(contactRdf)
         }
         return contactRdf
+    }
+
+
+    private suspend fun getPrivateTypeIndex(webIdString: String): PrivateTypeIndex {
+        val webId = solidResourceManager.read(URI.create(webIdString), WebId::class.java).handleResponse()
+        var privateTypeIndexUri = webId.getPrivateTypeIndex()
+
+        if (privateTypeIndexUri == null) {
+            val webIdProfile = solidResourceManager.read(URI.create(webId.getProfileUrl()),
+                WebIdProfile::class.java).handleResponse()
+            privateTypeIndexUri = webIdProfile.getPrivateTypeIndex()
+
+            if (privateTypeIndexUri == null) {
+                webIdProfile.setPrivateTypeIndex(webIdString, webId.getStorages()[0].toString())
+                solidResourceManager.update(webIdProfile).handleResponse()
+                privateTypeIndexUri = webIdProfile.getPrivateTypeIndex()
+                solidResourceManager.create(
+                    PrivateTypeIndex(
+                        URI.create(privateTypeIndexUri),
+                        MediaType.JSON_LD,
+                        null,
+                        null
+                    )
+                ).handleResponse()
+            }
+        }
+
+        return solidResourceManager.read(
+            URI.create(privateTypeIndexUri),
+            PrivateTypeIndex::class.java
+        ).handleResponse()
+    }
+
+    private suspend fun getPublicTypeIndex(webIdString: String): PublicTypeIndex {
+        val webId = solidResourceManager.read(URI.create(webIdString), WebId::class.java).handleResponse()
+        var publicTypeIndexUri = webId.getPublicTypeIndex()
+
+        if (publicTypeIndexUri == null) {
+            val webIdProfile = solidResourceManager.read(URI.create(webId.getProfileUrl()),
+                WebIdProfile::class.java).handleResponse()
+            publicTypeIndexUri = webIdProfile.getPublicTypeIndex()
+
+            if (publicTypeIndexUri == null) {
+                webIdProfile.setPublicTypeIndex(webIdString, webId.getStorages()[0].toString())
+                solidResourceManager.update(webIdProfile).handleResponse()
+                publicTypeIndexUri = webIdProfile.getPublicTypeIndex()
+                solidResourceManager.create(
+                    PublicTypeIndex(
+                        URI.create(publicTypeIndexUri),
+                        MediaType.JSON_LD,
+                        null,
+                        null
+                    )
+                ).handleResponse()
+            }
+        }
+
+        return solidResourceManager.read(
+            URI.create(publicTypeIndexUri),
+            PublicTypeIndex::class.java
+        ).handleResponse()
     }
 }

@@ -111,33 +111,7 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         if(existingResource is SolidNetworkResponse.Success) {
             return SolidNetworkResponse.Error(409, "Resource already exists")
         } else if (existingResource is SolidNetworkResponse.Error) {
-            try {
-                val tokenResponse = handleTokenRefreshAndReturn()
-
-                val request: Request = Request.newBuilder()
-                    .uri(resource.getIdentifier())
-                    .header(HTTPHeaderName.CONTENT_TYPE, resource.getContentType())
-                    .header(
-                        HTTPHeaderName.AUTHORIZATION,
-                        "${tokenResponse?.tokenType} ${tokenResponse?.idToken}"
-                    )
-                    .PUT(Request.BodyPublishers.ofInputStream(resource.getEntity()))
-                    .build()
-
-                val response: Response<InputStream> = client.send(
-                    request,
-                    Response.BodyHandlers.ofInputStream()
-                )
-                if (response.isSuccessful()) {
-                    return SolidNetworkResponse.Success(resource)
-                }
-                return SolidNetworkResponse.Error(
-                    response.statusCode(),
-                    response.body().toPlainString()
-                )
-            } catch (e: Exception) {
-                return SolidNetworkResponse.Exception(e)
-            }
+            return rawCreate(resource)
         } else {
             return SolidNetworkResponse.Error(500, "Unknown error")
         }
@@ -151,31 +125,21 @@ class SolidResourceManagerImplementation: SolidResourceManager {
 
         when(existingResourceResponse) {
             is SolidNetworkResponse.Success -> {
-                try {
-                    val tokenResponse = handleTokenRefreshAndReturn()
-
-                    val request: Request = Request.newBuilder()
-                        .uri(newResource.getIdentifier())
-                        .header(HTTPHeaderName.CONTENT_TYPE, newResource.getContentType())
-                        .header(
-                            HTTPHeaderName.AUTHORIZATION,
-                            "${tokenResponse?.tokenType} ${tokenResponse?.idToken}"
-                        )
-                        .PUT(Request.BodyPublishers.ofInputStream(newResource.getEntity()))
-                        .build()
-
-                    val response: Response<InputStream> = client.send(
-                        request,
-                        Response.BodyHandlers.ofInputStream()
-                    )
-                    if (response.isSuccessful()) {
-                        return SolidNetworkResponse.Success(newResource)
+                val deleteResponse = delete(existingResourceResponse.data)
+                when(deleteResponse) {
+                    is SolidNetworkResponse.Success -> {
+                        return rawCreate(newResource)
                     }
-                    return SolidNetworkResponse.Error(response.statusCode(), response.body().toPlainString())
-                } catch (e: Exception) {
-                    return SolidNetworkResponse.Exception(e)
+                    is SolidNetworkResponse.Error -> {
+                        return SolidNetworkResponse.Error(
+                            deleteResponse.errorCode,
+                            deleteResponse.errorMessage
+                        )
+                    }
+                    is SolidNetworkResponse.Exception -> {
+                        return SolidNetworkResponse.Exception(deleteResponse.exception)
+                    }
                 }
-
             }
             is SolidNetworkResponse.Error -> {
                 return SolidNetworkResponse.Error(
@@ -197,38 +161,87 @@ class SolidResourceManagerImplementation: SolidResourceManager {
 
         when (existingResourceResponse) {
             is SolidNetworkResponse.Success -> {
-                try {
-                    val tokenResponse = handleTokenRefreshAndReturn()
-
-                    val request: Request = Request.newBuilder()
-                        .uri(resource.getIdentifier())
-                        .header(
-                            HTTPHeaderName.AUTHORIZATION,
-                            "${tokenResponse?.tokenType} ${tokenResponse?.idToken}"
-                        )
-                        .DELETE()
-                        .build()
-
-                    val response: Response<InputStream> = client.send(
-                        request,
-                        Response.BodyHandlers.ofInputStream()
-                    )
-
-                    if (response.isSuccessful()) {
-                        return SolidNetworkResponse.Success(resource)
-                    } else {
-                        return SolidNetworkResponse.Error(
-                            response.statusCode(),
-                            response.body().toPlainString()
-                        )
-                    }
-                } catch (e: Exception) {
-                    return SolidNetworkResponse.Exception(e)
-                }
+                return rawDelete(resource)
             }
             else -> {
                 return existingResourceResponse
             }
+        }
+    }
+
+
+    private suspend fun <T: Resource> rawCreate(
+        resource: T
+    ): SolidNetworkResponse<T> {
+        try {
+            val tokenResponse = handleTokenRefreshAndReturn()
+
+            val type = if (SolidContainer::class.java.isAssignableFrom(resource.javaClass)) {
+                "<${LDP.BasicContainer}>; rel=\"type\""
+            } else if (RDFSource::class.java.isAssignableFrom(resource.javaClass)) {
+                "<${LDP.RDFSource}>; rel=\"type\""
+            } else {
+                "<${LDP.NonRDFSource}>; rel=\"type\""
+            }
+
+            val request: Request = Request.newBuilder()
+                .uri(resource.getIdentifier())
+                .type(resource.getContentType())
+                .header(HTTPHeaderName.LINK, type)
+                .header(HTTPHeaderName.ACCEPT, resource.getContentType())
+                .header(
+                    HTTPHeaderName.AUTHORIZATION,
+                    "${tokenResponse?.tokenType} ${tokenResponse?.idToken}"
+                )
+                .PUT(Request.BodyPublishers.ofInputStream(resource.getEntity()))
+                .build()
+
+            val response: Response<InputStream> = client.send(
+                request,
+                Response.BodyHandlers.ofInputStream()
+            )
+            if (response.isSuccessful()) {
+                return SolidNetworkResponse.Success(resource)
+            }
+            return SolidNetworkResponse.Error(
+                response.statusCode(),
+                response.body().toPlainString()
+            )
+        } catch (e: Exception) {
+            return SolidNetworkResponse.Exception(e)
+        }
+    }
+
+    private suspend fun <T: Resource> rawDelete(
+        resource: T
+    ): SolidNetworkResponse<T> {
+        try {
+            val tokenResponse = handleTokenRefreshAndReturn()
+
+            val request: Request = Request.newBuilder()
+                .uri(resource.getIdentifier())
+                .header(
+                    HTTPHeaderName.AUTHORIZATION,
+                    "${tokenResponse?.tokenType} ${tokenResponse?.idToken}"
+                )
+                .DELETE()
+                .build()
+
+            val response: Response<InputStream> = client.send(
+                request,
+                Response.BodyHandlers.ofInputStream()
+            )
+
+            if (response.isSuccessful()) {
+                return SolidNetworkResponse.Success(resource)
+            } else {
+                return SolidNetworkResponse.Error(
+                    response.statusCode(),
+                    response.body().toPlainString()
+                )
+            }
+        } catch (e: Exception) {
+            return SolidNetworkResponse.Exception(e)
         }
     }
 
@@ -239,19 +252,34 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         val type = response.headers().firstValue(HTTPHeaderName.CONTENT_TYPE)
             .orElse(HTTPAcceptType.OCTET_STREAM)
         val string = response.body().toPlainString()
-        if (RDFSource::class.java.isAssignableFrom(clazz)) {
-            val options = JsonLdOptions().apply {
-                isRdfStar = true
-            }
-
+        if (SolidContainer::class.java.isAssignableFrom(clazz)) {
             val dataSet = JsonLd
                 .toRdf(provideNormalizedDoc(string.byteInputStream()))
-                .options(options)
                 .get()
             return clazz
                 .getConstructor(URI::class.java, MediaType::class.java, RdfDataset::class.java,
                     Headers::class.java)
                 .newInstance(response.uri(), MediaType.of(type), dataSet, null)
+        }
+        else if (RDFSource::class.java.isAssignableFrom(clazz)) {
+            val dataSet = JsonLd
+                .toRdf(JsonDocument.of(string.byteInputStream()))
+                .rdfDirection(JsonLdOptions.RdfDirection.I18N_DATATYPE)
+                .mode(JsonLdVersion.V1_1)
+                .produceGeneralizedRdf()
+                .get()
+            return clazz
+                .getConstructor(
+                    URI::class.java,
+                    MediaType::class.java,
+                    RdfDataset::class.java,
+                    Headers::class.java
+                ).newInstance(
+                    response.uri(),
+                    MediaType.of(type),
+                    dataSet,
+                    null
+                )
         } else {
             return clazz
                 .getConstructor(URI::class.java, String::class.java, InputStream::class.java)

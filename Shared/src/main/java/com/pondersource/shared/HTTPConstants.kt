@@ -4,6 +4,8 @@ object HTTPHeaderName {
     const val AUTHORIZATION = "Authorization"
     const val ACCEPT = "Accept"
     const val CONTENT_TYPE = "Content-Type"
+    const val LINK = "Link"
+    const val IF_NONE_MATCH = "If-None-Match"
 }
 
 object HTTPAcceptType {
