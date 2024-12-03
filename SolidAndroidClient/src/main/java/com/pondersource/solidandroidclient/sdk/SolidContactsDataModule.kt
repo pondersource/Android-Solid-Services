@@ -12,11 +12,14 @@ import com.pondersource.shared.data.datamodule.contact.FullGroup
 import com.pondersource.shared.data.datamodule.contact.NewContact
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_DATA_MODULES_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
-import com.pondersource.solidandroidclient.IASSContactsModuleInterface
 import com.pondersource.solidandroidclient.IASSDataModulesService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import com.pondersource.solidandroidclient.contacts.IASSContactModuleAddressBookCallback
+import com.pondersource.solidandroidclient.contacts.IASSContactModuleAddressBookListCallback
+import com.pondersource.solidandroidclient.contacts.IASSContactModuleFullContactCallback
+import com.pondersource.solidandroidclient.contacts.IASSContactModuleFullGroupCallback
+import com.pondersource.solidandroidclient.contacts.IASSContactsModuleInterface
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class SolidContactsDataModule {
 
@@ -69,24 +72,34 @@ class SolidContactsDataModule {
         }
     }
 
-    fun getAddressBooks(): AddressBookList? {
-        return runBlocking(Dispatchers.IO) {
-            delay(2000L)
-            checkService()
-            iASSContactsModuleInterface!!.getAddressBooks()
+    suspend fun getAddressBooks(): AddressBookList? {
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.getAddressBooks(object: IASSContactModuleAddressBookListCallback.Stub() {
+                override fun valueChanged(addressBookList: AddressBookList?) {
+                    continuation.resume(addressBookList)
+                }
+            })
         }
     }
 
-    fun createAddressBook(
+    suspend fun createAddressBook(
         title: String,
-        storage: String,
-        ownerWebId: String,
+        isPrivate: Boolean = true,
+        storage: String? = null,
+        ownerWebId: String? = null,
         container: String? = null,
     ) : AddressBook? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
+        checkService()
+        return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.createAddressBook(
                 title,
+                isPrivate,
+                object : IASSContactModuleAddressBookCallback.Stub() {
+                    override fun valueChanged(addressBook: AddressBook?) {
+                        continuation.resume(addressBook)
+                    }
+                },
                 storage,
                 ownerWebId,
                 container
@@ -94,134 +107,189 @@ class SolidContactsDataModule {
         }
     }
 
-    fun getAddressBook(
+    suspend fun getAddressBook(
         uri: String,
     ): AddressBook? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.getAddressBook(uri)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.getAddressBook(uri, object : IASSContactModuleAddressBookCallback.Stub() {
+                override fun valueChanged(addressBook: AddressBook?) {
+                    continuation.resume(addressBook)
+                }
+            })
         }
     }
 
-    fun createNewContact(
+    suspend fun createNewContact(
         addressBookUri: String,
         newContact: NewContact,
         groupUris: List<String> = emptyList(),
     ) : FullContact? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
+        checkService()
+        return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.createNewContact(
                 addressBookUri,
                 newContact,
-                groupUris
+                groupUris,
+                object : IASSContactModuleFullContactCallback.Stub() {
+                    override fun valueChanged(fullContact: FullContact?) {
+                        continuation.resume(fullContact)
+                    }
+                }
             )
         }
     }
 
-    fun getContact(
+    suspend fun getContact(
         contactUri: String
     ): FullContact? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.getContact(contactUri)!!
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.getContact(contactUri, object : IASSContactModuleFullContactCallback.Stub() {
+                override fun valueChanged(fullContact: FullContact?) {
+                    continuation.resume(fullContact)
+                }
+            })
         }
+
     }
 
-    fun renameContact(
+    suspend fun renameContact(
         contactUri: String,
         newName: String,
     ): FullContact? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.renameContact(contactUri, newName)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.renameContact(contactUri, newName, object : IASSContactModuleFullContactCallback.Stub() {
+                override fun valueChanged(fullContact: FullContact?) {
+                    continuation.resume(fullContact)
+                }
+            })
         }
     }
 
-    fun addNewPhoneNumber(
+    suspend fun addNewPhoneNumber(
         contactUri: String,
         newPhoneNumber: String,
     ): FullContact? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.addNewPhoneNumber(contactUri, newPhoneNumber)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.addNewPhoneNumber(contactUri, newPhoneNumber, object : IASSContactModuleFullContactCallback.Stub() {
+                override fun valueChanged(fullContact: FullContact?) {
+                    continuation.resume(fullContact)
+                }
+            })
         }
     }
 
-    fun addNewEmailAddress(
+    suspend fun addNewEmailAddress(
         contactUri: String,
         newEmailAddress: String,
     ): FullContact? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.addNewEmailAddress(contactUri, newEmailAddress)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.addNewEmailAddress(contactUri, newEmailAddress, object : IASSContactModuleFullContactCallback.Stub() {
+                override fun valueChanged(fullContact: FullContact?) {
+                    continuation.resume(fullContact)
+                }
+            })
         }
     }
 
-    fun removePhoneNumber(
+    suspend fun removePhoneNumber(
         contactUri: String,
         phoneNumber: String,
     ): FullContact? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.removePhoneNumber(contactUri, phoneNumber)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.removePhoneNumber(contactUri, phoneNumber, object : IASSContactModuleFullContactCallback.Stub() {
+                override fun valueChanged(fullContact: FullContact?) {
+                    continuation.resume(fullContact)
+                }
+            })
         }
     }
 
-    fun removeEmailAddress(
+    suspend fun removeEmailAddress(
         contactUri: String,
         emailAddress: String,
     ): FullContact? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.removeEmailAddress(contactUri, emailAddress)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.removeEmailAddress(contactUri, emailAddress, object : IASSContactModuleFullContactCallback.Stub() {
+                override fun valueChanged(fullContact: FullContact?) {
+                    continuation.resume(fullContact)
+                }
+            })
         }
     }
 
-    fun createNewGroup(
+    suspend fun createNewGroup(
         addressBookUri: String,
         title: String,
     ): FullGroup? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.createNewGroup(addressBookUri, title)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.createNewGroup(addressBookUri, title, object : IASSContactModuleFullGroupCallback.Stub() {
+                override fun valueChanged(fullGroup: FullGroup?) {
+                    continuation.resume(fullGroup)
+                }
+            })
         }
     }
 
-    fun getGroup(
+    suspend fun getGroup(
         groupUri: String,
     ): FullGroup? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.getGroup(groupUri)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.getGroup(groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
+                override fun valueChanged(fullGroup: FullGroup?) {
+                    continuation.resume(fullGroup)
+                }
+            })
         }
     }
-    fun removeGroup(
+
+    suspend fun removeGroup(
         addressBookUri: String,
         groupUri: String
     ): FullGroup? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.removeGroup(addressBookUri, groupUri)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.removeGroup(addressBookUri, groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
+                override fun valueChanged(fullGroup: FullGroup?) {
+                    continuation.resume(fullGroup)
+                }
+            })
         }
     }
 
-    fun addContactToGroup(
+    suspend fun addContactToGroup(
         contactUri: String,
         groupUri: String,
     ): FullGroup? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.addContactToGroup(contactUri, groupUri)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.addContactToGroup(contactUri, groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
+                override fun valueChanged(fullGroup: FullGroup?) {
+                    continuation.resume(fullGroup)
+                }
+            })
         }
     }
 
-    fun removeContactFromGroup(
+    suspend fun removeContactFromGroup(
         contactUri: String,
         groupUri: String,
     ): FullGroup? {
-        return runBlocking(Dispatchers.IO) {
-            checkService()
-            iASSContactsModuleInterface!!.removeContactFromGroup(contactUri, groupUri)
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.removeContactFromGroup(contactUri, groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
+                override fun valueChanged(fullGroup: FullGroup?) {
+                    continuation.resume(fullGroup)
+                }
+            })
         }
     }
 }

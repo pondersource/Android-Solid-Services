@@ -15,8 +15,8 @@ interface SolidContactsDataModule {
 
     suspend fun createAddressBook(
         title: String,
-        storage: String,
         isPrivate: Boolean = true,
+        storage: String,
         ownerWebId: String,// TODO: we need default value
         container: String? = null,
     ) : DataModuleResult<AddressBook>

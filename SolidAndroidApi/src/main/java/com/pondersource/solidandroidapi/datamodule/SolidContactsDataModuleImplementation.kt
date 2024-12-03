@@ -51,10 +51,10 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
 
      override suspend fun createAddressBook(
           title: String,
-          storage: String,
           isPrivate: Boolean,
+          storage: String,
           ownerWebId: String,
-          container: String?,
+          container: String?
      ): DataModuleResult<AddressBook> {
           val newContainer = container ?: "${storage}${CONTACTS_DIRECTORY_SUFFIX}"
           return try {
