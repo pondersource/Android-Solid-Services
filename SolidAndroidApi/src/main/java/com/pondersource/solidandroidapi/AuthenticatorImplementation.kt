@@ -10,6 +10,8 @@ import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
 import com.inrupt.client.Request
 import com.inrupt.client.Response
+import com.inrupt.client.openid.OpenIdConfig
+import com.inrupt.client.openid.OpenIdException
 import com.inrupt.client.openid.OpenIdSession
 import com.inrupt.client.solid.SolidSyncClient
 import com.pondersource.shared.HTTPAcceptType
@@ -20,7 +22,6 @@ import com.pondersource.shared.data.Profile
 import com.pondersource.shared.data.UserInfo
 import com.pondersource.shared.data.webid.WebId
 import com.pondersource.shared.resource.Resource
-import com.pondersource.shared.util.Utils
 import com.pondersource.shared.util.isSuccessful
 import com.pondersource.shared.util.toPlainString
 import com.pondersource.solidandroidapi.repository.UserRepository
@@ -35,8 +36,15 @@ import net.openid.appauth.EndSessionRequest
 import net.openid.appauth.RegistrationRequest
 import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.TokenResponse
+import org.jose4j.jwk.HttpsJwks
+import org.jose4j.jwt.JwtClaims
+import org.jose4j.jwt.NumericDate
+import org.jose4j.jwt.consumer.InvalidJwtException
+import org.jose4j.jwt.consumer.JwtConsumerBuilder
+import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver
 import java.io.InputStream
 import java.net.URI
+import java.time.Instant
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -96,10 +104,9 @@ class AuthenticatorImplementation : Authenticator {
         userRepository.writeProfile(profile)
     }
 
-    private suspend fun getUserInfo(): UserInfo? {
+    private fun getUserInfoFromIdToken(): UserInfo? {
         if (isUserAuthorized()) {
-            checkTokenAndRefresh()
-            val webId = Utils.getWebId(profile.authState.idToken)
+            val webId = getWebId(profile.authState.idToken!!)
             return UserInfo(webId)
         } else {
             return null
@@ -303,7 +310,7 @@ class AuthenticatorImplementation : Authenticator {
         updateAuthorizationResponse(authResponse, authException)
         if (authException == null && authResponse != null) {
             requestToken()
-            profile.userInfo = getUserInfo()
+            profile.userInfo = getUserInfoFromIdToken()
             profile.webId = getWebIdProfile(profile.userInfo!!.webId)
             userRepository.writeProfile(profile)
         }
@@ -353,5 +360,51 @@ class AuthenticatorImplementation : Authenticator {
         } else {
             Pair(null, "There is no configuration")
         }
+    }
+
+    private fun parseIdToken(idToken: String, config: OpenIdConfig): JwtClaims {
+        return try {
+            val builder = JwtConsumerBuilder()
+
+            // Required by OpenID Connect
+            builder.setRequireExpirationTime()
+            builder.setExpectedIssuers(true, *arrayOfNulls<String>(0))
+            builder.setRequireSubject()
+            builder.setRequireIssuedAt()
+
+            // If a grace period is set, allow for some clock skew
+            if (config.expGracePeriodSecs > 0) {
+                builder.setAllowedClockSkewInSeconds(config.expGracePeriodSecs)
+            } else {
+                builder.setEvaluationTime(NumericDate.fromSeconds(Instant.now().epochSecond))
+            }
+
+            // If an expected audience is set, verify that we have the correct value
+            if (config.expectedAudience != null) {
+                builder.setExpectedAudience(true, config.expectedAudience)
+            } else {
+                builder.setSkipDefaultAudienceValidation()
+            }
+
+            // If a JWKS location is set, perform signature validation
+            if (config.publicKeyLocation != null) {
+                val jwks = HttpsJwks(config.publicKeyLocation.toString())
+                val resolver = HttpsJwksVerificationKeyResolver(jwks)
+                builder.setVerificationKeyResolver(resolver)
+            } else {
+                builder.setSkipSignatureVerification()
+            }
+
+            val consumer = builder.build()
+            consumer.processToClaims(idToken)
+        } catch (ex: InvalidJwtException) {
+            throw OpenIdException("Unable to parse ID token", ex)
+        }
+    }
+
+    private fun getWebId(idToken: String): String {
+        val claims = parseIdToken(idToken, OpenIdConfig())
+        val webId = claims.getClaimValueAsString("webid")
+        return webId ?: claims.getClaimValueAsString("sub")
     }
 }
