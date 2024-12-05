@@ -10,12 +10,7 @@ class StartupViewModel @Inject constructor(
     val authenticator: Authenticator,
 ) : BaseViewModel(){
 
-    suspend fun isLoggedIn(): Boolean {
-        return if(authenticator.isUserAuthorized()) {
-            authenticator.getLastTokenResponse()
-            true
-        } else {
-            false
-        }
+    fun isLoggedIn(): Boolean {
+        return authenticator.isUserAuthorized()
     }
 }

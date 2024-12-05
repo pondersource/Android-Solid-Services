@@ -93,12 +93,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    suspend fun isLoggedIn(): Boolean {
-        return if(authenticator.isUserAuthorized()) {
-            authenticator.getLastTokenResponse()
-            true
-        } else {
-            false
-        }
+    fun isLoggedIn(): Boolean {
+        return authenticator.isUserAuthorized()
     }
 }
