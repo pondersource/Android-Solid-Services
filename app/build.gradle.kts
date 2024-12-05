@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.pondersource.androidsolidservices"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         applicationId = "com.pondersource.androidsolidservices"
         minSdk = 26
@@ -26,7 +26,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
