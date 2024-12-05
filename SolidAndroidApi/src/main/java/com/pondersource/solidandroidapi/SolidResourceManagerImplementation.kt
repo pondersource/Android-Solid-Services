@@ -27,7 +27,6 @@ import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
 
-
 class SolidResourceManagerImplementation: SolidResourceManager {
 
     companion object {
@@ -169,6 +168,22 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         }
     }
 
+    override suspend fun deleteContainer(containerUri: URI): SolidNetworkResponse<Boolean> {
+        if(containerUri.toString().endsWith("/")) {
+            val containerRdf = read(containerUri, SolidContainer::class.java).handleResponse()
+            containerRdf.getContained().forEach {
+                if(it.types.contains(LDP.BasicContainer.toString())) {
+                    deleteContainer(URI.create(it.identifier)).handleResponse()
+                } else {
+                    rawDelete(URI.create(it.identifier)).handleResponse()
+                }
+            }
+            rawDelete(containerUri).handleResponse()
+            return SolidNetworkResponse.Success(true)
+        } else {
+            return SolidNetworkResponse.Error(400, "Container URL must end with /")
+        }
+    }
 
     private suspend fun <T: Resource> rawCreate(
         resource: T
@@ -234,6 +249,39 @@ class SolidResourceManagerImplementation: SolidResourceManager {
 
             if (response.isSuccessful()) {
                 return SolidNetworkResponse.Success(resource)
+            } else {
+                return SolidNetworkResponse.Error(
+                    response.statusCode(),
+                    response.body().toPlainString()
+                )
+            }
+        } catch (e: Exception) {
+            return SolidNetworkResponse.Exception(e)
+        }
+    }
+
+    private suspend fun rawDelete(
+        uri: URI
+    ): SolidNetworkResponse<Boolean> {
+        try {
+            val tokenResponse = handleTokenRefreshAndReturn()
+
+            val request: Request = Request.newBuilder()
+                .uri(uri)
+                .header(
+                    HTTPHeaderName.AUTHORIZATION,
+                    "${tokenResponse?.tokenType} ${tokenResponse?.idToken}"
+                )
+                .DELETE()
+                .build()
+
+            val response: Response<InputStream> = client.send(
+                request,
+                Response.BodyHandlers.ofInputStream()
+            )
+
+            if (response.isSuccessful()) {
+                return SolidNetworkResponse.Success(true)
             } else {
                 return SolidNetworkResponse.Error(
                     response.statusCode(),

@@ -22,4 +22,8 @@ interface SolidResourceManager {
     suspend fun <T: Resource> delete(
         resource: T,
     ): SolidNetworkResponse<T>
+
+    suspend fun deleteContainer(
+        containerUri: URI
+    ): SolidNetworkResponse<Boolean>
 }
