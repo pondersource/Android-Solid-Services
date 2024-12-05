@@ -68,7 +68,7 @@ class SolidContactsDataModule {
 
     private fun checkService() {
         if (iASSContactsModuleInterface == null) {
-            throw IllegalStateException("Service not connected")
+            throw SolidException.SolidServiceConnectionException()
         }
     }
 
@@ -113,6 +113,19 @@ class SolidContactsDataModule {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.getAddressBook(uri, object : IASSContactModuleAddressBookCallback.Stub() {
+                override fun valueChanged(addressBook: AddressBook?) {
+                    continuation.resume(addressBook)
+                }
+            })
+        }
+    }
+
+    suspend fun deleteAddressBook(
+        addressBookUri: String,
+    ): AddressBook? {
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.deleteAddressBood(addressBookUri, null, object : IASSContactModuleAddressBookCallback.Stub() {
                 override fun valueChanged(addressBook: AddressBook?) {
                     continuation.resume(addressBook)
                 }
@@ -224,13 +237,32 @@ class SolidContactsDataModule {
         }
     }
 
+    suspend fun deleteContact(
+        addressBookUri: String,
+        contactUri: String
+    ): FullContact? {
+        checkService()
+        return suspendCoroutine { continuation ->
+            iASSContactsModuleInterface!!.deleteContact(addressBookUri, contactUri, object : IASSContactModuleFullContactCallback.Stub() {
+                override fun valueChanged(fullContact: FullContact?) {
+                    continuation.resume(fullContact)
+                }
+            })
+        }
+    }
+
     suspend fun createNewGroup(
         addressBookUri: String,
         title: String,
+        contactUris: List<String> = emptyList(),
     ): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.createNewGroup(addressBookUri, title, object : IASSContactModuleFullGroupCallback.Stub() {
+            iASSContactsModuleInterface!!.createNewGroup(
+                addressBookUri,
+                title,
+                contactUris,
+                object : IASSContactModuleFullGroupCallback.Stub() {
                 override fun valueChanged(fullGroup: FullGroup?) {
                     continuation.resume(fullGroup)
                 }
@@ -251,13 +283,13 @@ class SolidContactsDataModule {
         }
     }
 
-    suspend fun removeGroup(
+    suspend fun deleteGroup(
         addressBookUri: String,
         groupUri: String
     ): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.removeGroup(addressBookUri, groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
+            iASSContactsModuleInterface!!.deleteGroup(addressBookUri, groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
                 override fun valueChanged(fullGroup: FullGroup?) {
                     continuation.resume(fullGroup)
                 }

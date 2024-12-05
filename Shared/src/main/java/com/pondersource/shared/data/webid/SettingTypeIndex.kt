@@ -68,4 +68,22 @@ abstract class SettingTypeIndex: RDFSource {
             )
         )
     }
+
+    fun containsAddressBook(addressBookUri: String): Boolean {
+        val list = dataset.defaultGraph.toList()
+        return list.find { it.`object`.value == addressBookUri } != null
+    }
+
+    fun removeAddressBook(addressBookUri: String) {
+        val list = dataset.defaultGraph.toList()
+        val triple = list.find { it.`object`.value == addressBookUri }
+        if (triple != null) {
+            this.dataset = rdf.createDataset()
+            list.forEach {
+                if (it.subject != triple.subject && it.`object`.value != triple.subject.value) {
+                    this.dataset.add(it)
+                }
+            }
+        }
+    }
 }

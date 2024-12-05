@@ -95,6 +95,16 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
           }
      }
 
+     override suspend fun deleteAddressBook(addressBookUri: String, ownerWebId: String): DataModuleResult<AddressBook> {
+          try {
+               val addressBook = getAddressBook(addressBookUri)
+               helper.deleteAddressBook(addressBookUri, ownerWebId)
+               return addressBook
+          } catch (e: Exception) {
+               return DataModuleResult.Error(e.message)
+          }
+     }
+
      override suspend fun createNewContact(
           addressBookUri: String,
           newContact: NewContact,
@@ -183,13 +193,32 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
           }
      }
 
+     override suspend fun deleteContact(
+          addressBookUri: String,
+          contactUri: String
+     ): DataModuleResult<FullContact> {
+          return try {
+               val contact = getContact(contactUri)
+               helper.deleteContact(addressBookUri, contactUri)
+               contact
+          } catch (e: Exception) {
+               DataModuleResult.Error(e.message)
+          }
+     }
+
      override suspend fun createNewGroup(
           addressBookUri: String,
-          title: String
+          title: String,
+          contactUris: List<String>,
      ): DataModuleResult<FullGroup> {
           return try {
                val groupRDF = helper.createGroup(URI.create(addressBookUri), title)
-               DataModuleResult.Success(FullGroup.createFromRdf(groupRDF))
+
+               contactUris.forEach {
+                    helper.addContactToGroup(URI.create(it), groupRDF)
+               }
+
+               return getGroup(groupRDF.getIdentifier().toString())
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
           }
@@ -206,7 +235,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
           }
      }
 
-     override suspend fun removeGroup(
+     override suspend fun deleteGroup(
           addressBookUri: String,
           groupUri: String
      ): DataModuleResult<FullGroup> {
@@ -235,7 +264,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
           groupUri: String
      ): DataModuleResult<FullGroup> {
           return try {
-               val groupRdf = helper.removeContactFromGroup(URI.create(contactUri), URI.create(groupUri))
+               val groupRdf = helper.removeContactFromGroup(contactUri, groupUri)
                DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
           }catch (e: Exception) {
                DataModuleResult.Error(e.message)

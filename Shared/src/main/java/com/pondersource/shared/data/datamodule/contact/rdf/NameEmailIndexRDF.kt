@@ -58,18 +58,18 @@ class NameEmailIndexRDF: RDFSource {
         )
     }
 
-    fun removeContact(addressBookUri: String, contactUri: String): Boolean {
+    fun removeContact(contactUri: String): Boolean {
         val list = dataset.defaultGraph.toList()
         val contactTriples = list.filter {
-            (it.subject.value == addressBookUri && it.predicate.equals(inAddressBookKey) && it.`object`.value == contactUri) ||
-            (it.subject.value == contactUri && it.predicate.equals(rdfKey) && it.`object`.equals(individualKey)) ||
-            (it.subject.value == contactUri && it.predicate.equals(fullNameKey))
+            (it.predicate.equals(inAddressBookKey) && it.`object`.value == contactUri) ||
+            (it.subject.value == contactUri)
         }
         if (contactTriples.isNotEmpty()) {
-            list.removeAll(contactTriples)
             dataset = rdf.createDataset().apply {
                 list.forEach {
-                    add(it)
+                    if(it.subject.value != contactUri && it.`object`.value != contactUri) {
+                        add(it)
+                    }
                 }
             }
             return true

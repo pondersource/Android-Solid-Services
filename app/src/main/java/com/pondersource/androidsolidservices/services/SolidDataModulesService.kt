@@ -81,6 +81,21 @@ class SolidDataModulesService : LifecycleService() {
             }
         }
 
+        override fun deleteAddressBood(
+            uri: String,
+            ownerWebId: String?,
+            callback: IASSContactModuleAddressBookCallback
+        ) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                callback.valueChanged(
+                    solidContactsDataModule.deleteAddressBook(
+                        uri,
+                        ownerWebId ?:  auth.getProfile().userInfo!!.webId,
+                    ).extractResult()
+                )
+            }
+        }
+
         override fun createNewContact(
             addressBookUri: String,
             newContact: NewContact,
@@ -169,14 +184,30 @@ class SolidDataModulesService : LifecycleService() {
             }
         }
 
+        override fun deleteContact(
+            addressBookUri: String,
+            contactUri: String,
+            callback: IASSContactModuleFullContactCallback
+        ) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                callback.valueChanged(
+                    solidContactsDataModule.deleteContact(
+                        addressBookUri,
+                        contactUri,
+                    ).extractResult()
+                )
+            }
+        }
+
         override fun createNewGroup(
             addressBookUri: String,
             title: String,
+            contactUris: List<String>,
             callback: IASSContactModuleFullGroupCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.createNewGroup(addressBookUri, title).extractResult()
+                    solidContactsDataModule.createNewGroup(addressBookUri, title, contactUris).extractResult()
                 )
             }
         }
@@ -192,14 +223,14 @@ class SolidDataModulesService : LifecycleService() {
             }
         }
 
-        override fun removeGroup(
+        override fun deleteGroup(
             addressBookUri: String,
             groupUri: String,
             callback: IASSContactModuleFullGroupCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.removeGroup(addressBookUri, groupUri).extractResult()
+                    solidContactsDataModule.deleteGroup(addressBookUri, groupUri).extractResult()
                 )
             }
         }

@@ -148,29 +148,34 @@ class ContactRDF: RDFSource {
         return returnList
     }
 
-    fun addPhoneNumber(newPhoneNumber: String): Boolean {
-        val alreadyExistPhoneNumber = dataset.defaultGraph.toList().find { it.predicate.equals(valueKey) && it.`object`.value == "tel:${newPhoneNumber}" }
+    fun addPhoneNumber(newPhoneNumber: String?): Boolean {
+        if(!newPhoneNumber.isNullOrEmpty()) {
+            val alreadyExistPhoneNumber = dataset.defaultGraph.toList()
+                .find { it.predicate.equals(valueKey) && it.`object`.value == "tel:${newPhoneNumber}" }
 
-        if (alreadyExistPhoneNumber != null) {
-            return false
-        } else {
-            val namedNode = rdf.createBlankNode(newPhoneNumber)
-            addTriple(
-                rdf.createTriple(
-                    rdf.createIRI(getIdentifier().toString()),
-                    hasTelephoneKey,
-                    namedNode
-                ),
-                Int.MAX_VALUE
-            )
-            addTriple(
-                rdf.createTriple(
-                    namedNode,
-                    valueKey,
-                    rdf.createTypedString("tel:${newPhoneNumber}", null)
+            if (alreadyExistPhoneNumber != null) {
+                return false
+            } else {
+                val namedNode = rdf.createBlankNode(newPhoneNumber)
+                addTriple(
+                    rdf.createTriple(
+                        rdf.createIRI(getIdentifier().toString()),
+                        hasTelephoneKey,
+                        namedNode
+                    ),
+                    Int.MAX_VALUE
                 )
-            )
-            return true
+                addTriple(
+                    rdf.createTriple(
+                        namedNode,
+                        valueKey,
+                        rdf.createTypedString("tel:${newPhoneNumber}", null)
+                    )
+                )
+                return true
+            }
+        } else {
+            return false
         }
     }
 
@@ -189,29 +194,34 @@ class ContactRDF: RDFSource {
         return returnList
     }
 
-    fun addEmailAddress(newEmailAddress: String): Boolean {
-        val alreadyExistEmailAddress = dataset.defaultGraph.toList().find { it.predicate.equals(valueKey) && it.`object`.value == "mailto:${newEmailAddress}" }
+    fun addEmailAddress(newEmailAddress: String?): Boolean {
+        if (!newEmailAddress.isNullOrEmpty()) {
+            val alreadyExistEmailAddress = dataset.defaultGraph.toList()
+                .find { it.predicate.equals(valueKey) && it.`object`.value == "mailto:${newEmailAddress}" }
 
-        return if (alreadyExistEmailAddress != null) {
-            false
-        } else {
-            val namedNode = rdf.createBlankNode(newEmailAddress)
-            addTriple(
-                rdf.createTriple(
-                    rdf.createIRI(getIdentifier().toString()),
-                    hasEmailKey,
-                    namedNode
-                ),
-                Int.MAX_VALUE
-            )
-            addTriple(
-                rdf.createTriple(
-                    namedNode,
-                    valueKey,
-                    rdf.createTypedString("mailto:${newEmailAddress}", null)
+            return if (alreadyExistEmailAddress != null) {
+                false
+            } else {
+                val namedNode = rdf.createBlankNode(newEmailAddress)
+                addTriple(
+                    rdf.createTriple(
+                        rdf.createIRI(getIdentifier().toString()),
+                        hasEmailKey,
+                        namedNode
+                    ),
+                    Int.MAX_VALUE
                 )
-            )
-            true
+                addTriple(
+                    rdf.createTriple(
+                        namedNode,
+                        valueKey,
+                        rdf.createTypedString("mailto:${newEmailAddress}", null)
+                    )
+                )
+                true
+            }
+        } else {
+            return false
         }
     }
 

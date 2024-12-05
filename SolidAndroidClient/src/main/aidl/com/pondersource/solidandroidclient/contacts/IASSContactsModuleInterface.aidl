@@ -31,6 +31,12 @@ interface IASSContactsModuleInterface {
 
     void getAddressBook(String uri, IASSContactModuleAddressBookCallback callback);
 
+    void deleteAddressBood(
+        String uri,
+        @nullable String ownerWebId,
+        IASSContactModuleAddressBookCallback callback
+    );
+
     void createNewContact(
         String addressBookUri,
         in NewContact newContact,
@@ -73,9 +79,16 @@ interface IASSContactsModuleInterface {
         IASSContactModuleFullContactCallback callback
     );
 
+    void deleteContact(
+        String addressBookUri,
+        String contactUri,
+        IASSContactModuleFullContactCallback callback
+    );
+
     void createNewGroup(
          String addressBookUri,
          String title,
+         in List<String> contactUris,
          IASSContactModuleFullGroupCallback callback
     );
 
@@ -84,7 +97,7 @@ interface IASSContactsModuleInterface {
         IASSContactModuleFullGroupCallback callback
     );
 
-    void removeGroup(
+    void deleteGroup(
         String addressBookUri,
         String groupUri,
         IASSContactModuleFullGroupCallback callback

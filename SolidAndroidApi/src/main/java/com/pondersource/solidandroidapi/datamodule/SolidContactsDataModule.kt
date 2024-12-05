@@ -9,6 +9,7 @@ import com.pondersource.shared.data.datamodule.contact.NewContact
 
 interface SolidContactsDataModule {
 
+    //region AddressBooks
     suspend fun getAddressBooks(
         webId: String
     ): DataModuleResult<AddressBookList>
@@ -30,6 +31,13 @@ interface SolidContactsDataModule {
         newName: String,
     ): DataModuleResult<AddressBook>
 
+    suspend fun deleteAddressBook(
+        addressBookUri: String,
+        ownerWebId: String,
+    ): DataModuleResult<AddressBook>
+    //endregion
+
+    //region Contacts
     suspend fun createNewContact(
         addressBookString: String,
         newContact: NewContact,
@@ -65,16 +73,24 @@ interface SolidContactsDataModule {
         emailAddress: String,
     ): DataModuleResult<FullContact>
 
+    suspend fun deleteContact(
+        addressBookUri: String,
+        contactUri: String,
+    ): DataModuleResult<FullContact>
+    //endregion
+
+    //region Groups
     suspend fun createNewGroup(
         addressBookString: String,
         title: String,
+        contactUris: List<String> = emptyList(),
     ): DataModuleResult<FullGroup>
 
     suspend fun getGroup(
         groupString: String,
     ): DataModuleResult<FullGroup>
 
-    suspend fun removeGroup(
+    suspend fun deleteGroup(
         addressBookString: String,
         groupString: String
     ): DataModuleResult<FullGroup>
@@ -88,4 +104,5 @@ interface SolidContactsDataModule {
         contactString: String,
         groupString: String,
     ): DataModuleResult<FullGroup>
+    //endregion
 }

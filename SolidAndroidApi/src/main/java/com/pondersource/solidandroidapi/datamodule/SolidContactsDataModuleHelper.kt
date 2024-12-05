@@ -122,6 +122,24 @@ class SolidContactsDataModuleHelper {
 
     }
 
+    suspend fun deleteAddressBook(addressBookUri: String, ownerWebId: String): AddressBookRDF {
+        val addressBookRDF = getAddressBook(URI.create(addressBookUri))
+
+        val privateTypeIndex = getPrivateTypeIndex(ownerWebId)
+        val publicTypeIndex = getPublicTypeIndex(ownerWebId)
+        if(privateTypeIndex.containsAddressBook(addressBookUri)) {
+            privateTypeIndex.removeAddressBook(addressBookUri)
+            solidResourceManager.update(privateTypeIndex).handleResponse()
+        } else if (publicTypeIndex.containsAddressBook(addressBookUri)) {
+            publicTypeIndex.removeAddressBook(addressBookUri)
+            solidResourceManager.update(publicTypeIndex).handleResponse()
+        }
+
+        val addressBookMainContainer = addressBookUri.substring(0, addressBookUri.lastIndexOf("/") + 1)
+        solidResourceManager.deleteContainer(URI.create(addressBookMainContainer))
+        return addressBookRDF
+    }
+
     suspend fun getAddressBookContacts(nameEmailIndexUri: URI): NameEmailIndexRDF {
         return solidResourceManager.read(nameEmailIndexUri, NameEmailIndexRDF::class.java).handleResponse()
     }
@@ -165,14 +183,39 @@ class SolidContactsDataModuleHelper {
     }
 
     suspend fun addContactToGroup(contact: ContactRDF, groupUri: URI): GroupRDF {
-        val groupRdf = getGroup(groupUri)
-        groupRdf.addMember(contact)
-        solidResourceManager.update(groupRdf)
-        return groupRdf
+        return addContactToGroup(contact, getGroup(groupUri))
+    }
+
+    suspend fun addContactToGroup(contactUri: URI, group: GroupRDF): GroupRDF {
+        return addContactToGroup(getContact(contactUri), group)
+    }
+
+    suspend fun addContactToGroup(contact: ContactRDF, group: GroupRDF): GroupRDF {
+        group.addMember(contact)
+        solidResourceManager.update(group)
+        return group
     }
 
     suspend fun getContact(contactUri: URI): ContactRDF {
         return solidResourceManager.read(contactUri, ContactRDF::class.java).handleResponse()
+    }
+
+
+    suspend fun deleteContact(addressBookUri: String, contactUri: String) {
+        val addressBookRDF = getAddressBook(URI.create(addressBookUri))
+        val nameEmailIndexRDF = getAddressBookContacts(URI.create(addressBookRDF.getNameEmailIndex()))
+        if(nameEmailIndexRDF.removeContact(contactUri)) {
+            solidResourceManager.update(nameEmailIndexRDF)
+            val groupsIndexRDF = getAddressBookGroups(URI.create(addressBookRDF.getGroupsIndex()))
+            groupsIndexRDF.getGroups(addressBookUri.toString()).forEach {
+                removeContactFromGroup(contactUri, it.uri)
+            }
+        } else {
+            //contact is not in this address book, so no need for search in groups
+        }
+        val contactDir = contactUri.substring(0, contactUri.lastIndexOf("/") + 1)
+        solidResourceManager.deleteContainer(URI.create(contactDir))
+
     }
 
     suspend fun createGroup(addressBookUri: URI, groupName: String): GroupRDF {
@@ -211,9 +254,9 @@ class SolidContactsDataModuleHelper {
         return solidResourceManager.read(groupUri, GroupRDF::class.java).handleResponse()
     }
 
-    suspend fun removeContactFromGroup(contactUri: URI, groupUri: URI): GroupRDF {
-        val groupRdf = getGroup(groupUri)
-        val result = groupRdf.removeMember(contactUri)
+    suspend fun removeContactFromGroup(contactUri: String, groupUri: String): GroupRDF {
+        val groupRdf = getGroup(URI.create(groupUri))
+        val result = groupRdf.removeMember(URI.create(contactUri))
         if (result) {
             solidResourceManager.update(groupRdf).handleResponse()
         }
@@ -265,25 +308,6 @@ class SolidContactsDataModuleHelper {
             solidResourceManager.delete(groupRdf).handleResponse()
         }
         return groupRdf
-    }
-
-    suspend fun removeContactFromAddressBook(addressBookUri: URI, contactUri: URI) {
-        val addressBookRDF = getAddressBook(addressBookUri)
-        val nameEmailIndexRDF = getAddressBookContacts(URI.create(addressBookRDF.getNameEmailIndex()))
-        if(nameEmailIndexRDF.removeContact(addressBookUri.toString(), contactUri.toString())) {
-            solidResourceManager.update(nameEmailIndexRDF)
-            val groupsIndexRDF = getAddressBookGroups(URI.create(addressBookRDF.getGroupsIndex()))
-            groupsIndexRDF.getGroups(addressBookUri.toString()).forEach {
-                removeContactFromGroup(URI.create(it.uri), contactUri)
-            }
-        } else {
-            //contact is not in this address book, so no need for search in groups
-        }
-        val contactDir = contactUri.toString().substring(0, contactUri.toString().lastIndexOf("${PEOPLE_DIRECTORY_SUFFIX}/") + 1)
-        val container = SolidContainer(
-            identifier = URI.create(contactDir),
-        )
-        solidResourceManager.delete(container)
     }
 
     suspend fun getPrivateAddressBooks(webId: String): List<String> {
