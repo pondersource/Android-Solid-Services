@@ -156,13 +156,14 @@ class AuthenticatorImplementation : Authenticator {
                     profile.authState.lastAuthorizationResponse!!.createTokenExchangeRequest(),
                     ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
                 ) { tokenResponse, exception ->
+                    updateTokenResponse(tokenResponse, exception)
                     cont.resume(Pair(tokenResponse, exception))
                 }
             }
         } else {
             Pair(null, profile.authState.authorizationException)
         }
-        updateTokenResponse(result.first, result.second)
+        //updateTokenResponse(result.first, result.second)
         return result
     }
 
@@ -177,13 +178,14 @@ class AuthenticatorImplementation : Authenticator {
                     profile.authState.createTokenRefreshRequest(),
                     ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
                 ) { tokenResponse, exception ->
+                    updateTokenResponse(tokenResponse, exception)
                     cont.resume(Pair(tokenResponse, exception))
                 }
             }
         } else {
             Pair(null, profile.authState.authorizationException)
         }
-        updateTokenResponse(result.first, result.second)
+        //updateTokenResponse(result.first, result.second)
         return Pair(result.first, result.second)
     }
 
