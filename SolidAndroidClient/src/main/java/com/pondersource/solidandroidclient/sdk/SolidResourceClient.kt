@@ -19,6 +19,8 @@ import com.pondersource.solidandroidclient.IASSNonRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSResourceService
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidResourceException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
@@ -43,14 +45,17 @@ class SolidResourceClient {
     }
 
     private var iASSAuthService: IASSResourceService? = null
+    private val connectionFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val hasInstalledAndroidSolidServices: () -> Boolean
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             iASSAuthService = IASSResourceService.Stub.asInterface(service)
+            connectionFlow.value = true
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
             iASSAuthService = null
+            connectionFlow.value = false
         }
     }
 
@@ -78,6 +83,10 @@ class SolidResourceClient {
         if (iASSAuthService == null) {
             throw SolidException.SolidServiceConnectionException()
         }
+    }
+
+    fun resourceServiceConnectionState(): Flow<Boolean> {
+        return connectionFlow
     }
 
     private fun checkBasicConditions() {

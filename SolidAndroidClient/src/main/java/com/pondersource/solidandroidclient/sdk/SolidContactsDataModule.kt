@@ -18,6 +18,8 @@ import com.pondersource.solidandroidclient.contacts.IASSContactModuleAddressBook
 import com.pondersource.solidandroidclient.contacts.IASSContactModuleFullContactCallback
 import com.pondersource.solidandroidclient.contacts.IASSContactModuleFullGroupCallback
 import com.pondersource.solidandroidclient.contacts.IASSContactsModuleInterface
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -41,16 +43,19 @@ class SolidContactsDataModule {
 
     private var iASSDataModulesService: IASSDataModulesService? = null
     private var iASSContactsModuleInterface: IASSContactsModuleInterface? = null
+    private val ContactsConnectionFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             iASSDataModulesService = IASSDataModulesService.Stub.asInterface(service)
             iASSContactsModuleInterface = iASSDataModulesService!!.contactsDataModuleInterface
+            ContactsConnectionFlow.value = true
 
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
             iASSDataModulesService = null
             iASSContactsModuleInterface = null
+            ContactsConnectionFlow.value = false
         }
     }
 
@@ -70,6 +75,10 @@ class SolidContactsDataModule {
         if (iASSContactsModuleInterface == null) {
             throw SolidException.SolidServiceConnectionException()
         }
+    }
+
+    fun contactsDataModuleServiceConnectionState(): Flow<Boolean> {
+        return ContactsConnectionFlow
     }
 
     suspend fun getAddressBooks(): AddressBookList? {

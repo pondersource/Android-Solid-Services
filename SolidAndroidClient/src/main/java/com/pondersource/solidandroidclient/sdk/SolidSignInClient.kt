@@ -14,6 +14,8 @@ import com.pondersource.solidandroidclient.IASSLogoutCallback
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidAppNotFoundException
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidNotLoggedInException
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidServiceConnectionException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class SolidSignInClient {
 
@@ -43,14 +45,17 @@ class SolidSignInClient {
     private var applicationInfo: ApplicationInfo
     private var applicationName: String
     private val hasInstalledAndroidSolidServices: () -> Boolean
+    private val connectionFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private var iASSAuthService: IASSAuthenticatorService? = null
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             iASSAuthService = IASSAuthenticatorService.Stub.asInterface(service)
+            connectionFlow.value = true
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
             iASSAuthService = null
+            connectionFlow.value = true
         }
     }
 
@@ -71,7 +76,11 @@ class SolidSignInClient {
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
-    fun hasConnectedToService() = iASSAuthService != null
+    fun authServiceConnectionState(): Flow<Boolean> {
+        return connectionFlow
+    }
+
+    private fun hasConnectedToService() = iASSAuthService != null
 
     fun checkConnectionWithASS(onContinue: () -> Unit) {
         return if (hasInstalledAndroidSolidServices()) {
