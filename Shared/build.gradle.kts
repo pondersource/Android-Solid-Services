@@ -74,7 +74,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "com.pondersource.solidandroidshared"
             artifactId = "shared"
-            version = "0.1"
+            version = "0.2.0"
 
             afterEvaluate {
                 from(components["release"])

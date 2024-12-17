@@ -85,7 +85,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "com.pondersource.solidandroidclient"
             artifactId = "solidandroidclient"
-            version = "0.1"
+            version = "0.2.0"
 
             afterEvaluate {
                 from(components["release"])
