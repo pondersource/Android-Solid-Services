@@ -35,6 +35,7 @@ googleMaterial = "1.12.0"
 titaniumJsonLdJre8 = "1.4.1"
 jakartaJson = "2.0.1"
 lifecycleRuntime = "2.8.7"
+vanniktechMavenPublish = "0.30.0"
 
 [libraries]
 jetbrains-kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin"}
@@ -139,5 +140,7 @@ google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidx-navigation-safeargs-kotlin = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }
 
 google-protobuf = { id = "com.google.protobuf", version.ref = "googleProtobuf"}
+
+vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish"}
 
 [bundles]

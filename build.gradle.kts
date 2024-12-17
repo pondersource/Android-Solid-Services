@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.google.hilt.android) apply false
     alias(libs.plugins.google.protobuf) apply false
+    alias(libs.plugins.vanniktech.maven.publish) apply false
 }
 
 tasks.register("clean", Delete::class){
