@@ -25,11 +25,13 @@ You can find the generated ```.apk``` file in the path:
 
 You can open it for instance with Android Studio. It will take a while for the emulator to start up but then you'll be presented with a login screen
 and and you can log in to your pod there. Here are some screenshots from the application:
+| ![Screenshot_20241218_152823](https://github.com/user-attachments/assets/77932c43-7cec-4a7c-96c7-fb1f59e1e92b) | ![Screenshot_20241218_152854](https://github.com/user-attachments/assets/543b2d9e-2f51-481f-b50d-934ece61172f) | ![Screenshot_20241218_152906](https://github.com/user-attachments/assets/854ad425-1db3-4284-bf89-79ba7490303f) | ![Screenshot_20241218_152952](https://github.com/user-attachments/assets/b6df9725-321d-4572-b9fa-07cf28de3e9a) |
+|-|-|-|-|
 
 
 ## Solid Android Client library
 This android library has the responsibility to check your app already has access grant, request to access the pod resources, resource management requests and access data modules (currently Contacts data module).
-you can add this library to your android project by adding this line your your module-level ```build.gradle.kts``` file :
+you can add this library to your android project by adding this line to your module-level ```build.gradle.kts``` file :
 ```gradle
 dependencies {
     ...
