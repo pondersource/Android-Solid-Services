@@ -80,14 +80,6 @@ fun Login(
                 ) {
                     Text(text = stringResource(R.string.login_with_inrupt))
                 }
-
-                Button(
-                    onClick = {
-                        viewModel.loginWithSolidcommunity()
-                    }
-                ) {
-                    Text(text = stringResource(R.string.login_with_solidcommunity))
-                }
             }
         } else if (viewModel.loginLoading.value == true) {
             CircularProgressIndicator()
