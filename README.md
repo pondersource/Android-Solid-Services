@@ -1,4 +1,3 @@
-# Android Solid Services
 This project is [funded](https://nlnet.nl/project/SolidDataModules/) by <img src="https://nlnet.nl/logo/banner.svg" style="width: 5%; margin: 0 1% 0 1%;">
 / <img src="https://nlnet.nl/image/logos/NGI0Entrust_tag.svg" style="width: 5%; margin: 0 1% 0 1%;">
 
@@ -156,4 +155,8 @@ After authenticating successfully, you can interact with Solid resources and dat
 val resourceManager = com.pondersource.solidandroidapi.SolidResourceManagerImplementation.getInstance(context)
 val contactModule = com.pondersource.solidandroidapi.SolidContactsDataModuleImplementation.getInstance(context)
 ```
+---
+For a better understanding of the project structure you can refer to this diagram:
+![AndroidSolidServices (1)](https://github.com/user-attachments/assets/1b953cc9-3334-4827-9aac-63c29b4f7203)
+
 
