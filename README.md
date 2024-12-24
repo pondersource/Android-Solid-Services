@@ -1,6 +1,3 @@
-This project is [funded](https://nlnet.nl/project/SolidDataModules/) by <img src="https://nlnet.nl/logo/banner.svg" style="width: 5%; margin: 0 1% 0 1%;">
-/ <img src="https://nlnet.nl/image/logos/NGI0Entrust_tag.svg" style="width: 5%; margin: 0 1% 0 1%;">
-
 This project consists of three parts:
 - [Android Solid Services app](#android-solid-services-app)
 - [Solid Android Client library](#solid-android-client-library)
@@ -159,4 +156,7 @@ val contactModule = com.pondersource.solidandroidapi.SolidContactsDataModuleImpl
 For a better understanding of the project structure you can refer to this diagram:
 ![AndroidSolidServices (1)](https://github.com/user-attachments/assets/1b953cc9-3334-4827-9aac-63c29b4f7203)
 
+## Acknowledgments
+Thanks to funding from [NLnet](https://nlnet.nl/) <img src="https://nlnet.nl/logo/banner.svg" style="width: 5%; margin: 0 1% 0 1%;">
+/ <img src="https://nlnet.nl/image/logos/NGI0Entrust_tag.svg" style="width: 5%; margin: 0 1% 0 1%;">
 
