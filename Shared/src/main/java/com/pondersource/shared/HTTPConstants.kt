@@ -2,6 +2,7 @@ package com.pondersource.shared
 
 object HTTPHeaderName {
     const val AUTHORIZATION = "Authorization"
+    const val DPOP = "Dpop"
     const val ACCEPT = "Accept"
     const val CONTENT_TYPE = "Content-Type"
     const val LINK = "Link"

@@ -3,6 +3,7 @@ package com.pondersource.solidandroidapi
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import com.apicatalog.jsonld.JsonLd
 import com.apicatalog.jsonld.JsonLdOptions
 import com.apicatalog.jsonld.document.JsonDocument
@@ -26,6 +27,8 @@ import com.pondersource.shared.util.isSuccessful
 import com.pondersource.shared.util.toPlainString
 import com.pondersource.solidandroidapi.repository.UserRepository
 import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
+import io.jsonwebtoken.Jwts
+import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationResponse
@@ -35,6 +38,7 @@ import net.openid.appauth.ClientSecretBasic
 import net.openid.appauth.EndSessionRequest
 import net.openid.appauth.RegistrationRequest
 import net.openid.appauth.ResponseTypeValues
+import net.openid.appauth.TokenRequest
 import net.openid.appauth.TokenResponse
 import org.jose4j.jwk.HttpsJwks
 import org.jose4j.jwt.JwtClaims
@@ -118,7 +122,7 @@ class AuthenticatorImplementation : Authenticator {
         oidcIssuer: String
     ): Pair<AuthorizationServiceConfiguration?, AuthorizationException?>{
         return suspendCoroutine { cont ->
-            AuthorizationServiceConfiguration.fetchFromIssuer(Uri.parse(oidcIssuer)) { serviceConfiguration, exception ->
+            AuthorizationServiceConfiguration.fetchFromIssuer(oidcIssuer.toUri()) { serviceConfiguration, exception ->
                 cont.resume(Pair(serviceConfiguration, exception))
             }
         }
@@ -140,6 +144,7 @@ class AuthenticatorImplementation : Authenticator {
             .setGrantTypeValues(listOf("authorization_code", "refresh_token"))
             .build()
 
+
         val res = suspendCoroutine { cont ->
             authService.performRegistrationRequest(regReq) { response, ex ->
                 cont.resume(response)
@@ -148,13 +153,25 @@ class AuthenticatorImplementation : Authenticator {
         updateRegistrationResponse(res)
     }
 
-    private suspend fun requestToken(): Pair<TokenResponse?, AuthorizationException?> {
+    private suspend fun requestToken(tokenRefreshRequest: Boolean = false): Pair<TokenResponse?, AuthorizationException?> {
 
         val result : Pair<TokenResponse?, AuthorizationException?> = if (profile.authState.lastAuthorizationResponse != null) {
             suspendCoroutine { cont ->
+                val tokenRequest = profile.authState.createTokenRequest(tokenRefreshRequest)
+                val clientAuthentication = if(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!.supportsDPop()) {
+                    DPopClientSecretBasic(
+                        clientSecret = profile.authState.lastRegistrationResponse!!.clientSecret!!,
+                        configuration = tokenRequest.configuration,
+                        refreshToken = profile.authState.refreshToken
+                    )
+                } else {
+                    ClientSecretBasic(
+                        profile.authState.lastRegistrationResponse!!.clientSecret!!,
+                    )
+                }
                 authService.performTokenRequest(
-                    profile.authState.lastAuthorizationResponse!!.createTokenExchangeRequest(),
-                    ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
+                    tokenRequest,
+                    clientAuthentication
                 ) { tokenResponse, exception ->
                     updateTokenResponse(tokenResponse, exception)
                     cont.resume(Pair(tokenResponse, exception))
@@ -163,30 +180,7 @@ class AuthenticatorImplementation : Authenticator {
         } else {
             Pair(null, profile.authState.authorizationException)
         }
-        //updateTokenResponse(result.first, result.second)
         return result
-    }
-
-    /**
-     * Refreshes the token in case it has been expired.
-     * @return RefreshTokenResponse which contains accessToken, tokenId and exception
-     */
-    private suspend fun refreshToken(): Pair<TokenResponse?, AuthorizationException?> {
-        val result : Pair<TokenResponse?, AuthorizationException?> = if (profile.authState.lastAuthorizationResponse != null) {
-            suspendCoroutine { cont ->
-                authService.performTokenRequest(
-                    profile.authState.createTokenRefreshRequest(),
-                    ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
-                ) { tokenResponse, exception ->
-                    updateTokenResponse(tokenResponse, exception)
-                    cont.resume(Pair(tokenResponse, exception))
-                }
-            }
-        } else {
-            Pair(null, profile.authState.authorizationException)
-        }
-        //updateTokenResponse(result.first, result.second)
-        return Pair(result.first, result.second)
     }
 
     private suspend fun getWebIdProfile(webId: String): WebId {
@@ -205,18 +199,21 @@ class AuthenticatorImplementation : Authenticator {
 
         val client: SolidSyncClient = SolidSyncClient.getClient()
         try {
-            val tokenResponse = if (needsTokenRefresh()) {
-                val tokenResponse = getLastTokenResponse()
-                client.session(OpenIdSession.ofIdToken(tokenResponse!!.idToken!!))
-                tokenResponse
-            } else {
-                getLastTokenResponse()
-            }
+
+            val tokenResponse = getLastTokenResponse()
+                ?: throw IllegalArgumentException("Auth object should be authenticated before interacting with resources.")
+
+            client.session(OpenIdSession.ofIdToken(tokenResponse.idToken!!))
+            val headers = getAuthHeaders("GET", resource.toString())
 
             val request = Request.newBuilder()
                 .uri(resource)
                 .header(HTTPHeaderName.ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.OCTET_STREAM)
-                .header(HTTPHeaderName.AUTHORIZATION, "${tokenResponse?.tokenType} ${tokenResponse?.accessToken}")
+                .apply {
+                    headers.forEach { (key, value) ->
+                        this.header(key, value)
+                    }
+                }
                 .GET()
                 .build()
 
@@ -311,28 +308,45 @@ class AuthenticatorImplementation : Authenticator {
     ) {
         updateAuthorizationResponse(authResponse, authException)
         if (authException == null && authResponse != null) {
-            requestToken()
-            profile.userInfo = getUserInfoFromIdToken()
-            profile.webId = getWebIdProfile(profile.userInfo!!.webId)
-            userRepository.writeProfile(profile)
+            val tokenResponse = requestToken()
+            if(tokenResponse.second == null && tokenResponse.first != null) {
+                profile.userInfo = getUserInfoFromIdToken()
+                profile.webId = getWebIdProfile(profile.userInfo!!.webId)
+                userRepository.writeProfile(profile)
+            }
         }
     }
 
-    override suspend fun getLastTokenResponse(): TokenResponse? {
-        checkTokenAndRefresh()
+    override suspend fun getLastTokenResponse(
+        forceRefresh: Boolean
+    ): TokenResponse? {
+        checkTokenAndRefresh(forceRefresh)
         return profile.authState.lastTokenResponse
     }
 
-    private suspend fun checkTokenAndRefresh() {
-        if (needsTokenRefresh()){
-            refreshToken()
+    override suspend fun getAuthHeaders(httpMethod: String, uri: String): Map<String, String> {
+        val headers = mutableMapOf<String, String>()
+
+        val tokenResponse = getLastTokenResponse()
+
+        headers[HTTPHeaderName.AUTHORIZATION] = "${tokenResponse!!.tokenType} ${tokenResponse.accessToken}"
+        if(tokenResponse.tokenType!!.lowercase() == "dpop") {
+            headers[HTTPHeaderName.DPOP] = DPoPGenerator.getInstance(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!)
+                .generateProof(httpMethod, uri, tokenResponse.accessToken)
+        }
+        return headers
+    }
+
+    private suspend fun checkTokenAndRefresh(forceRefresh: Boolean = false) {
+        if (forceRefresh || needsTokenRefresh()){
+            requestToken(true)
         } else {
             //Token is still valid
         }
     }
 
-    override fun needsTokenRefresh(): Boolean {
-        return (System.currentTimeMillis() + 10_000L) > profile.authState.lastTokenResponse!!.accessTokenExpirationTime!!
+    private fun needsTokenRefresh(): Boolean {
+        return (System.currentTimeMillis() + 280_000L) > profile.authState.lastTokenResponse!!.accessTokenExpirationTime!!
     }
 
     override fun isUserAuthorized(): Boolean {
@@ -405,8 +419,17 @@ class AuthenticatorImplementation : Authenticator {
     }
 
     private fun getWebId(idToken: String): String {
+        Jwts.builder()
         val claims = parseIdToken(idToken, OpenIdConfig())
         val webId = claims.getClaimValueAsString("webid")
         return webId ?: claims.getClaimValueAsString("sub")
+    }
+}
+
+fun AuthState.createTokenRequest(isRefresh: Boolean): TokenRequest {
+    return if(isRefresh) {
+        this.createTokenRefreshRequest()
+    } else {
+        this.lastAuthorizationResponse!!.createTokenExchangeRequest()
     }
 }
