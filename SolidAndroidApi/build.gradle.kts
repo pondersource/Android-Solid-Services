@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import com.vanniktech.maven.publish.SonatypeHost
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
 
 plugins {
     alias(libs.plugins.android.library)
@@ -18,6 +19,17 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
         manifestPlaceholders["appAuthRedirectScheme"] = namespace.toString()
+        manifestPlaceholders["keystoreAlias"] = "oauth2redirect"
+
+        buildConfigField(
+            "String",
+            "KEY_GENERATOR_ALIAS",
+            project.findProperty("key_generator_alias") as String
+        )
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -53,6 +65,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
+
+    api(libs.io.jsonwebtoken.api)
+    runtimeOnly(libs.io.jsonwebtoken.impl)
+    runtimeOnly(libs.io.jsonwebtoken.orgjson) {
+        exclude(group= "org.json:json", module= "json") //provided by Android natively
+    }
 
     api(project(":Shared"))
 }

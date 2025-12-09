@@ -22,10 +22,11 @@ import com.pondersource.shared.util.isSuccessful
 import com.pondersource.shared.util.toPlainString
 import com.pondersource.shared.vocab.LDP
 import jakarta.json.JsonString
-import net.openid.appauth.TokenResponse
 import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 class SolidResourceManagerImplementation: SolidResourceManager {
 
@@ -56,19 +57,13 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         client.session(OpenIdSession.ofIdToken(newTokenId))
     }
 
-    private suspend fun handleTokenRefreshAndReturn(): TokenResponse? {
+    private suspend fun getAuthenticationHeaders(httpMethod: String, uri: String): Map<String, String> {
+        val tokenResponse = auth.getLastTokenResponse()
+            ?: throw IllegalArgumentException("Auth object should be authenticated before interacting with resources.")
 
-        if (auth.getProfile().userInfo == null) {
-            throw IllegalArgumentException("Auth object should be authenticated before interacting with resources.")
-        }
+        updateClientWithNewToken(tokenResponse.idToken!!)
 
-        return if (auth.needsTokenRefresh()) {
-            val tokenResponse = auth.getLastTokenResponse()
-            updateClientWithNewToken(tokenResponse!!.idToken!!)
-            tokenResponse
-        } else {
-            auth.getLastTokenResponse()
-        }
+        return auth.getAuthHeaders(httpMethod, uri)
     }
 
     override suspend fun <T: Resource> read(
@@ -77,13 +72,17 @@ class SolidResourceManagerImplementation: SolidResourceManager {
     ): SolidNetworkResponse<T> {
 
         try {
-            val tokenResponse = handleTokenRefreshAndReturn()
+            val authHeaders = getAuthenticationHeaders("GET", resource.toString())
 
             val request = Request.newBuilder()
                 .uri(resource)
                 .header(HTTPHeaderName.ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.ANY)
-                .header(HTTPHeaderName.AUTHORIZATION, "${tokenResponse?.tokenType} ${tokenResponse?.idToken}")
                 .GET()
+                .also {
+                    authHeaders.forEach { (key, value) ->
+                        it.header(key, value)
+                    }
+                }
                 .build()
 
             val response: Response<InputStream> = client.send(
@@ -189,7 +188,7 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         resource: T
     ): SolidNetworkResponse<T> {
         try {
-            val tokenResponse = handleTokenRefreshAndReturn()
+            val authHeaders = getAuthenticationHeaders("PUT", resource.toString())
 
             val type = if (SolidContainer::class.java.isAssignableFrom(resource.javaClass)) {
                 "<${LDP.BasicContainer}>; rel=\"type\""
@@ -204,10 +203,11 @@ class SolidResourceManagerImplementation: SolidResourceManager {
                 .type(resource.getContentType())
                 .header(HTTPHeaderName.LINK, type)
                 .header(HTTPHeaderName.ACCEPT, resource.getContentType())
-                .header(
-                    HTTPHeaderName.AUTHORIZATION,
-                    "${tokenResponse?.tokenType} ${tokenResponse?.idToken}"
-                )
+                .also {
+                    authHeaders.forEach { (key, value) ->
+                        it.header(key, value)
+                    }
+                }
                 .PUT(Request.BodyPublishers.ofInputStream(resource.getEntity()))
                 .build()
 
@@ -231,14 +231,15 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         resource: T
     ): SolidNetworkResponse<T> {
         try {
-            val tokenResponse = handleTokenRefreshAndReturn()
+            val authHeaders = getAuthenticationHeaders("DELETE", resource.toString())
 
             val request: Request = Request.newBuilder()
                 .uri(resource.getIdentifier())
-                .header(
-                    HTTPHeaderName.AUTHORIZATION,
-                    "${tokenResponse?.tokenType} ${tokenResponse?.idToken}"
-                )
+                .also {
+                    authHeaders.forEach { (key, value) ->
+                        it.header(key, value)
+                    }
+                }
                 .DELETE()
                 .build()
 
@@ -264,14 +265,15 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         uri: URI
     ): SolidNetworkResponse<Boolean> {
         try {
-            val tokenResponse = handleTokenRefreshAndReturn()
+            val authHeaders = getAuthenticationHeaders("DELETE", uri.toString())
 
             val request: Request = Request.newBuilder()
                 .uri(uri)
-                .header(
-                    HTTPHeaderName.AUTHORIZATION,
-                    "${tokenResponse?.tokenType} ${tokenResponse?.idToken}"
-                )
+                .also {
+                    authHeaders.forEach { (key, value) ->
+                        it.header(key, value)
+                    }
+                }
                 .DELETE()
                 .build()
 

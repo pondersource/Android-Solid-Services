@@ -36,6 +36,7 @@ titaniumJsonLdJre8 = "1.4.1"
 jakartaJson = "2.0.1"
 lifecycleRuntime = "2.8.7"
 vanniktechMavenPublish = "0.30.0"
+jjwt = "0.13.0"
 
 [libraries]
 jetbrains-kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin"}
@@ -116,6 +117,13 @@ inrupt-client-okhttp = { group = "com.inrupt.client", name = "inrupt-client-okht
 inrupt-client-openid = { group = "com.inrupt.client", name = "inrupt-client-openid" }
 inrupt-client-solid = { group = "com.inrupt.client", name = "inrupt-client-solid" }
 inrupt-client-vocabulary = { group = "com.inrupt.client", name = "inrupt-client-vocabulary" }
+
+
+io-jsonwebtoken-api = { group = "io.jsonwebtoken", name = "jjwt-api", version.ref = "jjwt" }
+io-jsonwebtoken-impl = { group = "io.jsonwebtoken", name = "jjwt-impl", version.ref = "jjwt" }
+io-jsonwebtoken-orgjson = { group = "io.jsonwebtoken", name = "jjwt-orgjson", version.ref = "jjwt" }
+
+
 
 #Testing
 androidx-test-ext-junit = {group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit"}
