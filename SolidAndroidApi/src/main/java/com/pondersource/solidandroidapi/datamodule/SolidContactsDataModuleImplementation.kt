@@ -14,16 +14,13 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
 
      companion object {
           @Volatile
-          private lateinit var INSTANCE: SolidContactsDataModule
+          private var INSTANCE: SolidContactsDataModule? = null
 
           fun getInstance(
                context: Context,
           ): SolidContactsDataModule {
-               return if (Companion::INSTANCE.isInitialized) {
-                    INSTANCE
-               } else {
-                    INSTANCE = SolidContactsDataModuleImplementation(context)
-                    INSTANCE
+               return INSTANCE ?: synchronized(this) {
+                    INSTANCE ?: SolidContactsDataModuleImplementation(context).also { INSTANCE = it }
                }
           }
      }
@@ -45,7 +42,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                     privateAddressBookUris = privates
                ))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -66,7 +63,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                ).getIdentifier().toString()
                getAddressBook(ownerWebId, createdAddressBookUri)
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -80,7 +77,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val addressBookGroupsRdf = helper.getAddressBookGroups(ownerWebId, URI.create(addressBookRdf.getGroupsIndex()))
                DataModuleResult.Success(AddressBook.createFromRdf(addressBookRdf, addressBookContactsRdf, addressBookGroupsRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -93,7 +90,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                helper.renameAddressBook(ownerWebId, addressBookUri, newName)
                return getAddressBook(ownerWebId, addressBookUri)
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -124,7 +121,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                }
                return DataModuleResult.Success(FullContact.createFromRdf(newContact))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -136,7 +133,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val contactRdf = helper.getContact(ownerWebId, URI.create(contactString))
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -149,7 +146,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val contactRdf = helper.renameContact(ownerWebId, contactString, newName)
                return DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -162,7 +159,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val contactRdf = helper.addNewPhoneNumber(ownerWebId, URI.create(contactString), newPhoneNumber)
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -175,7 +172,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val contactRdf = helper.addNewEmailAddress(ownerWebId, URI.create(contactString), newEmailAddress)
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -188,7 +185,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val contactRdf = helper.removePhoneNumberFromContact(ownerWebId, URI.create(contactString), phoneNumber)
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -201,7 +198,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val contactRdf = helper.removeEmailAddressFromContact(ownerWebId, URI.create(contactString), emailAddress)
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -215,7 +212,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                helper.deleteContact(ownerWebId, addressBookUri, contactUri)
                contact
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -234,7 +231,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
 
                return getGroup(ownerWebId, groupRDF.getIdentifier().toString())
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -246,7 +243,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val groupRdf = helper.getGroup(ownerWebId, URI.create(groupString))
                DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -259,7 +256,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val groupRdf = helper.removeGroup(ownerWebId, URI.create(addressBookString), URI.create(groupString))
                DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -272,7 +269,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val groupRdf = helper.addContactToGroup(ownerWebId, URI.create(contactString), URI.create(groupString))
                DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
           } catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 
@@ -285,7 +282,7 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
                val groupRdf = helper.removeContactFromGroup(ownerWebId, contactString, groupString)
                DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
           }catch (e: Exception) {
-               DataModuleResult.Error(e.message)
+               DataModuleResult.Exception(e)
           }
      }
 }

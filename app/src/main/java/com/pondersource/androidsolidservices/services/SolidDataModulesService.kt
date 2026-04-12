@@ -5,7 +5,7 @@ import android.os.IBinder
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.pondersource.shared.data.datamodule.contact.NewContact
-import com.pondersource.shared.data.datamodule.extractResult
+import com.pondersource.shared.data.datamodule.getOrNull
 import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
 import com.pondersource.solidandroidclient.IASSDataModulesService
@@ -47,7 +47,7 @@ class SolidDataModulesService : LifecycleService() {
 
         override fun getAddressBooks(callback: IASSContactModuleAddressBookListCallback) {
             lifecycleScope.launch(Dispatchers.IO) {
-                callback.valueChanged(solidContactsDataModule.getAddressBooks(auth.getProfile().userInfo!!.webId).extractResult())
+                callback.valueChanged(solidContactsDataModule.getAddressBooks(auth.getProfile().userInfo!!.webId).getOrNull())
             }
         }
 
@@ -68,7 +68,7 @@ class SolidDataModulesService : LifecycleService() {
                         storage ?: auth.getProfile().webId!!.getStorages().get(0).toString(), //TODO
 
                         container
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -82,7 +82,7 @@ class SolidDataModulesService : LifecycleService() {
                     solidContactsDataModule.getAddressBook(
                         getProfile().userInfo!!.webId,
                         uri
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -97,7 +97,7 @@ class SolidDataModulesService : LifecycleService() {
                     solidContactsDataModule.deleteAddressBook(
                         uri,
                         ownerWebId ?:  auth.getProfile().userInfo!!.webId,
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -115,7 +115,7 @@ class SolidDataModulesService : LifecycleService() {
                         addressBookUri,
                         newContact,
                         groupUris
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -129,7 +129,7 @@ class SolidDataModulesService : LifecycleService() {
                     solidContactsDataModule.getContact(
                         getProfile().userInfo!!.webId,
                         contactUri
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -145,7 +145,7 @@ class SolidDataModulesService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         contactUri,
                         newName
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -161,7 +161,7 @@ class SolidDataModulesService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         contactUri,
                         newPhoneNumber
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -177,7 +177,7 @@ class SolidDataModulesService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         contactUri,
                         newEmailAddress
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -193,7 +193,7 @@ class SolidDataModulesService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         contactUri,
                         phoneNumber
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -209,7 +209,7 @@ class SolidDataModulesService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         contactUri,
                         emailAddress
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -225,7 +225,7 @@ class SolidDataModulesService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         addressBookUri,
                         contactUri,
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -243,7 +243,7 @@ class SolidDataModulesService : LifecycleService() {
                         addressBookUri,
                         title,
                         contactUris
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -257,7 +257,7 @@ class SolidDataModulesService : LifecycleService() {
                     solidContactsDataModule.getGroup(
                         getProfile().userInfo!!.webId,
                         groupUri
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -273,7 +273,7 @@ class SolidDataModulesService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         addressBookUri,
                         groupUri
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -289,7 +289,7 @@ class SolidDataModulesService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         contactUri,
                         groupUri
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }
@@ -305,7 +305,7 @@ class SolidDataModulesService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         contactUri,
                         groupUri
-                    ).extractResult()
+                    ).getOrNull()
                 )
             }
         }

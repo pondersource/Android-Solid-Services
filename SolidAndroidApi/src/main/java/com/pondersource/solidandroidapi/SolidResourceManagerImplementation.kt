@@ -33,16 +33,13 @@ class SolidResourceManagerImplementation: SolidResourceManager {
 
     companion object {
         @Volatile
-        private lateinit var INSTANCE: SolidResourceManager
+        private var INSTANCE: SolidResourceManager? = null
 
         fun getInstance(
             context: Context,
         ): SolidResourceManager {
-            return if (Companion::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = SolidResourceManagerImplementation(context)
-                INSTANCE
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SolidResourceManagerImplementation(context).also { INSTANCE = it }
             }
         }
     }
@@ -210,15 +207,15 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         containerUri: URI
     ): SolidNetworkResponse<Boolean> {
         if(containerUri.toString().endsWith("/")) {
-            val containerRdf = read(webid, containerUri, SolidContainer::class.java).handleResponse()
+            val containerRdf = read(webid, containerUri, SolidContainer::class.java).getOrThrow()
             containerRdf.getContained().forEach {
                 if(it.types.contains(LDP.BasicContainer.toString())) {
-                    deleteContainer(webid, URI.create(it.identifier)).handleResponse()
+                    deleteContainer(webid, URI.create(it.identifier)).getOrThrow()
                 } else {
-                    rawDelete(webid, URI.create(it.identifier)).handleResponse()
+                    rawDelete(webid, URI.create(it.identifier)).getOrThrow()
                 }
             }
-            rawDelete(webid, containerUri).handleResponse()
+            rawDelete(webid, containerUri).getOrThrow()
             return SolidNetworkResponse.Success(true)
         } else {
             return SolidNetworkResponse.Error(400, "Container URL must end with /")

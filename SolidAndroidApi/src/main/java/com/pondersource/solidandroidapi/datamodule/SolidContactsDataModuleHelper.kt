@@ -28,16 +28,13 @@ class SolidContactsDataModuleHelper {
         private const val TAG = "SolidContactsDataModuleHelper"
 
         @Volatile
-        private lateinit var INSTANCE: SolidContactsDataModuleHelper
+        private var INSTANCE: SolidContactsDataModuleHelper? = null
 
         fun getInstance(
             context: Context,
         ): SolidContactsDataModuleHelper {
-            return if (Companion::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = SolidContactsDataModuleHelper(context)
-                INSTANCE
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SolidContactsDataModuleHelper(context).also { INSTANCE = it }
             }
         }
     }
