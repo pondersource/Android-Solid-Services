@@ -30,6 +30,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +62,8 @@ fun Setting(
     LaunchedEffect(Unit) {
         viewModel.refreshAccounts()
     }
+
+    val activeWebId by viewModel.activeWebId.collectAsState()
 
     Scaffold(
         topBar = {
@@ -105,7 +109,7 @@ fun Setting(
                     items(viewModel.accounts.value) { profile ->
                         AccountRow(
                             profile = profile,
-                            isActive = profile.userInfo?.webId == viewModel.activeWebId.value,
+                            isActive = profile.userInfo?.webId == activeWebId,
                             onClick = {
                                 profile.userInfo?.webId?.let { webId ->
                                     viewModel.switchAccount(webId)

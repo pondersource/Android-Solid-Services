@@ -9,8 +9,11 @@ import com.pondersource.androidsolidservices.base.Constants
 import com.pondersource.shared.data.Profile
 import com.pondersource.solidandroidapi.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -22,7 +25,9 @@ class SettingViewModel @Inject constructor(
 ): BaseViewModel() {
 
     val accounts = mutableStateOf<List<Profile>>(authenticator.getAllLoggedInProfiles())
-    val activeWebId = mutableStateOf(runBlocking { authenticator.getActiveWebId() ?: "" })
+    val activeWebId: StateFlow<String> = authenticator.activeProfileFlow
+        .map { it.userInfo?.webId ?: "" }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
     val logoutLoading = mutableStateOf(false)
     /** True when there are no accounts left — navigate to Login. */
     val navigateToLogin = mutableStateOf(false)
@@ -30,7 +35,6 @@ class SettingViewModel @Inject constructor(
     fun switchAccount(webId: String) {
         viewModelScope.launch {
             authenticator.setActiveWebId(webId)
-            activeWebId.value = webId
         }
     }
 
@@ -44,7 +48,7 @@ class SettingViewModel @Inject constructor(
             accounts.value = authenticator.getAllLoggedInProfiles()
             val remaining = accounts.value
             if (remaining.isNotEmpty()) {
-                activeWebId.value = authenticator.getActiveWebId() ?: ""
+                // activeWebId updates reactively via activeProfileFlow
             } else {
                 navigateToLogin.value = true
             }
@@ -69,8 +73,5 @@ class SettingViewModel @Inject constructor(
 
     fun refreshAccounts() {
         accounts.value = authenticator.getAllLoggedInProfiles()
-        viewModelScope.launch {
-            activeWebId.value = authenticator.getActiveWebId() ?: ""
-        }
     }
 }
