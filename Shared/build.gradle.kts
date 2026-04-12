@@ -1,9 +1,8 @@
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
-import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.vanniktech.maven.publish)
     id("kotlin-parcelize")
@@ -42,12 +41,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     buildFeatures {
         aidl = true
     }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
+    }
+    jvmToolchain(11)
 }
 
 dependencies {
@@ -107,21 +110,6 @@ mavenPublishing {
         }
     }
 
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
     signAllPublications()
 }
-
-/*
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = "com.pondersource.shared"
-            artifactId = "shared"
-            version = "0.2.0"
-
-            afterEvaluate {
-                from(components["release"])
-            }
-        }
-    }
-}*/

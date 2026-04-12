@@ -1,10 +1,8 @@
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
-import com.vanniktech.maven.publish.SonatypeHost
-import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.vanniktech.maven.publish)
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.google.protobuf)
@@ -54,9 +52,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
     }
+    jvmToolchain(11)
 }
 
 dependencies {
@@ -116,21 +118,6 @@ mavenPublishing {
         }
     }
 
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
     signAllPublications()
 }
-
-/*
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = "com.pondersource.solidandroidapi"
-            artifactId = "solidandroidapi"
-            version = "0.2.0"
-
-            afterEvaluate {
-                from(components["release"])
-            }
-        }
-    }
-}*/

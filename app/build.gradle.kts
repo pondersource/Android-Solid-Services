@@ -1,6 +1,7 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.parcelize)
     alias(libs.plugins.jetbrains.kotlin.compose.compiler)
     alias(libs.plugins.jetbrains.kotlin.serialization)
@@ -44,16 +45,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
-    }
 
     buildFeatures {
-        viewBinding = true
+        buildConfig = true
         compose = true
     }
 
@@ -72,6 +66,17 @@ android {
             )
         }
     }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
+    }
+    jvmToolchain(11)
+}
+
+composeCompiler {
+
 }
 
 
