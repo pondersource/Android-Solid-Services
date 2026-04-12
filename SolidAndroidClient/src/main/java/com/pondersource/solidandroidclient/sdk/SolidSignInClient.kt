@@ -17,6 +17,18 @@ import com.pondersource.solidandroidclient.sdk.SolidException.SolidServiceConnec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
+/**
+ * Manages sign-in authorization between a third-party app and the Android Solid Services app.
+ *
+ * Obtain an instance via [Solid.getSignInClient].  All operations require the Android Solid
+ * Services app to be installed and running on the device.
+ *
+ * Typical flow:
+ * 1. Check [authServiceConnectionState] to confirm the IPC service is connected.
+ * 2. Call [getAccount] — if it returns `null`, the app is not yet authorized.
+ * 3. Call [requestLogin] to prompt the user to grant access.
+ * 4. Use [disconnectFromSolid] to revoke access when the user signs out.
+ */
 class SolidSignInClient {
 
     companion object {
@@ -24,9 +36,12 @@ class SolidSignInClient {
         private var INSTANCE: SolidSignInClient? = null
 
         /**
-         *  get a single instance of the class
-         *  @param context ApplicationContext
-         *  @return SolidSignInClient object
+         * Returns the application-scoped singleton [SolidSignInClient].
+         * @param context Any [Context]; the application context is used internally.
+         * @param applicationInfo The calling app's [android.content.pm.ApplicationInfo], used
+         *   to identify the app when requesting access.
+         * @param hasInstalledAndroidSolidServices A lambda that returns `true` when the
+         *   Android Solid Services app is installed on the device.
          */
         fun getInstance(
             context: Context,
@@ -73,6 +88,10 @@ class SolidSignInClient {
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
+    /**
+     * Hot [Flow] of the IPC service connection state.
+     * Emits `true` once the bound service connects and `false` if it disconnects.
+     */
     fun authServiceConnectionState(): Flow<Boolean> {
         return connectionFlow
     }
@@ -96,6 +115,13 @@ class SolidSignInClient {
     }
 
 
+    /**
+     * Returns a [SolidSignInAccount] if this app is authorized, or `null` if it has not yet
+     * been granted access by the user.
+     * @throws SolidException.SolidAppNotFoundException if the ASS app is not installed.
+     * @throws SolidException.SolidServiceConnectionException if the IPC service is not connected.
+     * @throws SolidException.SolidNotLoggedInException if no user is logged in.
+     */
     @Throws(Exception::class)
     fun getAccount() : SolidSignInAccount?{
         if (hasInstalledAndroidSolidServices()) {
@@ -119,6 +145,15 @@ class SolidSignInClient {
         }
     }
 
+    /**
+     * Requests the user to grant this app access to Solid via the ASS app.
+     *
+     * A system dialog is shown to the user inside the ASS app.  The result is delivered
+     * asynchronously to [callBack]:
+     * - `(true, null)` — access granted
+     * - `(false, null)` — access denied by the user
+     * - `(null, error)` — an error occurred
+     */
     fun requestLogin(callBack: (Boolean?, SolidException?) -> Unit) {
         checkConnectionWithASS {
             iASSAuthService!!.requestLogin(object : IASSLoginCallback.Stub() {
@@ -133,6 +168,9 @@ class SolidSignInClient {
         }
     }
 
+    /**
+     * Revokes this app's access to Solid.  [callBack] receives `true` on success.
+     */
     fun disconnectFromSolid(callBack: (Boolean) -> Unit) {
         checkConnectionWithASS {
             iASSAuthService!!.disconnectFromSolid(object : IASSLogoutCallback.Stub() {

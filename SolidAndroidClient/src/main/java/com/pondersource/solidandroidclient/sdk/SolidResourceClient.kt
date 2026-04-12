@@ -28,12 +28,30 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
+/**
+ * Reads, creates, updates and deletes resources on the authenticated user's Solid pod by
+ * communicating with the Android Solid Services app over IPC.
+ *
+ * Obtain an instance via [Solid.getResourceClient].
+ *
+ * All public methods are `suspend` functions and must be called from a coroutine.  They throw
+ * a subclass of [SolidException.SolidResourceException] on failure rather than returning a
+ * result wrapper, so callers should wrap calls in `try/catch` or use `runCatching`.
+ *
+ * @see Solid.getResourceClient
+ */
 class SolidResourceClient {
 
     companion object {
         @Volatile
         private var INSTANCE: SolidResourceClient? = null
 
+        /**
+         * Returns the application-scoped singleton [SolidResourceClient].
+         * @param context Any [Context]; the application context is used internally.
+         * @param hasInstalledAndroidSolidServices A lambda that returns `true` when the
+         *   Android Solid Services app is installed on the device.
+         */
         fun getInstance(
             context: Context,
             hasInstalledAndroidSolidServices: () -> Boolean
@@ -71,6 +89,10 @@ class SolidResourceClient {
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
+    /**
+     * Hot [Flow] of the IPC service connection state.
+     * Emits `true` once the bound service connects and `false` if it disconnects.
+     */
     fun resourceServiceConnectionState(): Flow<Boolean> = connectionFlow
 
     private fun checkBasicConditions() {
@@ -105,6 +127,11 @@ class SolidResourceClient {
 
     // ── Public suspend API ────────────────────────────────────────────────────
 
+    /**
+     * Fetches and parses the authenticated user's WebID document from their pod.
+     * @throws SolidException if the app is not installed, the service is not connected,
+     *   or the server returns an error.
+     */
     suspend fun getWebId(): WebId {
         checkBasicConditions()
         return suspendCoroutine { cont ->
@@ -120,6 +147,12 @@ class SolidResourceClient {
         }
     }
 
+    /**
+     * Reads a resource from the pod.
+     * @param resourceUrl The full URL of the resource.
+     * @param clazz The expected resource type; must extend [RDFSource] or [NonRDFSource].
+     * @throws SolidException on connection or server errors.
+     */
     suspend fun <T : Resource> read(resourceUrl: String, clazz: Class<T>): T {
         checkBasicConditions()
         return suspendCoroutine { cont ->
@@ -153,6 +186,10 @@ class SolidResourceClient {
         }
     }
 
+    /**
+     * Creates a new resource on the pod at the URI specified by [resource].
+     * @throws SolidException on connection or server errors.
+     */
     suspend fun <T : Resource> create(resource: T): T {
         checkBasicConditions()
         return suspendCoroutine { cont ->
@@ -186,6 +223,10 @@ class SolidResourceClient {
         }
     }
 
+    /**
+     * Replaces an existing resource on the pod.
+     * @throws SolidException on connection or server errors.
+     */
     suspend fun <T : Resource> update(resource: T): T {
         checkBasicConditions()
         return suspendCoroutine { cont ->
@@ -219,6 +260,10 @@ class SolidResourceClient {
         }
     }
 
+    /**
+     * Deletes a resource from the pod.
+     * @throws SolidException on connection or server errors.
+     */
     suspend fun <T : Resource> delete(resource: T): T {
         checkBasicConditions()
         return suspendCoroutine { cont ->

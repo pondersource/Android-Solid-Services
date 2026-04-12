@@ -9,9 +9,22 @@ import com.pondersource.shared.data.datamodule.contact.FullGroup
 import com.pondersource.shared.data.datamodule.contact.NewContact
 import com.pondersource.shared.data.webid.WebId
 
+/**
+ * Manages Solid Contacts data (address books, contacts, groups) on a user's Solid pod.
+ *
+ * All operations are performed on behalf of [ownerWebId] using the Solid Contacts
+ * specification.  Results are wrapped in [DataModuleResult] to distinguish data errors
+ * from unexpected exceptions.
+ *
+ * Obtain an instance via [SolidContactsDataModule.getInstance].
+ */
 interface SolidContactsDataModule {
 
     companion object {
+        /**
+         * Returns the application-scoped singleton [SolidContactsDataModule].
+         * @param context Any [Context]; the application context is used internally.
+         */
         fun getInstance(context: Context): SolidContactsDataModule = SolidContactsDataModuleImplementation.getInstance(context)
     }
 
