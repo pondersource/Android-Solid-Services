@@ -17,6 +17,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -31,6 +33,9 @@ fun Main(
     navController: NavController,
     viewModel: MainViewModel,
 ) {
+
+    val webId by viewModel.webId.collectAsState()
+    val storages by viewModel.storages.collectAsState()
 
     var storagesExpanded = remember { mutableStateOf(false) }
     var storageSelected = remember { mutableStateOf("") }
@@ -58,7 +63,7 @@ fun Main(
                     style = MaterialTheme.typography.titleSmall
                 )
                 Text(
-                    text = viewModel.webId.value,
+                    text = webId,
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -96,7 +101,7 @@ fun Main(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        viewModel.storages.value.forEach {
+                        storages.forEach {
                             DropdownMenuItem(
                                 text = {
                                     Text(

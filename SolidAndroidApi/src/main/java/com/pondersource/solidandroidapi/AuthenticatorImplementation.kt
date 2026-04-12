@@ -30,6 +30,8 @@ import com.pondersource.shared.util.toPlainString
 import com.pondersource.solidandroidapi.repository.UserRepository
 import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import io.jsonwebtoken.Jwts
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthState
@@ -84,6 +86,8 @@ class AuthenticatorImplementation : Authenticator {
     private val authService: AuthorizationService
     private var profiles: ProfileList
     private var activeWebId: String?
+    private var _activeProfileFlow: MutableStateFlow<Profile>
+    override val activeProfileFlow: StateFlow<Profile> get() = _activeProfileFlow
 
     private constructor(
         context: Context,
@@ -95,6 +99,7 @@ class AuthenticatorImplementation : Authenticator {
             profiles = userRepository.readAllProfilesOnce()
             activeWebId = userRepository.getActiveWebId()
         }
+        _activeProfileFlow = MutableStateFlow(getProfile())
     }
 
     private suspend fun refreshProfiles() {
@@ -391,6 +396,7 @@ class AuthenticatorImplementation : Authenticator {
                 userRepository.setActiveWebId(newWebId)
                 activeWebId = newWebId
                 refreshProfiles()
+                _activeProfileFlow.value = getProfile()
                 return newWebId
             } else {
                 return ""
@@ -486,6 +492,7 @@ class AuthenticatorImplementation : Authenticator {
         if (profile.authState.isAuthorized && profile.userInfo != null) {
             activeWebId = webId
             userRepository.setActiveWebId(webId)
+            _activeProfileFlow.value = getProfile()
         } else {
             throw IllegalArgumentException("Cannot set active account: profile for $webId is not authorized or incomplete.")
         }
@@ -510,6 +517,7 @@ class AuthenticatorImplementation : Authenticator {
                 val newActiveWebId = remaining.first().userInfo!!.webId
                 activeWebId = newActiveWebId
                 userRepository.setActiveWebId(newActiveWebId)
+                _activeProfileFlow.value = getProfile()
             } else {
                 activeWebId = null
                 userRepository.setActiveWebId(null)

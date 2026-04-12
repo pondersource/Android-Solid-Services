@@ -2,9 +2,12 @@ package com.pondersource.solidandroidapi
 
 import android.content.Intent
 import com.pondersource.shared.data.Profile
+import kotlinx.coroutines.flow.StateFlow
 import net.openid.appauth.TokenResponse
 
 interface Authenticator {
+
+    val activeProfileFlow: StateFlow<Profile>
 
     suspend fun createAuthenticationIntentWithWebId(
         webId: String,

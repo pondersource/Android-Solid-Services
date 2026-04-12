@@ -2,12 +2,15 @@ package com.pondersource.androidsolidservices.ui.main
 
 import android.accounts.Account
 import android.accounts.AccountManager
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
 import com.pondersource.androidsolidservices.base.BaseViewModel
 import com.pondersource.androidsolidservices.base.Constants
 import com.pondersource.solidandroidapi.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -18,10 +21,13 @@ class MainViewModel @Inject constructor(
     @Named(Constants.ASS_ACCOUNT_NAME) private val aSSAccountName: String,
 ): BaseViewModel() {
 
-    val activeProfile = mutableStateOf(authenticator.getProfile())
-    val webId: MutableState<String> = mutableStateOf(activeProfile.value.userInfo!!.webId)
-    val storages = mutableStateOf(activeProfile.value.webId!!.getStorages().map { it.toString() })
-    val allProfiles = mutableStateOf(authenticator.getAllLoggedInProfiles())
+    val webId: StateFlow<String> = authenticator.activeProfileFlow
+        .map { it.userInfo!!.webId }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), authenticator.getProfile().userInfo!!.webId)
+
+    val storages: StateFlow<List<String>> = authenticator.activeProfileFlow
+        .map { it.webId!!.getStorages().map { uri -> uri.toString() } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), authenticator.getProfile().webId!!.getStorages().map { it.toString() })
 
     init {
         syncAccountManager()
