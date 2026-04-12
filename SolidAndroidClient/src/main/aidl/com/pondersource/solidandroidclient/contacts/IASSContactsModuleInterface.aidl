@@ -31,7 +31,7 @@ interface IASSContactsModuleInterface {
 
     void getAddressBook(String uri, IASSContactModuleAddressBookCallback callback);
 
-    void deleteAddressBood(
+    void deleteAddressBook(
         String uri,
         @nullable String ownerWebId,
         IASSContactModuleAddressBookCallback callback

@@ -131,7 +131,7 @@ class SolidContactsDataModule {
     ): AddressBook? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.deleteAddressBood(addressBookUri, null, object : IASSContactModuleAddressBookCallback.Stub() {
+            iASSContactsModuleInterface!!.deleteAddressBook(addressBookUri, null, object : IASSContactModuleAddressBookCallback.Stub() {
                 override fun valueChanged(addressBook: AddressBook?) {
                     continuation.resume(addressBook)
                 }

@@ -87,7 +87,7 @@ class SolidDataModulesService : LifecycleService() {
             }
         }
 
-        override fun deleteAddressBood(
+        override fun deleteAddressBook(
             uri: String,
             ownerWebId: String?,
             callback: IASSContactModuleAddressBookCallback
