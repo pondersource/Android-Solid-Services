@@ -1,9 +1,8 @@
 package com.pondersource.androidsolidservices.repository.datasource.local.accessgrant
 
 import android.content.SharedPreferences
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.pondersource.androidsolidservices.model.GrantedApp
+import kotlinx.serialization.json.Json
 
 class AccessGrantLocalDataSourceImplementation (
     private val sharedPreferences: SharedPreferences
@@ -40,13 +39,13 @@ class AccessGrantLocalDataSourceImplementation (
     }
 
     override fun grantedApplications(): List<GrantedApp> {
-        val savedString = sharedPreferences.getString(APP_LIST_KEY, "[]")
-        return Gson().fromJson(savedString, object : TypeToken<List<GrantedApp>>(){}.type)
+        val savedString = sharedPreferences.getString(APP_LIST_KEY, "[]")!!
+        return Json.decodeFromString<List<GrantedApp>>(savedString)
     }
 
     private fun saveGrantedApps(grantedApps: List<GrantedApp>) {
         sharedPreferences.edit().apply {
-            putString(APP_LIST_KEY, Gson().toJson(grantedApps))
+            putString(APP_LIST_KEY, Json.encodeToString(grantedApps))
             apply()
         }
     }

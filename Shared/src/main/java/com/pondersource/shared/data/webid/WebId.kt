@@ -4,9 +4,12 @@ import com.apicatalog.jsonld.JsonLd
 import com.apicatalog.jsonld.document.JsonDocument
 import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.inrupt.client.vocabulary.PIM
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import com.inrupt.client.vocabulary.RDF
 import com.inrupt.client.vocabulary.RDFS
 import com.pondersource.shared.RDFSource
@@ -27,19 +30,19 @@ class WebId: RDFSource {
             if (webId == null) {
                 return null
             }
-            return JsonObject().apply {
-                addProperty(KEY_IDENTIFIER, webId.getIdentifier().toString())
-                addProperty(KEY_TYPE, webId.getContentType())
-                addProperty(KEY_DATASET, webId.getEntity().toPlainString())
+            return buildJsonObject {
+                put(KEY_IDENTIFIER, webId.getIdentifier().toString())
+                put(KEY_TYPE, webId.getContentType())
+                put(KEY_DATASET, webId.getEntity().toPlainString())
             }.toString()
         }
 
         fun readFromString(objectString: String): WebId {
-            val obj = JsonParser.parseString(objectString).asJsonObject
+            val obj = Json.parseToJsonElement(objectString).jsonObject
             return WebId(
-                URI.create(obj.get(KEY_IDENTIFIER).asString),
-                MediaType.of(obj.get(KEY_TYPE).asString),
-                JsonLd.toRdf(JsonDocument.of(obj.get(KEY_DATASET).asString.byteInputStream())).get(),
+                URI.create(obj[KEY_IDENTIFIER]!!.jsonPrimitive.content),
+                MediaType.of(obj[KEY_TYPE]!!.jsonPrimitive.content),
+                JsonLd.toRdf(JsonDocument.of(obj[KEY_DATASET]!!.jsonPrimitive.content.byteInputStream())).get(),
             )
         }
     }

@@ -13,9 +13,8 @@ import com.apicatalog.rdf.RdfTriple
 import com.apicatalog.rdf.RdfValue
 import com.apicatalog.rdf.impl.DefaultRdfProvider
 import com.apicatalog.rdf.spi.RdfProvider
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.inrupt.client.vocabulary.RDF
+import kotlinx.serialization.json.Json
 import com.pondersource.shared.resource.Resource
 import com.pondersource.shared.vocab.DC
 import com.pondersource.shared.vocab.ExtendedXsdConstants
@@ -68,8 +67,9 @@ open class RDFSource : Resource {
 
     private constructor(inParcel: Parcel) {
         this.identifier = URI.create(inParcel.readString())
-        this.headers = Gson().fromJson<Headers>(inParcel.readString(), object : TypeToken<Headers>() {}.type)
-        this.mediaType = Gson().fromJson<MediaType>(inParcel.readString(), object : TypeToken<MediaType>() {}.type)
+        val headersMap = Json.decodeFromString<Map<String, List<String>>>(inParcel.readString()!!)
+        this.headers = Headers.Builder().apply { headersMap.forEach { (name, values) -> values.forEach { add(name, it) } } }.build()
+        this.mediaType = MediaType.of(inParcel.readString()!!)
         this.dataset = JsonLd.toRdf(JsonDocument.of(inParcel.readString()!!.byteInputStream())).options(JsonLdOptions().apply {
             isRdfStar = true
         }).get()
@@ -204,8 +204,8 @@ open class RDFSource : Resource {
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(identifier.toString())
-        dest.writeString(Gson().toJson(headers))
-        dest.writeString(Gson().toJson(mediaType))
+        dest.writeString(Json.encodeToString(headers.toMultimap()))
+        dest.writeString(mediaType.toString())
         dest.writeString(JsonLd.fromRdf(RdfDocument.of(dataset)).get().toString())
         dest.writeString(itselfSubject)
     }

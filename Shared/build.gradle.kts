@@ -64,7 +64,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
 
     api(libs.openid.appauth)
-    api(libs.google.code.gson)
 
     api(platform(libs.inrupt.client.bom))
     api(libs.inrupt.client.solid)

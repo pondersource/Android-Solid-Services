@@ -1,8 +1,10 @@
 package com.pondersource.shared.data
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class UserInfo(
-    @SerializedName("webid")
+    @SerialName("webid")
     val webId: String,
 )

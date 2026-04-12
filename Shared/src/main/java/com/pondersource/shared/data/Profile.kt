@@ -1,7 +1,7 @@
 package com.pondersource.shared.data
 
-import com.google.gson.Gson
 import com.pondersource.shared.data.webid.WebId
+import kotlinx.serialization.json.Json
 import com.pondersource.shared.data.webid.WebId.Companion.readFromString
 import com.pondersource.shared.data.webid.WebId.Companion.writeToString
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -55,7 +55,7 @@ class ProfileMapSerializer(
 class ProfileSerializer: KSerializer<Profile> {
     override fun serialize(encoder: Encoder, value: Profile) {
         encoder.encodeString(value.authState.jsonSerializeString())
-        encoder.encodeString(Gson().toJson(value.userInfo))
+        encoder.encodeString(if (value.userInfo != null) Json.encodeToString(value.userInfo) else "")
         encoder.encodeString(writeToString(value.webId) ?: "")
     }
 
@@ -67,7 +67,7 @@ class ProfileSerializer: KSerializer<Profile> {
         if (stateString.isNotEmpty()) {
             profile.authState =  AuthState.jsonDeserialize(stateString)
         }
-        profile.userInfo = Gson().fromJson(userInfoString, UserInfo::class.java)
+        profile.userInfo = if (userInfoString.isNotEmpty()) Json.decodeFromString<UserInfo>(userInfoString) else null
         if (webIdString.isNotEmpty()) {
             profile.webId = readFromString(webIdString)
         }

@@ -2,9 +2,8 @@ package com.pondersource.shared
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.pondersource.shared.resource.Resource
+import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okio.IOException
 import java.io.InputStream
@@ -35,7 +34,8 @@ open class NonRDFSource : Resource {
     private constructor(inParcel: Parcel) {
         this.identifier = URI.create(inParcel.readString())
         this.contentType = inParcel.readString()!!
-        this.headers = Gson().fromJson<Headers>(inParcel.readString(), object : TypeToken<Headers>() {}.type)
+        val headersMap = Json.decodeFromString<Map<String, List<String>>>(inParcel.readString()!!)
+        this.headers = Headers.Builder().apply { headersMap.forEach { (name, values) -> values.forEach { add(name, it) } } }.build()
         this.entity = inParcel.readString()!!.byteInputStream()
     }
 
@@ -88,7 +88,7 @@ open class NonRDFSource : Resource {
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(identifier.toString())
         dest.writeString(contentType)
-        dest.writeString(Gson().toJson(headers))
+        dest.writeString(Json.encodeToString(headers.toMultimap()))
         dest.writeString(getEntity().bufferedReader().use { it.readText() })
     }
 }

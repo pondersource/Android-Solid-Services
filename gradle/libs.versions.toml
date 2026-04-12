@@ -1,7 +1,6 @@
 [versions]
 android = "9.1.0"
 appauth = "0.11.1"
-gson = "2.13.2"
 inruptClient = "1.2.0"
 ktx = "1.18.0"
 lifecucle-ktx = "2.10.0"
@@ -106,7 +105,6 @@ androidx-legacy-support = {group = "androidx.legacy", name = "legacy-support-v4"
 
 androidx-exifInterface = {group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifInterface"}
 
-google-code-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 openid-appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
 titanium-json-ld-jre8 = { group = "com.apicatalog", name = "titanium-json-ld-jre8", version.ref = "titaniumJsonLdJre8" }
 glassfish-jakarta-json = { group = "org.glassfish", name = "jakarta.json", version.ref = "jakartaJson" }
