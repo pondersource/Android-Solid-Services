@@ -30,10 +30,13 @@ import com.pondersource.shared.util.toPlainString
 import com.pondersource.solidandroidapi.repository.UserRepository
 import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import io.jsonwebtoken.Jwts
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
@@ -79,11 +82,14 @@ class AuthenticatorImplementation : Authenticator {
         }
     }
 
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val initDeferred = CompletableDeferred<Unit>()
+
     private val userRepository: UserRepository
     private val authService: AuthorizationService
-    private var profiles: ProfileList
-    private var activeWebId: String?
-    private var _activeProfileFlow: MutableStateFlow<Profile>
+    private var profiles: ProfileList = ProfileList()
+    private var activeWebId: String? = null
+    private val _activeProfileFlow = MutableStateFlow(Profile())
     override val activeProfileFlow: StateFlow<Profile> get() = _activeProfileFlow
 
     private constructor(
@@ -91,13 +97,19 @@ class AuthenticatorImplementation : Authenticator {
     ) {
         this.userRepository = UserRepositoryImplementation.getInstance(context)
         this.authService = AuthorizationService(context)
-        // Load persisted state into memory on startup
-        runBlocking {
+        // Load persisted state on a background thread — never blocks the calling thread.
+        applicationScope.launch {
             profiles = userRepository.readAllProfilesOnce()
             activeWebId = userRepository.getActiveWebId()
+            if (getAllLoggedInProfiles().isNotEmpty()) {
+                _activeProfileFlow.value = getProfile()
+            }
+            initDeferred.complete(Unit)
         }
-        _activeProfileFlow = MutableStateFlow(getProfile())
     }
+
+    /** Suspends until the initial DataStore load has completed. */
+    private suspend fun awaitInit() = initDeferred.await()
 
     private suspend fun refreshProfiles() {
         profiles = userRepository.readAllProfilesOnce()
@@ -206,10 +218,12 @@ class AuthenticatorImplementation : Authenticator {
                     tokenRequest,
                     clientAuthentication
                 ) { tokenResponse, exception ->
-                    runBlocking {
+                    // Run the DataStore write on the IO dispatcher, then resume the
+                    // suspended caller — avoids blocking the AppAuth callback thread.
+                    applicationScope.launch {
                         updateTokenResponse(webid, tokenResponse, exception)
+                        cont.resume(Pair(tokenResponse, exception))
                     }
-                    cont.resume(Pair(tokenResponse, exception))
                 }
             }
         } else {
@@ -326,6 +340,7 @@ class AuthenticatorImplementation : Authenticator {
         webId: String,
         redirectUri: String,
     ) : Pair<Intent?, String?> {
+        awaitInit()
         val webIdDetails = getWebIdProfile(webId)
 
         return createAuthenticationIntentWithOidcIssuer(
@@ -338,7 +353,7 @@ class AuthenticatorImplementation : Authenticator {
         oidcIssuer: String,
         redirectUri: String,
     ) : Pair<Intent?, String?> {
-
+        awaitInit()
         val conf = getAuthorizationConf(oidcIssuer)
 
         return if (conf.first != null) {
@@ -374,6 +389,7 @@ class AuthenticatorImplementation : Authenticator {
         authResponse: AuthorizationResponse?,
         authException: AuthorizationException?
     ): String? {
+        awaitInit()
         updateAuthorizationResponse(authResponse, authException)
         if (authException == null && authResponse != null) {
             val tokenResponse = requestToken(IN_PROGRESS_AUTH)
@@ -407,6 +423,7 @@ class AuthenticatorImplementation : Authenticator {
         webId: String,
         forceRefresh: Boolean
     ): TokenResponse? {
+        awaitInit()
         checkTokenAndRefresh(webId, forceRefresh)
         val profile = profiles.getProfileOrReturnDefault(webId)
         return profile.authState.lastTokenResponse
@@ -417,6 +434,7 @@ class AuthenticatorImplementation : Authenticator {
         httpMethod: String,
         uri: String
     ): Map<String, String> {
+        awaitInit()
         val headers = mutableMapOf<String, String>()
 
         val profile = profiles.getProfileOrReturnDefault(webId)
@@ -476,15 +494,17 @@ class AuthenticatorImplementation : Authenticator {
             val activeProfile = allProfiles.find { it.userInfo?.webId == activeWebId }
             if (activeProfile != null) return activeProfile
         }
-        // Fallback to first authorized profile
-        return allProfiles.first()
+        // Fallback to first authorized profile, or an empty profile if not yet initialized
+        return allProfiles.firstOrNull() ?: Profile()
     }
 
     override suspend fun getActiveWebId(): String? {
+        awaitInit()
         return activeWebId
     }
 
     override suspend fun setActiveWebId(webId: String) {
+        awaitInit()
         val profile = profiles.getProfileOrReturnDefault(webId)
         if (profile.authState.isAuthorized && profile.userInfo != null) {
             activeWebId = webId
@@ -496,6 +516,7 @@ class AuthenticatorImplementation : Authenticator {
     }
 
     override suspend fun resetProfile() {
+        awaitInit()
         userRepository.removeAllProfiles()
         userRepository.setActiveWebId(null)
         activeWebId = null
@@ -505,6 +526,7 @@ class AuthenticatorImplementation : Authenticator {
     override suspend fun resetProfile(
         webId: String,
     ) {
+        awaitInit()
         userRepository.removeProfile(webId)
         // If the removed profile was the active one, switch to another or clear
         if (activeWebId == webId) {
@@ -528,7 +550,7 @@ class AuthenticatorImplementation : Authenticator {
         webId: String,
         logoutRedirectUrl: String,
     ) : Pair<Intent?, String?>{
-
+        awaitInit()
         val profile = profiles.getProfileOrReturnDefault(webId)
         return if (profile.authState.lastAuthorizationResponse != null &&
             profile.authState.authorizationServiceConfiguration != null) {

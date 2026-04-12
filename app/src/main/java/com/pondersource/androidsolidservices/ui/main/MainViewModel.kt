@@ -9,6 +9,7 @@ import com.pondersource.solidandroidapi.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
@@ -22,12 +23,14 @@ class MainViewModel @Inject constructor(
 ): BaseViewModel() {
 
     val webId: StateFlow<String> = authenticator.activeProfileFlow
+        .filter { it.userInfo != null }
         .map { it.userInfo!!.webId }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), authenticator.getProfile().userInfo!!.webId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 
     val storages: StateFlow<List<String>> = authenticator.activeProfileFlow
+        .filter { it.webId != null }
         .map { it.webId!!.getStorages().map { uri -> uri.toString() } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), authenticator.getProfile().webId!!.getStorages().map { it.toString() })
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     init {
         syncAccountManager()
