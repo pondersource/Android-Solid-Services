@@ -17,8 +17,8 @@ android {
         applicationId = "com.pondersource.androidsolidservices"
         minSdk = 26
         targetSdk = 33
-        versionCode = 3
-        versionName = "0.2.1"
+        versionCode = 4
+        versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -171,19 +171,4 @@ dependencies {
     implementation(project(":SolidAndroidApi"))
     implementation(project(":SolidAndroidClient"))
 
-}
-
-afterEvaluate {
-    if (project.hasProperty("android.injected.signing.store.file")) {
-        println("key store path: ${project.property("android.injected.signing.store.file")}")
-    }
-    if (project.hasProperty("android.injected.signing.store.password")) {
-        println("key store password: ${project.property("android.injected.signing.store.password")}")
-    }
-    if (project.hasProperty("android.injected.signing.key.alias")) {
-        println("key alias: ${project.property("android.injected.signing.key.alias")}")
-    }
-    if (project.hasProperty("android.injected.signing.key.password")) {
-        println("key password: ${project.property("android.injected.signing.key.password")}")
-    }
 }

@@ -90,7 +90,7 @@ mavenPublishing {
         sourcesJar = true,
         publishJavadocJar = true,
     ))
-    coordinates("com.pondersource.solidandroidapi", "solidandroidapi", "0.2.0")
+    coordinates("com.pondersource.solidandroidapi", "solidandroidapi", "0.3.0")
 
     pom {
         name.set("SolidAndroidApi")
