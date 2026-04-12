@@ -33,57 +33,44 @@ class LoginViewModel @Inject constructor(
     val loginLoading = mutableStateOf(false)
     val loginResult = mutableStateOf(false)
 
-    fun loginWithWebId(
-        webId: String,
-    ) {
+    private fun launchLogin(block: suspend () -> Pair<Intent?, String?>) {
         viewModelScope.launch {
             loginLoading.value = true
-            val intentRes =
-                authenticator.createAuthenticationIntentWithWebId(
-                    webId,
-                    AUTH_APP_REDIRECT_URL
-                )
-            loginBrowserIntentErrorMessage.value = intentRes.second
-            loginBrowserIntent.value = intentRes.first
+            try {
+                val intentRes = block()
+                loginBrowserIntentErrorMessage.value = intentRes.second
+                loginBrowserIntent.value = intentRes.first
+                if (intentRes.first == null) {
+                    loginLoading.value = false
+                }
+            } catch (e: Exception) {
+                loginBrowserIntentErrorMessage.value = e.message ?: "Login failed"
+                loginLoading.value = false
+            }
+        }
+    }
+
+    fun loginWithWebId(webId: String) {
+        launchLogin {
+            authenticator.createAuthenticationIntentWithWebId(webId, AUTH_APP_REDIRECT_URL)
         }
     }
 
     fun loginWithInruptCom() {
-        viewModelScope.launch {
-            loginLoading.value = true
-            val intentRes =
-                authenticator.createAuthenticationIntentWithOidcIssuer(
-                    OIDC_ISSUER_INRUPT_COM,
-                    AUTH_APP_REDIRECT_URL,
-                )
-            loginBrowserIntentErrorMessage.value = intentRes.second
-            loginBrowserIntent.value = intentRes.first
+        launchLogin {
+            authenticator.createAuthenticationIntentWithOidcIssuer(OIDC_ISSUER_INRUPT_COM, AUTH_APP_REDIRECT_URL)
         }
     }
 
     fun loginWithSolidcommunity() {
-        viewModelScope.launch {
-            loginLoading.value = true
-            val intentRes =
-                authenticator.createAuthenticationIntentWithOidcIssuer(
-                    OIDC_ISSUER_SOLIDCOMMIUNITY,
-                    AUTH_APP_REDIRECT_URL,
-                )
-            loginBrowserIntentErrorMessage.value = intentRes.second
-            loginBrowserIntent.value = intentRes.first
+        launchLogin {
+            authenticator.createAuthenticationIntentWithOidcIssuer(OIDC_ISSUER_SOLIDCOMMIUNITY, AUTH_APP_REDIRECT_URL)
         }
     }
 
     fun loginWithCustomIssuer(issuerUrl: String) {
-        viewModelScope.launch {
-            loginLoading.value = true
-            val intentRes =
-                authenticator.createAuthenticationIntentWithOidcIssuer(
-                    issuerUrl,
-                    AUTH_APP_REDIRECT_URL,
-                )
-            loginBrowserIntentErrorMessage.value = intentRes.second
-            loginBrowserIntent.value = intentRes.first
+        launchLogin {
+            authenticator.createAuthenticationIntentWithOidcIssuer(issuerUrl, AUTH_APP_REDIRECT_URL)
         }
     }
 
@@ -92,13 +79,18 @@ class LoginViewModel @Inject constructor(
         authorizationException: AuthorizationException?
     ) {
         viewModelScope.launch {
-            authenticator.submitAuthorizationResponse(
-                authorizationResponse,
-                authorizationException
-            )
+            try {
+                authenticator.submitAuthorizationResponse(
+                    authorizationResponse,
+                    authorizationException
+                )
+            } catch (_: Exception) {
+                // Token exchange may have succeeded even if a later step (e.g. WebID
+                // profile fetch) failed. Fall through to the isLoggedIn() check.
+            }
             loginLoading.value = false
             loginBrowserIntent.value = null
-            if(isLoggedIn()) {
+            if (isLoggedIn()) {
                 loginBrowserIntentErrorMessage.value = null
                 loginResult.value = true
             } else {
@@ -112,7 +104,9 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun isLoggedIn(): Boolean {
+    suspend fun isLoggedIn(): Boolean {
+        // getActiveWebId() awaits Authenticator init, ensuring profiles are loaded.
+        authenticator.getActiveWebId()
         return authenticator.isUserAuthorized()
     }
 }

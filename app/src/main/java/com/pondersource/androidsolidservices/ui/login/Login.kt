@@ -56,9 +56,18 @@ fun Login(
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (!viewModel.isAddingAccount && viewModel.isLoggedIn()) {
+            navController.navigate(MainPage) {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
+        }
+    }
+
     LaunchedEffect(viewModel.loginBrowserIntent.value) {
-        if (viewModel.loginBrowserIntent.value != null) {
-            doAuthenticationInBrowser.launch(viewModel.loginBrowserIntent.value!!)
+        viewModel.loginBrowserIntent.value?.let { intent ->
+            doAuthenticationInBrowser.launch(intent)
+            viewModel.loginBrowserIntent.value = null
         }
     }
 

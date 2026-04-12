@@ -9,7 +9,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,7 +17,6 @@ import androidx.navigation.NavHostController
 import com.pondersource.androidsolidservices.R
 import com.pondersource.androidsolidservices.ui.navigation.Login
 import com.pondersource.androidsolidservices.ui.navigation.MainPage
-import kotlinx.coroutines.launch
 
 @Composable
 fun Startup(
@@ -26,21 +24,17 @@ fun Startup(
     viewModel: StartupViewModel
 ) {
 
-    val scope = rememberCoroutineScope()
-
     LaunchedEffect(Unit) {
-        scope.launch {
-            if (viewModel.isLoggedIn()) {
-                navController.navigate(MainPage) {
-                    popUpTo(navController.graph.id) {
-                        inclusive = true
-                    }
+        if (viewModel.isLoggedIn()) {
+            navController.navigate(MainPage) {
+                popUpTo(navController.graph.id) {
+                    inclusive = true
                 }
-            } else {
-                navController.navigate(Login()) {
-                    popUpTo(navController.graph.id) {
-                        inclusive = true
-                    }
+            }
+        } else {
+            navController.navigate(Login()) {
+                popUpTo(navController.graph.id) {
+                    inclusive = true
                 }
             }
         }
