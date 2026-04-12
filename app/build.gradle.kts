@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.pondersource.androidsolidservices"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.pondersource.androidsolidservices"
         minSdk = 26
