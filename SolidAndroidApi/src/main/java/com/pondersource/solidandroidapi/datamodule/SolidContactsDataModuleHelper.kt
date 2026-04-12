@@ -22,7 +22,7 @@ import com.pondersource.solidandroidapi.SolidResourceManagerImplementation
 import java.net.URI
 import java.util.UUID
 
-class SolidContactsDataModuleHelper {
+internal class SolidContactsDataModuleHelper {
 
     companion object {
         private const val TAG = "SolidContactsDataModuleHelper"

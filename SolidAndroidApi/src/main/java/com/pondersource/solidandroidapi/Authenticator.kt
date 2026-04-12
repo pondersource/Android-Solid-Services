@@ -1,11 +1,16 @@
 package com.pondersource.solidandroidapi
 
+import android.content.Context
 import android.content.Intent
 import com.pondersource.shared.data.Profile
 import kotlinx.coroutines.flow.StateFlow
 import net.openid.appauth.TokenResponse
 
 interface Authenticator {
+
+    companion object {
+        fun getInstance(context: Context): Authenticator = AuthenticatorImplementation.getInstance(context)
+    }
 
     val activeProfileFlow: StateFlow<Profile>
 

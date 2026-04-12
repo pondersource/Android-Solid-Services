@@ -1,5 +1,6 @@
 package com.pondersource.solidandroidapi.datamodule
 
+import android.content.Context
 import com.pondersource.shared.data.datamodule.DataModuleResult
 import com.pondersource.shared.data.datamodule.contact.AddressBook
 import com.pondersource.shared.data.datamodule.contact.AddressBookList
@@ -9,6 +10,10 @@ import com.pondersource.shared.data.datamodule.contact.NewContact
 import com.pondersource.shared.data.webid.WebId
 
 interface SolidContactsDataModule {
+
+    companion object {
+        fun getInstance(context: Context): SolidContactsDataModule = SolidContactsDataModuleImplementation.getInstance(context)
+    }
 
     //region AddressBooks
     suspend fun getAddressBooks(

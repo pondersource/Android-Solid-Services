@@ -10,7 +10,7 @@ import com.pondersource.shared.data.datamodule.contact.NewContact
 import com.pondersource.shared.data.datamodule.contact.CONTACTS_DIRECTORY_SUFFIX
 import java.net.URI
 
-class SolidContactsDataModuleImplementation: SolidContactsDataModule {
+internal class SolidContactsDataModuleImplementation: SolidContactsDataModule {
 
      companion object {
           @Volatile

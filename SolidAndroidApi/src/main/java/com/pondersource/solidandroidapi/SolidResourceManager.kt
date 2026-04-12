@@ -1,10 +1,15 @@
 package com.pondersource.solidandroidapi
 
+import android.content.Context
 import com.pondersource.shared.SolidNetworkResponse
 import com.pondersource.shared.resource.Resource
 import java.net.URI
 
 interface SolidResourceManager {
+
+    companion object {
+        fun getInstance(context: Context): SolidResourceManager = SolidResourceManagerImplementation.getInstance(context)
+    }
 
     suspend fun <T: Resource> read(
         webid: String,

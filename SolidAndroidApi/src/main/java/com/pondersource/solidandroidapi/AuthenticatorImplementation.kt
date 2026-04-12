@@ -64,7 +64,7 @@ import kotlin.coroutines.suspendCoroutine
 /**
  * Authenticator is responsible to do the Authentication phase with the selected Identity Provider.
  */
-class AuthenticatorImplementation : Authenticator {
+internal class AuthenticatorImplementation : Authenticator {
 
     companion object {
 

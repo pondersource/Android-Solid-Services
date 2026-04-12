@@ -7,7 +7,7 @@ import com.pondersource.shared.resource.Resource
 import java.net.URI
 import java.security.InvalidParameterException
 
-class SolidAccountResourceManagerImplementation(
+internal class SolidAccountResourceManagerImplementation(
     context: Context,
     private val profile: Profile,
 ): SolidAccountResourceManager {

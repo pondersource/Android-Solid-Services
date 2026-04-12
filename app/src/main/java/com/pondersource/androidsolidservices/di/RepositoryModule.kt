@@ -6,7 +6,6 @@ import com.pondersource.androidsolidservices.repository.AccessGrantRepositoryImp
 import com.pondersource.androidsolidservices.repository.ResourcePermissionRepository
 import com.pondersource.androidsolidservices.repository.ResourcePermissionRepositoryImplementation
 import com.pondersource.solidandroidapi.repository.UserRepository
-import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSource
 import dagger.Module
 import dagger.Provides
@@ -22,7 +21,7 @@ class RepositoryModule {
     fun provideUserRepository(
         @ApplicationContext context: Context,
     ): UserRepository {
-        return UserRepositoryImplementation.getInstance(context)
+        return UserRepository.getInstance(context)
     }
 
     @Provides

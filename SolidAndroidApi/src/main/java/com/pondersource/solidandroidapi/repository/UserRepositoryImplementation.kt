@@ -15,12 +15,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.OutputStream
 
-class UserRepositoryImplementation private constructor(
+internal class UserRepositoryImplementation private constructor(
     private val context: Context,
 ): UserRepository {
 

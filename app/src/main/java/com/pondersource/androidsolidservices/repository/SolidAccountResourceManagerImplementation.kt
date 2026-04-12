@@ -4,7 +4,7 @@ import android.content.Context
 import com.pondersource.shared.SolidNetworkResponse
 import com.pondersource.shared.data.Profile
 import com.pondersource.shared.resource.Resource
-import com.pondersource.solidandroidapi.SolidResourceManagerImplementation
+import com.pondersource.solidandroidapi.SolidResourceManager
 import java.net.URI
 import java.security.InvalidParameterException
 
@@ -13,7 +13,7 @@ class SolidAccountResourceManagerImplementation(
     private val profile: Profile,
 ): SolidAccountResourceManager {
 
-    private val resourceManager = SolidResourceManagerImplementation.getInstance(context)
+    private val resourceManager = SolidResourceManager.getInstance(context)
 
     init {
         if(profile.userInfo?.webId.isNullOrEmpty()) {

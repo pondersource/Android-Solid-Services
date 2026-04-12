@@ -29,7 +29,7 @@ import java.net.URI
 import kotlin.collections.component1
 import kotlin.collections.component2
 
-class SolidResourceManagerImplementation: SolidResourceManager {
+internal class SolidResourceManagerImplementation: SolidResourceManager {
 
     companion object {
         @Volatile

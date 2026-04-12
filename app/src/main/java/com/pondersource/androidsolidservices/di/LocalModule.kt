@@ -4,11 +4,8 @@ import android.accounts.AccountManager
 import android.content.Context
 import com.pondersource.androidsolidservices.base.Constants
 import com.pondersource.solidandroidapi.Authenticator
-import com.pondersource.solidandroidapi.AuthenticatorImplementation
 import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
-import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModuleImplementation
 import com.pondersource.solidandroidapi.SolidResourceManager
-import com.pondersource.solidandroidapi.SolidResourceManagerImplementation
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,7 +36,7 @@ class LocalModule {
     fun provideAuthenticator(
         @ApplicationContext context: Context,
     ): Authenticator {
-        return AuthenticatorImplementation.getInstance(context)
+        return Authenticator.getInstance(context)
     }
 
     @Provides
@@ -47,9 +44,7 @@ class LocalModule {
     fun provideSolidResourceManager(
         @ApplicationContext context: Context,
     ): SolidResourceManager {
-        return SolidResourceManagerImplementation.getInstance(
-            context
-        )
+        return SolidResourceManager.getInstance(context)
     }
 
     @Provides
@@ -57,8 +52,6 @@ class LocalModule {
     fun provideSolidContactsDataModule(
         @ApplicationContext context: Context,
     ): SolidContactsDataModule {
-        return SolidContactsDataModuleImplementation.getInstance(
-            context
-        )
+        return SolidContactsDataModule.getInstance(context)
     }
 }
