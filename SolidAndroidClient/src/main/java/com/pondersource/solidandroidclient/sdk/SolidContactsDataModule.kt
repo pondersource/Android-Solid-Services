@@ -27,16 +27,13 @@ class SolidContactsDataModule {
 
     companion object {
         @Volatile
-        private lateinit var INSTANCE: SolidContactsDataModule
+        private var INSTANCE: SolidContactsDataModule? = null
 
         fun getInstance(
             context: Context,
         ): SolidContactsDataModule {
-            return if (Companion::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = SolidContactsDataModule(context)
-                INSTANCE
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SolidContactsDataModule(context).also { INSTANCE = it }
             }
         }
     }

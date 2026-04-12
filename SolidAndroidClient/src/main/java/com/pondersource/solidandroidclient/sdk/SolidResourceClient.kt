@@ -29,17 +29,14 @@ class SolidResourceClient {
 
     companion object {
         @Volatile
-        private lateinit var INSTANCE: SolidResourceClient
+        private var INSTANCE: SolidResourceClient? = null
 
         fun getInstance(
             context: Context,
             hasInstalledAndroidSolidServices: () -> Boolean
         ): SolidResourceClient {
-            return if (Companion::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = SolidResourceClient(context, hasInstalledAndroidSolidServices)
-                INSTANCE
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SolidResourceClient(context, hasInstalledAndroidSolidServices).also { INSTANCE = it }
             }
         }
     }

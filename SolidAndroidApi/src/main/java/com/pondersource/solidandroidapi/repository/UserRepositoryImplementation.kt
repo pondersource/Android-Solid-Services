@@ -31,7 +31,7 @@ class UserRepositoryImplementation private constructor(
         private val ACTIVE_WEB_ID_KEY = stringPreferencesKey("active_web_id")
 
         @Volatile
-        private lateinit var INSTANCE: UserRepository
+        private var INSTANCE: UserRepository? = null
 
         object ProfileListSerializer: Serializer<ProfileList> {
             override val defaultValue: ProfileList
@@ -61,11 +61,8 @@ class UserRepositoryImplementation private constructor(
         fun getInstance(
             context: Context,
         ): UserRepository {
-            return if (Companion::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = UserRepositoryImplementation(context)
-                INSTANCE
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: UserRepositoryImplementation(context).also { INSTANCE = it }
             }
         }
     }

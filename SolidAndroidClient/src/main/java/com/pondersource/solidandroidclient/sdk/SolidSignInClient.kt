@@ -21,7 +21,7 @@ class SolidSignInClient {
 
     companion object {
         @Volatile
-        private lateinit var INSTANCE: SolidSignInClient
+        private var INSTANCE: SolidSignInClient? = null
 
         /**
          *  get a single instance of the class
@@ -33,11 +33,8 @@ class SolidSignInClient {
             applicationInfo: ApplicationInfo,
             hasInstalledAndroidSolidServices: () -> Boolean
         ): SolidSignInClient {
-            return if (Companion::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = SolidSignInClient(context, applicationInfo, hasInstalledAndroidSolidServices)
-                INSTANCE
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SolidSignInClient(context, applicationInfo, hasInstalledAndroidSolidServices).also { INSTANCE = it }
             }
         }
     }

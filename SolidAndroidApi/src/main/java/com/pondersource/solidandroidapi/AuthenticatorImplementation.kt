@@ -68,16 +68,13 @@ class AuthenticatorImplementation : Authenticator {
         private const val IN_PROGRESS_AUTH = "in_progress"
 
         @Volatile
-        private lateinit var INSTANCE: Authenticator
+        private var INSTANCE: Authenticator? = null
 
         fun getInstance(
             context: Context,
         ): Authenticator {
-            return if (Companion::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = AuthenticatorImplementation(context)
-                INSTANCE
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: AuthenticatorImplementation(context).also { INSTANCE = it }
             }
         }
     }
