@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.vanniktech.maven.publish)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.google.protobuf)
     `maven-publish`
 }
 
@@ -71,6 +73,10 @@ dependencies {
     runtimeOnly(libs.io.jsonwebtoken.orgjson) {
         exclude(group= "org.json:json", module= "json") //provided by Android natively
     }
+
+    //Local storage for saving profiles
+    implementation(libs.jetbrains.kotlinx.serialization.json)
+    implementation(libs.androidx.datastore)
 
     api(project(":Shared"))
 }

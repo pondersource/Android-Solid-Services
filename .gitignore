@@ -2,6 +2,7 @@
 .gradle
 /local.properties
 .idea
+.kotlin
 .DS_Store
 /build
 /captures
@@ -9,3 +10,5 @@
 .cxx
 local.properties
 .
+/app/release
+/app/build

@@ -16,6 +16,7 @@ import com.pondersource.shared.HTTPAcceptType
 import com.pondersource.shared.HTTPHeaderName
 import com.pondersource.shared.RDFSource
 import com.pondersource.shared.SolidNetworkResponse
+import com.pondersource.shared.data.webid.WebId
 import com.pondersource.shared.resource.Resource
 import com.pondersource.shared.resource.SolidContainer
 import com.pondersource.shared.util.isSuccessful
@@ -57,22 +58,27 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         client.session(OpenIdSession.ofIdToken(newTokenId))
     }
 
-    private suspend fun getAuthenticationHeaders(httpMethod: String, uri: String): Map<String, String> {
-        val tokenResponse = auth.getLastTokenResponse()
+    private suspend fun getAuthenticationHeaders(
+        webId: String,
+        httpMethod: String,
+        uri: String
+    ): Map<String, String> {
+        val tokenResponse = auth.getLastTokenResponse(webId)
             ?: throw IllegalArgumentException("Auth object should be authenticated before interacting with resources.")
 
         updateClientWithNewToken(tokenResponse.idToken!!)
 
-        return auth.getAuthHeaders(httpMethod, uri)
+        return auth.getAuthHeaders(webId, httpMethod, uri)
     }
 
     override suspend fun <T: Resource> read(
+        webid: String,
         resource: URI,
         clazz: Class<T>,
     ): SolidNetworkResponse<T> {
 
         try {
-            val authHeaders = getAuthenticationHeaders("GET", resource.toString())
+            val authHeaders = getAuthenticationHeaders(webid, "GET", resource.toString())
 
             val request = Request.newBuilder()
                 .uri(resource)
@@ -101,32 +107,34 @@ class SolidResourceManagerImplementation: SolidResourceManager {
     }
 
     override suspend fun <T: Resource> create(
+        webid: String,
         resource: T
     ): SolidNetworkResponse<T> {
 
-        val existingResource = read(resource.getIdentifier(), resource.javaClass)
+        val existingResource = read(webid, resource.getIdentifier(), resource.javaClass)
 
         if(existingResource is SolidNetworkResponse.Success) {
             return SolidNetworkResponse.Error(409, "Resource already exists")
         } else if (existingResource is SolidNetworkResponse.Error) {
-            return rawCreate(resource)
+            return rawCreate(webid, resource)
         } else {
             return SolidNetworkResponse.Error(500, "Unknown error")
         }
     }
 
     override suspend fun <T: Resource> update(
+        webid: String,
         newResource: T
     ): SolidNetworkResponse<T> {
 
-        val existingResourceResponse = read(newResource.getIdentifier(), newResource.javaClass)
+        val existingResourceResponse = read(webid, newResource.getIdentifier(), newResource.javaClass)
 
         when(existingResourceResponse) {
             is SolidNetworkResponse.Success -> {
-                val deleteResponse = delete(existingResourceResponse.data)
+                val deleteResponse = delete(webid, existingResourceResponse.data)
                 when(deleteResponse) {
                     is SolidNetworkResponse.Success -> {
-                        return rawCreate(newResource)
+                        return rawCreate(webid, newResource)
                     }
                     is SolidNetworkResponse.Error -> {
                         return SolidNetworkResponse.Error(
@@ -152,14 +160,15 @@ class SolidResourceManagerImplementation: SolidResourceManager {
     }
 
     override suspend fun <T: Resource> delete(
+        webid: String,
         resource: T,
     ): SolidNetworkResponse<T> {
 
-        val existingResourceResponse = read(resource.getIdentifier(), resource.javaClass)
+        val existingResourceResponse = read(webid, resource.getIdentifier(), resource.javaClass)
 
         when (existingResourceResponse) {
             is SolidNetworkResponse.Success -> {
-                return rawDelete(resource)
+                return rawDelete(webid, resource)
             }
             else -> {
                 return existingResourceResponse
@@ -167,17 +176,20 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         }
     }
 
-    override suspend fun deleteContainer(containerUri: URI): SolidNetworkResponse<Boolean> {
+    override suspend fun deleteContainer(
+        webid: String,
+        containerUri: URI
+    ): SolidNetworkResponse<Boolean> {
         if(containerUri.toString().endsWith("/")) {
-            val containerRdf = read(containerUri, SolidContainer::class.java).handleResponse()
+            val containerRdf = read(webid, containerUri, SolidContainer::class.java).handleResponse()
             containerRdf.getContained().forEach {
                 if(it.types.contains(LDP.BasicContainer.toString())) {
-                    deleteContainer(URI.create(it.identifier)).handleResponse()
+                    deleteContainer(webid, URI.create(it.identifier)).handleResponse()
                 } else {
-                    rawDelete(URI.create(it.identifier)).handleResponse()
+                    rawDelete(webid, URI.create(it.identifier)).handleResponse()
                 }
             }
-            rawDelete(containerUri).handleResponse()
+            rawDelete(webid, containerUri).handleResponse()
             return SolidNetworkResponse.Success(true)
         } else {
             return SolidNetworkResponse.Error(400, "Container URL must end with /")
@@ -185,10 +197,11 @@ class SolidResourceManagerImplementation: SolidResourceManager {
     }
 
     private suspend fun <T: Resource> rawCreate(
+        webid: String,
         resource: T
     ): SolidNetworkResponse<T> {
         try {
-            val authHeaders = getAuthenticationHeaders("PUT", resource.toString())
+            val authHeaders = getAuthenticationHeaders(webid, "PUT", resource.toString())
 
             val type = if (SolidContainer::class.java.isAssignableFrom(resource.javaClass)) {
                 "<${LDP.BasicContainer}>; rel=\"type\""
@@ -228,10 +241,11 @@ class SolidResourceManagerImplementation: SolidResourceManager {
     }
 
     private suspend fun <T: Resource> rawDelete(
+        webid: String,
         resource: T
     ): SolidNetworkResponse<T> {
         try {
-            val authHeaders = getAuthenticationHeaders("DELETE", resource.toString())
+            val authHeaders = getAuthenticationHeaders(webid, "DELETE", resource.toString())
 
             val request: Request = Request.newBuilder()
                 .uri(resource.getIdentifier())
@@ -262,10 +276,11 @@ class SolidResourceManagerImplementation: SolidResourceManager {
     }
 
     private suspend fun rawDelete(
+        webid: String,
         uri: URI
     ): SolidNetworkResponse<Boolean> {
         try {
-            val authHeaders = getAuthenticationHeaders("DELETE", uri.toString())
+            val authHeaders = getAuthenticationHeaders(webid, "DELETE", uri.toString())
 
             val request: Request = Request.newBuilder()
                 .uri(uri)

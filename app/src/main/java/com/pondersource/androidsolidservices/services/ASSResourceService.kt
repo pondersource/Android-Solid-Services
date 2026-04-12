@@ -61,6 +61,8 @@ class ASSResourceService: LifecycleService() {
             }
         }
 
+        private fun getProfile() = authenticator.getProfile()
+
         override fun getWebId(callback: IASSRdfResourceCallback) {
 
             //TODO
@@ -72,7 +74,7 @@ class ASSResourceService: LifecycleService() {
                     callback.onError(code, message)
                 }
             ) {
-                val webId = authenticator.getProfile().webId
+                val webId = getProfile().webId
                 if (webId != null) {
                     callback.onResult(webId)
                 } else {
@@ -92,7 +94,7 @@ class ASSResourceService: LifecycleService() {
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result =
-                        solidResourceManager.create(resource)
+                        solidResourceManager.create(getProfile().userInfo!!.webId, resource)
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -119,7 +121,9 @@ class ASSResourceService: LifecycleService() {
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result =
-                        solidResourceManager.create(resource)
+                        solidResourceManager.create(
+                            getProfile().userInfo!!.webId,
+                            resource)
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -149,6 +153,7 @@ class ASSResourceService: LifecycleService() {
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result = solidResourceManager.read(
+                        getProfile().userInfo!!.webId,
                         URI.create(resourceUrl), NonRDFSource::class.java
                     )
                     when(result) {
@@ -180,6 +185,7 @@ class ASSResourceService: LifecycleService() {
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result = solidResourceManager.read(
+                        getProfile().userInfo!!.webId,
                         URI.create(resourceUrl), RDFSource::class.java
                     )
                     when(result) {
@@ -208,7 +214,10 @@ class ASSResourceService: LifecycleService() {
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result =
-                        solidResourceManager.update(resource)
+                        solidResourceManager.update(
+                            getProfile().userInfo!!.webId,
+                            resource
+                        )
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -235,7 +244,10 @@ class ASSResourceService: LifecycleService() {
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result =
-                        solidResourceManager.update(resource)
+                        solidResourceManager.update(
+                            getProfile().userInfo!!.webId,
+                            resource
+                        )
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -262,7 +274,10 @@ class ASSResourceService: LifecycleService() {
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result =
-                        solidResourceManager.delete(resource)
+                        solidResourceManager.delete(
+                            getProfile().userInfo!!.webId,
+                            resource
+                        )
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)
@@ -289,7 +304,10 @@ class ASSResourceService: LifecycleService() {
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result =
-                        solidResourceManager.delete(resource)
+                        solidResourceManager.delete(
+                            getProfile().userInfo!!.webId,
+                            resource
+                        )
                     when(result) {
                         is SolidNetworkResponse.Success -> {
                             callback.onResult(resource)

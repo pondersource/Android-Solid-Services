@@ -2,6 +2,8 @@ package com.pondersource.solidandroidapi
 
 import android.content.Intent
 import com.pondersource.shared.data.Profile
+import com.pondersource.shared.data.webid.WebId
+import net.openid.appauth.TokenResponse
 
 interface Authenticator {
 
@@ -18,19 +20,37 @@ interface Authenticator {
     suspend fun submitAuthorizationResponse(
         authResponse: net.openid.appauth.AuthorizationResponse?,
         authException: net.openid.appauth.AuthorizationException?
-    )
+    ): String?
 
-    suspend fun getLastTokenResponse(forceRefresh: Boolean = false): net.openid.appauth.TokenResponse?
+    suspend fun getLastTokenResponse(
+        webId: String,
+        forceRefresh: Boolean = false
+    ): TokenResponse?
 
-    suspend fun getAuthHeaders(httpMethod: String, uri: String): Map<String, String>
+    suspend fun getAuthHeaders(
+        webId: String,
+        httpMethod: String,
+        uri: String
+    ): Map<String, String>
 
     fun isUserAuthorized(): Boolean
 
+    fun getAllLoggedInProfiles(): List<Profile>
+
+    fun getProfile(
+        webId: String,
+    ): Profile
+
     fun getProfile(): Profile
 
-    fun resetProfile()
+    suspend fun resetProfile()
+
+    suspend fun resetProfile(
+        webId: String,
+    )
 
     suspend fun getTerminationSessionIntent(
+        webId: String,
         logoutRedirectUrl: String,
     ) : Pair<Intent?, String?>
 }

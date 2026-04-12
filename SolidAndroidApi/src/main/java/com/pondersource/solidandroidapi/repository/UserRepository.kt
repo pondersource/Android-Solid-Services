@@ -1,10 +1,14 @@
 package com.pondersource.solidandroidapi.repository
 
 import com.pondersource.shared.data.Profile
+import com.pondersource.shared.data.ProfileList
+import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
 
-    fun readProfile(): Profile
+    fun readAllProfiles(): Flow<ProfileList>
 
-    fun writeProfile(profile: Profile)
+    suspend fun writeProfile(webid: String, profile: Profile)
+
+    suspend fun removeProfile(webid: String)
 }

@@ -20,7 +20,9 @@ import com.pondersource.shared.HTTPHeaderName
 import com.pondersource.shared.RDFSource
 import com.pondersource.shared.SolidNetworkResponse
 import com.pondersource.shared.data.Profile
+import com.pondersource.shared.data.ProfileList
 import com.pondersource.shared.data.UserInfo
+import com.pondersource.shared.data.getProfileOrReturnDefault
 import com.pondersource.shared.data.webid.WebId
 import com.pondersource.shared.resource.Resource
 import com.pondersource.shared.util.isSuccessful
@@ -28,6 +30,8 @@ import com.pondersource.shared.util.toPlainString
 import com.pondersource.solidandroidapi.repository.UserRepository
 import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import io.jsonwebtoken.Jwts
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
@@ -49,6 +53,7 @@ import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver
 import java.io.InputStream
 import java.net.URI
 import java.time.Instant
+import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -58,6 +63,9 @@ import kotlin.coroutines.suspendCoroutine
 class AuthenticatorImplementation : Authenticator {
 
     companion object {
+
+        private const val IN_PROGRESS_AUTH = "in_progress"
+
         @Volatile
         private lateinit var INSTANCE: Authenticator
 
@@ -75,43 +83,50 @@ class AuthenticatorImplementation : Authenticator {
 
     private val userRepository: UserRepository
     private val authService: AuthorizationService
-    private var profile: Profile
+    private lateinit var profiles: ProfileList
 
     private constructor(
         context: Context,
     ) {
         this.userRepository = UserRepositoryImplementation.getInstance(context)
         this.authService = AuthorizationService(context)
-        this.profile = userRepository.readProfile()
     }
 
-    private fun updateRegistrationResponse(
+    private suspend fun updateRegistrationResponse(
         regResponse: net.openid.appauth.RegistrationResponse?
     ) {
-        profile.authState.update(regResponse)
-        userRepository.writeProfile(profile)
+        val profile = profiles.getProfileOrReturnDefault(IN_PROGRESS_AUTH).apply {
+            authState.update(regResponse)
+        }
+        userRepository.writeProfile(IN_PROGRESS_AUTH, profile)
     }
 
-    private fun updateAuthorizationResponse(
+    private suspend fun updateAuthorizationResponse(
         authResponse: AuthorizationResponse?,
         authException: AuthorizationException?
     ) {
-        profile.authState.update(authResponse, authException)
-        userRepository.writeProfile(profile)
+        val profile = profiles.getProfileOrReturnDefault(IN_PROGRESS_AUTH).apply {
+            authState.update(authResponse, authException)
+        }
+        userRepository.writeProfile(IN_PROGRESS_AUTH, profile)
     }
 
-    private fun updateTokenResponse(
+    private suspend fun updateTokenResponse(
+        webid: String,
         tokenResponse: TokenResponse?,
         authException: AuthorizationException?
     ) {
-        profile.authState.update(tokenResponse, authException)
-        userRepository.writeProfile(profile)
+        val profile = profiles.getProfileOrReturnDefault(webid).apply {
+            authState.update(tokenResponse, authException)
+        }
+        userRepository.writeProfile(webid, profile)
     }
 
-    private fun getUserInfoFromIdToken(): UserInfo? {
+    private fun getUserInfoFromIdToken(webId: String): UserInfo? {
         if (isUserAuthorized()) {
-            val webId = getWebId(profile.authState.idToken!!)
-            return UserInfo(webId)
+            val profile = getProfile(webId)
+            val actualWebId = getWebId(profile.authState.idToken!!)
+            return UserInfo(actualWebId)
         } else {
             return null
             //TODO(Not authorized user)
@@ -153,27 +168,33 @@ class AuthenticatorImplementation : Authenticator {
         updateRegistrationResponse(res)
     }
 
-    private suspend fun requestToken(tokenRefreshRequest: Boolean = false): Pair<TokenResponse?, AuthorizationException?> {
+    private suspend fun requestToken(
+        webid: String,
+        tokenRefreshRequest: Boolean = false
+    ): Pair<TokenResponse?, AuthorizationException?> {
 
+        val profile = profiles.getProfileOrReturnDefault(webid)
         val result : Pair<TokenResponse?, AuthorizationException?> = if (profile.authState.lastAuthorizationResponse != null) {
+            val tokenRequest = profile.authState.createTokenRequest(tokenRefreshRequest)
+            val clientAuthentication = if(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!.supportsDPop()) {
+                DPopClientSecretBasic(
+                    clientSecret = profile.authState.lastRegistrationResponse!!.clientSecret!!,
+                    configuration = tokenRequest.configuration,
+                    refreshToken = profile.authState.refreshToken
+                )
+            } else {
+                ClientSecretBasic(
+                    profile.authState.lastRegistrationResponse!!.clientSecret!!,
+                )
+            }
             suspendCoroutine { cont ->
-                val tokenRequest = profile.authState.createTokenRequest(tokenRefreshRequest)
-                val clientAuthentication = if(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!.supportsDPop()) {
-                    DPopClientSecretBasic(
-                        clientSecret = profile.authState.lastRegistrationResponse!!.clientSecret!!,
-                        configuration = tokenRequest.configuration,
-                        refreshToken = profile.authState.refreshToken
-                    )
-                } else {
-                    ClientSecretBasic(
-                        profile.authState.lastRegistrationResponse!!.clientSecret!!,
-                    )
-                }
                 authService.performTokenRequest(
                     tokenRequest,
                     clientAuthentication
                 ) { tokenResponse, exception ->
-                    updateTokenResponse(tokenResponse, exception)
+                    runBlocking {
+                        updateTokenResponse(webid, tokenResponse, exception)
+                    }
                     cont.resume(Pair(tokenResponse, exception))
                 }
             }
@@ -192,7 +213,7 @@ class AuthenticatorImplementation : Authenticator {
         }
     }
 
-    suspend fun <T: Resource> read(
+    private suspend fun <T: Resource> read(
         resource: URI,
         clazz: Class<T>,
     ): SolidNetworkResponse<T> {
@@ -200,11 +221,15 @@ class AuthenticatorImplementation : Authenticator {
         val client: SolidSyncClient = SolidSyncClient.getClient()
         try {
 
-            val tokenResponse = getLastTokenResponse()
+            val tokenResponse = getLastTokenResponse(IN_PROGRESS_AUTH)
                 ?: throw IllegalArgumentException("Auth object should be authenticated before interacting with resources.")
 
             client.session(OpenIdSession.ofIdToken(tokenResponse.idToken!!))
-            val headers = getAuthHeaders("GET", resource.toString())
+            val headers = getAuthHeaders(
+                IN_PROGRESS_AUTH,
+                "GET",
+                resource.toString()
+            )
 
             val request = Request.newBuilder()
                 .uri(resource)
@@ -277,6 +302,7 @@ class AuthenticatorImplementation : Authenticator {
         return if (conf.first != null) {
 
             registerToOpenId(conf.first!!, redirectUri)
+            val profile = profiles.getProfileOrReturnDefault(IN_PROGRESS_AUTH)
 
             if (profile.authState.lastRegistrationResponse != null) {
                 val builder = AuthorizationRequest.Builder(
@@ -305,29 +331,48 @@ class AuthenticatorImplementation : Authenticator {
     override suspend fun submitAuthorizationResponse(
         authResponse: AuthorizationResponse?,
         authException: AuthorizationException?
-    ) {
+    ): String? {
         updateAuthorizationResponse(authResponse, authException)
         if (authException == null && authResponse != null) {
-            val tokenResponse = requestToken()
+            val tokenResponse = requestToken(IN_PROGRESS_AUTH)
             if(tokenResponse.second == null && tokenResponse.first != null) {
-                profile.userInfo = getUserInfoFromIdToken()
-                profile.webId = getWebIdProfile(profile.userInfo!!.webId)
-                userRepository.writeProfile(profile)
+                val userInfo = getUserInfoFromIdToken(IN_PROGRESS_AUTH)
+                val webId = getWebIdProfile(userInfo!!.webId)
+
+                val loggedInProfile = profiles.getProfileOrReturnDefault(IN_PROGRESS_AUTH).apply {
+                    this.userInfo = userInfo
+                    this.webId = webId
+                }
+
+                userRepository.writeProfile(loggedInProfile.userInfo!!.webId, loggedInProfile)
+                userRepository.removeProfile(IN_PROGRESS_AUTH)
+                return loggedInProfile.userInfo!!.webId
+            } else {
+                return ""
             }
+        } else {
+            return null
         }
     }
 
     override suspend fun getLastTokenResponse(
+        webId: String,
         forceRefresh: Boolean
     ): TokenResponse? {
-        checkTokenAndRefresh(forceRefresh)
+        checkTokenAndRefresh(webId, forceRefresh)
+        val profile = profiles.getProfileOrReturnDefault(webId)
         return profile.authState.lastTokenResponse
     }
 
-    override suspend fun getAuthHeaders(httpMethod: String, uri: String): Map<String, String> {
+    override suspend fun getAuthHeaders(
+        webId: String,
+        httpMethod: String,
+        uri: String
+    ): Map<String, String> {
         val headers = mutableMapOf<String, String>()
 
-        val tokenResponse = getLastTokenResponse()
+        val profile = profiles.getProfileOrReturnDefault(webId)
+        val tokenResponse = getLastTokenResponse(webId)
 
         headers[HTTPHeaderName.AUTHORIZATION] = "${tokenResponse!!.tokenType} ${tokenResponse.accessToken}"
         if(tokenResponse.tokenType!!.lowercase() == "dpop") {
@@ -337,37 +382,60 @@ class AuthenticatorImplementation : Authenticator {
         return headers
     }
 
-    private suspend fun checkTokenAndRefresh(forceRefresh: Boolean = false) {
-        if (forceRefresh || needsTokenRefresh()){
-            requestToken(true)
+    private suspend fun checkTokenAndRefresh(
+        webid: String,
+        forceRefresh: Boolean = false
+    ) {
+        val profile = profiles.getProfileOrReturnDefault(webid)
+        if (forceRefresh || needsTokenRefresh(profile)){
+            requestToken(webid, true)
         } else {
             //Token is still valid
         }
     }
 
-    private fun needsTokenRefresh(): Boolean {
+    private fun needsTokenRefresh(profile: Profile): Boolean {
         return (System.currentTimeMillis() + 280_000L) > profile.authState.lastTokenResponse!!.accessTokenExpirationTime!!
     }
 
     override fun isUserAuthorized(): Boolean {
-        return profile.authState.isAuthorized
+        return profiles.profiles.values.firstOrNull { it.authState.isAuthorized } != null
     }
 
-    override fun getProfile() = profile
+    override fun getAllLoggedInProfiles(): List<Profile> {
+        return profiles.profiles.values.filter { it.authState.isAuthorized }.filter { it.userInfo != null && it.webId != null }
+    }
 
-    override fun resetProfile() {
-        profile = Profile()
-        userRepository.writeProfile(profile)
+    override fun getProfile(
+        webId: String,
+    ) = profiles.getProfileOrReturnDefault(webId)
+
+    override fun getProfile(): Profile {
+        return getAllLoggedInProfiles().first()
+    }
+
+    override suspend fun resetProfile() {
+        profiles.profiles.keys.forEach {
+            userRepository.removeProfile(it)
+        }
+    }
+
+    override suspend fun resetProfile(
+        webId: String,
+    ) {
+        userRepository.removeProfile(webId)
     }
 
     override suspend fun getTerminationSessionIntent(
+        webId: String,
         logoutRedirectUrl: String,
     ) : Pair<Intent?, String?>{
 
+        val profile = profiles.getProfileOrReturnDefault(webId)
         return if (profile.authState.lastAuthorizationResponse != null &&
             profile.authState.authorizationServiceConfiguration != null) {
 
-            val token =  getLastTokenResponse()
+            val token =  getLastTokenResponse(webId)
             val endSessionReq = EndSessionRequest.Builder(profile.authState.authorizationServiceConfiguration!!)
                 .setIdTokenHint(token!!.idToken)
                 .setPostLogoutRedirectUri(Uri.parse(logoutRedirectUrl))

@@ -4,31 +4,26 @@ import com.pondersource.shared.SolidNetworkResponse
 import com.pondersource.shared.resource.Resource
 import java.net.URI
 
-interface SolidResourceManager {
+interface SolidAccountResourceManager {
 
     suspend fun <T: Resource> read(
-        webid: String,
         resource: URI,
         clazz: Class<T>,
     ): SolidNetworkResponse<T>
 
     suspend fun <T: Resource> create(
-        webid: String,
         resource: T
     ): SolidNetworkResponse<T>
 
     suspend fun <T: Resource> update(
-        webid: String,
         newResource: T
     ): SolidNetworkResponse<T>
 
     suspend fun <T: Resource> delete(
-        webid: String,
         resource: T,
     ): SolidNetworkResponse<T>
 
     suspend fun deleteContainer(
-        webid: String,
         containerUri: URI
     ): SolidNetworkResponse<Boolean>
 }

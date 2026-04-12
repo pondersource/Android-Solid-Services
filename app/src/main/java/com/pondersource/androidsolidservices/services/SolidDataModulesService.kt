@@ -43,6 +43,8 @@ class SolidDataModulesService : LifecycleService() {
 
     private val contactsModuleInterface = object : IASSContactsModuleInterface.Stub() {
 
+        private fun getProfile() = auth.getProfile()
+
         override fun getAddressBooks(callback: IASSContactModuleAddressBookListCallback) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(solidContactsDataModule.getAddressBooks(auth.getProfile().userInfo!!.webId).extractResult())
@@ -60,10 +62,11 @@ class SolidDataModulesService : LifecycleService() {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
                     solidContactsDataModule.createAddressBook(
+                        ownerWebId ?: getProfile().userInfo!!.webId, //TODO
                         title,
                         isPrivate,
                         storage ?: auth.getProfile().webId!!.getStorages().get(0).toString(), //TODO
-                        ownerWebId ?: auth.getProfile().userInfo!!.webId, //TODO
+
                         container
                     ).extractResult()
                 )
@@ -76,7 +79,10 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.getAddressBook(uri).extractResult()
+                    solidContactsDataModule.getAddressBook(
+                        getProfile().userInfo!!.webId,
+                        uri
+                    ).extractResult()
                 )
             }
         }
@@ -105,6 +111,7 @@ class SolidDataModulesService : LifecycleService() {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
                     solidContactsDataModule.createNewContact(
+                        getProfile().userInfo!!.webId,
                         addressBookUri,
                         newContact,
                         groupUris
@@ -119,7 +126,10 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.getContact(contactUri).extractResult()
+                    solidContactsDataModule.getContact(
+                        getProfile().userInfo!!.webId,
+                        contactUri
+                    ).extractResult()
                 )
             }
         }
@@ -131,7 +141,11 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.renameContact(contactUri, newName).extractResult()
+                    solidContactsDataModule.renameContact(
+                        getProfile().userInfo!!.webId,
+                        contactUri,
+                        newName
+                    ).extractResult()
                 )
             }
         }
@@ -143,7 +157,11 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.addNewPhoneNumber(contactUri, newPhoneNumber).extractResult()
+                    solidContactsDataModule.addNewPhoneNumber(
+                        getProfile().userInfo!!.webId,
+                        contactUri,
+                        newPhoneNumber
+                    ).extractResult()
                 )
             }
         }
@@ -155,7 +173,11 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.addNewEmailAddress(contactUri, newEmailAddress).extractResult()
+                    solidContactsDataModule.addNewEmailAddress(
+                        getProfile().userInfo!!.webId,
+                        contactUri,
+                        newEmailAddress
+                    ).extractResult()
                 )
             }
         }
@@ -167,7 +189,11 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.removePhoneNumber(contactUri, phoneNumber).extractResult()
+                    solidContactsDataModule.removePhoneNumber(
+                        getProfile().userInfo!!.webId,
+                        contactUri,
+                        phoneNumber
+                    ).extractResult()
                 )
             }
         }
@@ -179,7 +205,11 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.removeEmailAddress(contactUri, emailAddress).extractResult()
+                    solidContactsDataModule.removeEmailAddress(
+                        getProfile().userInfo!!.webId,
+                        contactUri,
+                        emailAddress
+                    ).extractResult()
                 )
             }
         }
@@ -192,6 +222,7 @@ class SolidDataModulesService : LifecycleService() {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
                     solidContactsDataModule.deleteContact(
+                        getProfile().userInfo!!.webId,
                         addressBookUri,
                         contactUri,
                     ).extractResult()
@@ -207,7 +238,12 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.createNewGroup(addressBookUri, title, contactUris).extractResult()
+                    solidContactsDataModule.createNewGroup(
+                        getProfile().userInfo!!.webId,
+                        addressBookUri,
+                        title,
+                        contactUris
+                    ).extractResult()
                 )
             }
         }
@@ -218,7 +254,10 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.getGroup(groupUri).extractResult()
+                    solidContactsDataModule.getGroup(
+                        getProfile().userInfo!!.webId,
+                        groupUri
+                    ).extractResult()
                 )
             }
         }
@@ -230,7 +269,11 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.deleteGroup(addressBookUri, groupUri).extractResult()
+                    solidContactsDataModule.deleteGroup(
+                        getProfile().userInfo!!.webId,
+                        addressBookUri,
+                        groupUri
+                    ).extractResult()
                 )
             }
         }
@@ -242,7 +285,11 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.addContactToGroup(contactUri, groupUri).extractResult()
+                    solidContactsDataModule.addContactToGroup(
+                        getProfile().userInfo!!.webId,
+                        contactUri,
+                        groupUri
+                    ).extractResult()
                 )
             }
         }
@@ -254,7 +301,11 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.removeContactFromGroup(contactUri, groupUri).extractResult()
+                    solidContactsDataModule.removeContactFromGroup(
+                        getProfile().userInfo!!.webId,
+                        contactUri,
+                        groupUri
+                    ).extractResult()
                 )
             }
         }

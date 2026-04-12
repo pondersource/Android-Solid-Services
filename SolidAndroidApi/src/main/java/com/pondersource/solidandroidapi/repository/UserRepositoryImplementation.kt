@@ -1,26 +1,55 @@
 package com.pondersource.solidandroidapi.repository
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
-import com.google.gson.Gson
+import androidx.datastore.core.CorruptionException
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.Serializer
+import androidx.datastore.dataStore
 import com.pondersource.shared.data.Profile
-import com.pondersource.shared.data.UserInfo
-import com.pondersource.shared.data.webid.WebId.Companion.readFromString
-import com.pondersource.shared.data.webid.WebId.Companion.writeToString
-import net.openid.appauth.AuthState
+import com.pondersource.shared.data.ProfileList
+import com.pondersource.shared.data.contains
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.InputStream
+import java.io.OutputStream
 
-class UserRepositoryImplementation: UserRepository {
+class UserRepositoryImplementation private constructor(
+    private val context: Context,
+): UserRepository {
 
     companion object {
 
-        private const val SHARED_PREFS_NAME = "solid_android_api_shared_prefs"
-        private const val PROFILE_STATE_KEY = "profile_state"
-        private const val PROFILE_USER_INFO_KEY = "profile_user_info"
-        private const val PROFILE_WEB_ID_DETAILS_KEY = "profile_web_id_details"
+        private const val PROFILES_FILE_NAME = "profiles.json"
 
         @Volatile
         private lateinit var INSTANCE: UserRepository
+
+        object ProfileListSerializer: Serializer<ProfileList> {
+            override val defaultValue: ProfileList
+                get() = ProfileList()
+
+            override suspend fun readFrom(input: InputStream): ProfileList {
+                try {
+                    return Json.decodeFromString<ProfileList>(
+                        input.readBytes().decodeToString()
+                    )
+                } catch (serialization: SerializationException) {
+                    throw CorruptionException("Unable to read Settings", serialization)
+                }
+            }
+
+            override suspend fun writeTo(
+                t: ProfileList,
+                output: OutputStream
+            ) {
+                output.write(
+                    Json.encodeToString(t)
+                        .encodeToByteArray()
+                )
+            }
+        }
 
         fun getInstance(
             context: Context,
@@ -34,33 +63,32 @@ class UserRepositoryImplementation: UserRepository {
         }
     }
 
-    private val sharedPreferences: SharedPreferences
+    private val Context.profilesDataStore: DataStore<ProfileList> by dataStore(
+        fileName = PROFILES_FILE_NAME,
+        serializer = ProfileListSerializer,
+    )
 
-    private constructor(context: Context) {
-        this.sharedPreferences = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+    override fun readAllProfiles(): Flow<ProfileList> {
+        return context.profilesDataStore.data
     }
 
-    override fun readProfile(): Profile {
-        val profile = Profile()
-        val stateString = sharedPreferences.getString(PROFILE_STATE_KEY, null)
-        val webIdString = sharedPreferences.getString(PROFILE_WEB_ID_DETAILS_KEY, null)
-        if (!stateString.isNullOrEmpty()) {
-            profile.authState =  AuthState.jsonDeserialize(stateString)
-        }
-        profile.userInfo = Gson().fromJson(sharedPreferences.getString(PROFILE_USER_INFO_KEY, null), UserInfo::class.java)
-        if (!webIdString.isNullOrEmpty()) {
-            profile.webId = readFromString(webIdString)
-        }
-        return profile
-    }
-
-    override fun writeProfile(profile: Profile) {
-        sharedPreferences.edit().apply {
-            putString(PROFILE_STATE_KEY, profile.authState.jsonSerializeString())
-            putString(PROFILE_USER_INFO_KEY, Gson().toJson(profile.userInfo))
-            putString(PROFILE_WEB_ID_DETAILS_KEY, writeToString(profile.webId))
-            apply()
+    override suspend fun writeProfile(webid: String, profile: Profile) {
+        context.profilesDataStore.updateData {
+            it.copy(profiles = it.profiles.toMutableMap().apply {
+                put(webid, profile)
+            })
         }
     }
 
+    override suspend fun removeProfile(webid: String) {
+        context.profilesDataStore.updateData {
+            if(it.contains(webid)) {
+                it.copy(profiles = it.profiles.toMutableMap().apply {
+                    remove(webid)
+                })
+            } else {
+                it
+            }
+        }
+    }
 }

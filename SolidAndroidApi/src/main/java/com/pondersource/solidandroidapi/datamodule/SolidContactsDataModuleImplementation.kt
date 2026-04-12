@@ -35,11 +35,11 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun getAddressBooks(
-          webId: String
+         ownerWebId: String,
      ): DataModuleResult<AddressBookList> {
           return try {
-               val privates = helper.getPrivateAddressBooks(webId)
-               val public = helper.getPublicAddressBooks(webId)
+               val privates = helper.getPrivateAddressBooks(ownerWebId)
+               val public = helper.getPublicAddressBooks(ownerWebId)
                DataModuleResult.Success(AddressBookList(
                     publicAddressBookUris = public,
                     privateAddressBookUris = privates
@@ -50,33 +50,34 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun createAddressBook(
-          title: String,
-          isPrivate: Boolean,
-          storage: String,
-          ownerWebId: String,
-          container: String?
+         ownerWebId: String,
+         title: String,
+         isPrivate: Boolean,
+         storage: String,
+         container: String?
      ): DataModuleResult<AddressBook> {
           val newContainer = container ?: "${storage}${CONTACTS_DIRECTORY_SUFFIX}"
           return try {
                val createdAddressBookUri = helper.createAddressBook(
+                   ownerWebId,
                     title,
                     newContainer,
                     isPrivate,
-                    ownerWebId,
                ).getIdentifier().toString()
-               getAddressBook(createdAddressBookUri)
+               getAddressBook(ownerWebId, createdAddressBookUri)
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
           }
      }
 
      override suspend fun getAddressBook(
-          uri: String,
+         ownerWebId: String,
+         addressBookUri: String,
      ): DataModuleResult<AddressBook> {
           return try {
-               val addressBookRdf = helper.getAddressBook(URI.create(uri))
-               val addressBookContactsRdf = helper.getAddressBookContacts(URI.create(addressBookRdf.getNameEmailIndex()))
-               val addressBookGroupsRdf = helper.getAddressBookGroups(URI.create(addressBookRdf.getGroupsIndex()))
+               val addressBookRdf = helper.getAddressBook(ownerWebId, URI.create(addressBookUri))
+               val addressBookContactsRdf = helper.getAddressBookContacts(ownerWebId, URI.create(addressBookRdf.getNameEmailIndex()))
+               val addressBookGroupsRdf = helper.getAddressBookGroups(ownerWebId, URI.create(addressBookRdf.getGroupsIndex()))
                DataModuleResult.Success(AddressBook.createFromRdf(addressBookRdf, addressBookContactsRdf, addressBookGroupsRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -84,21 +85,25 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun renameAddressBook(
-          addressBookUri: String,
-          newName: String
+         ownerWebId: String,
+         addressBookUri: String,
+         newName: String
      ): DataModuleResult<AddressBook> {
           return try {
-               helper.renameAddressBook(addressBookUri, newName)
-               return getAddressBook(addressBookUri)
+               helper.renameAddressBook(ownerWebId, addressBookUri, newName)
+               return getAddressBook(ownerWebId, addressBookUri)
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
           }
      }
 
-     override suspend fun deleteAddressBook(addressBookUri: String, ownerWebId: String): DataModuleResult<AddressBook> {
+     override suspend fun deleteAddressBook(
+         ownerWebId: String,
+         addressBookUri: String,
+     ): DataModuleResult<AddressBook> {
           try {
-               val addressBook = getAddressBook(addressBookUri)
-               helper.deleteAddressBook(addressBookUri, ownerWebId)
+               val addressBook = getAddressBook(ownerWebId, addressBookUri)
+               helper.deleteAddressBook(ownerWebId, addressBookUri)
                return addressBook
           } catch (e: Exception) {
                return DataModuleResult.Error(e.message)
@@ -106,15 +111,16 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun createNewContact(
-          addressBookUri: String,
-          newContact: NewContact,
-          groupUris: List<String>
+         ownerWebId: String,
+         addressBookString: String,
+         newContact: NewContact,
+         groupStrings: List<String>
      ): DataModuleResult<FullContact> {
           return try {
-               val newContact = helper.createContact(URI.create(addressBookUri), newContact)
+               val newContact = helper.createContact(ownerWebId, URI.create(addressBookString), newContact)
 
-               groupUris.forEach {
-                    helper.addContactToGroup(newContact, URI.create(it))
+               groupStrings.forEach {
+                    helper.addContactToGroup(ownerWebId, newContact, URI.create(it))
                }
                return DataModuleResult.Success(FullContact.createFromRdf(newContact))
           } catch (e: Exception) {
@@ -123,10 +129,11 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun getContact(
-          contactUri: String
+         ownerWebId: String,
+         contactString: String
      ): DataModuleResult<FullContact> {
           return try {
-               val contactRdf = helper.getContact(URI.create(contactUri))
+               val contactRdf = helper.getContact(ownerWebId, URI.create(contactString))
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -134,11 +141,12 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun renameContact(
-          contactUri: String,
-          newName: String
+         ownerWebId: String,
+         contactString: String,
+         newName: String
      ): DataModuleResult<FullContact> {
           return try {
-               val contactRdf = helper.renameContact(contactUri, newName)
+               val contactRdf = helper.renameContact(ownerWebId, contactString, newName)
                return DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -146,11 +154,12 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun addNewPhoneNumber(
-          contactUri: String,
-          newPhoneNumber: String
+         ownerWebId: String,
+         contactString: String,
+         newPhoneNumber: String
      ): DataModuleResult<FullContact> {
           return try {
-               val contactRdf = helper.addNewPhoneNumber(URI.create(contactUri), newPhoneNumber)
+               val contactRdf = helper.addNewPhoneNumber(ownerWebId, URI.create(contactString), newPhoneNumber)
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -158,11 +167,12 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun addNewEmailAddress(
-          contactUri: String,
-          newEmailAddress: String
+         ownerWebId: String,
+         contactString: String,
+         newEmailAddress: String
      ): DataModuleResult<FullContact> {
           return try {
-               val contactRdf = helper.addNewEmailAddress(URI.create(contactUri), newEmailAddress)
+               val contactRdf = helper.addNewEmailAddress(ownerWebId, URI.create(contactString), newEmailAddress)
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -170,11 +180,12 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun removePhoneNumber(
-          contactUri: String,
-          phoneNumber: String
+         ownerWebId: String,
+         contactString: String,
+         phoneNumber: String
      ): DataModuleResult<FullContact> {
           return try {
-               val contactRdf = helper.removePhoneNumberFromContact(URI.create(contactUri), phoneNumber)
+               val contactRdf = helper.removePhoneNumberFromContact(ownerWebId, URI.create(contactString), phoneNumber)
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -182,11 +193,12 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun removeEmailAddress(
-          contactUri: String,
-          emailAddress: String
+         ownerWebId: String,
+         contactString: String,
+         emailAddress: String
      ): DataModuleResult<FullContact> {
           return try {
-               val contactRdf = helper.removeEmailAddressFromContact(URI.create(contactUri), emailAddress)
+               val contactRdf = helper.removeEmailAddressFromContact(ownerWebId, URI.create(contactString), emailAddress)
                DataModuleResult.Success(FullContact.createFromRdf(contactRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -194,12 +206,13 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun deleteContact(
-          addressBookUri: String,
-          contactUri: String
+         ownerWebId: String,
+         addressBookUri: String,
+         contactUri: String
      ): DataModuleResult<FullContact> {
           return try {
-               val contact = getContact(contactUri)
-               helper.deleteContact(addressBookUri, contactUri)
+               val contact = getContact(ownerWebId, contactUri)
+               helper.deleteContact(ownerWebId, addressBookUri, contactUri)
                contact
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -207,28 +220,30 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun createNewGroup(
-          addressBookUri: String,
-          title: String,
-          contactUris: List<String>,
+         ownerWebId: String,
+         addressBookString: String,
+         title: String,
+         contactUris: List<String>,
      ): DataModuleResult<FullGroup> {
           return try {
-               val groupRDF = helper.createGroup(URI.create(addressBookUri), title)
+               val groupRDF = helper.createGroup(ownerWebId, URI.create(addressBookString), title)
 
                contactUris.forEach {
-                    helper.addContactToGroup(URI.create(it), groupRDF)
+                    helper.addContactToGroup(ownerWebId, URI.create(it), groupRDF)
                }
 
-               return getGroup(groupRDF.getIdentifier().toString())
+               return getGroup(ownerWebId, groupRDF.getIdentifier().toString())
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
           }
      }
 
      override suspend fun getGroup(
-          groupUri: String
+         ownerWebId: String,
+         groupString: String
      ): DataModuleResult<FullGroup> {
           return try {
-               val groupRdf = helper.getGroup(URI.create(groupUri))
+               val groupRdf = helper.getGroup(ownerWebId, URI.create(groupString))
                DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -236,11 +251,12 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun deleteGroup(
-          addressBookUri: String,
-          groupUri: String
+         ownerWebId: String,
+         addressBookString: String,
+         groupString: String
      ): DataModuleResult<FullGroup> {
           return try {
-               val groupRdf = helper.removeGroup(URI.create(addressBookUri), URI.create(groupUri))
+               val groupRdf = helper.removeGroup(ownerWebId, URI.create(addressBookString), URI.create(groupString))
                DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -248,11 +264,12 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun addContactToGroup(
-          contactUri: String,
-          groupUri: String
+         ownerWebId: String,
+         contactString: String,
+         groupString: String
      ): DataModuleResult<FullGroup> {
           return try {
-               val groupRdf = helper.addContactToGroup(URI.create(contactUri), URI.create(groupUri))
+               val groupRdf = helper.addContactToGroup(ownerWebId, URI.create(contactString), URI.create(groupString))
                DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
           } catch (e: Exception) {
                DataModuleResult.Error(e.message)
@@ -260,11 +277,12 @@ class SolidContactsDataModuleImplementation: SolidContactsDataModule {
      }
 
      override suspend fun removeContactFromGroup(
-          contactUri: String,
-          groupUri: String
+         ownerWebId: String,
+         contactString: String,
+         groupString: String
      ): DataModuleResult<FullGroup> {
           return try {
-               val groupRdf = helper.removeContactFromGroup(contactUri, groupUri)
+               val groupRdf = helper.removeContactFromGroup(ownerWebId, contactString, groupString)
                DataModuleResult.Success(FullGroup.createFromRdf(groupRdf))
           }catch (e: Exception) {
                DataModuleResult.Error(e.message)

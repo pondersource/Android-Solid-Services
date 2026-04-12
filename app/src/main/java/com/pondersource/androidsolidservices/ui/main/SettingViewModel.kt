@@ -32,18 +32,12 @@ class SettingViewModel @Inject constructor(
     }
 
     fun logout() {
-        logoutLoading.value = true
-        authenticator.resetProfile()
-        val deleteRes = accountManager.removeAccountExplicitly(account)
-        logoutLoading.value = false
-        logoutResult.value = true
-    }
-
-    fun logoutWithBrowser() {
         viewModelScope.launch {
-            authenticator.getTerminationSessionIntent(
-                AUTH_END_REDIRECT_URL
-            )
+            logoutLoading.value = true
+            authenticator.resetProfile()
+            val deleteRes = accountManager.removeAccountExplicitly(account)
+            logoutLoading.value = false
+            logoutResult.value = true
         }
     }
 
