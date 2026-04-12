@@ -24,6 +24,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class SolidResourceClient {
 
@@ -41,17 +44,18 @@ class SolidResourceClient {
         }
     }
 
-    private var iASSAuthService: IASSResourceService? = null
+    private var iASSResourceService: IASSResourceService? = null
     private val connectionFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val hasInstalledAndroidSolidServices: () -> Boolean
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            iASSAuthService = IASSResourceService.Stub.asInterface(service)
+            iASSResourceService = IASSResourceService.Stub.asInterface(service)
             connectionFlow.value = true
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-            iASSAuthService = null
+            iASSResourceService = null
             connectionFlow.value = false
         }
     }
@@ -62,324 +66,189 @@ class SolidResourceClient {
     ) {
         this.hasInstalledAndroidSolidServices = hasInstalledAndroidSolidServices
         val intent = Intent().apply {
-            setClassName(
-                ANDROID_SOLID_SERVICES_PACKAGE_NAME,
-                ANDROID_SOLID_SERVICES_CRUD_SERVICE
-            )
+            setClassName(ANDROID_SOLID_SERVICES_PACKAGE_NAME, ANDROID_SOLID_SERVICES_CRUD_SERVICE)
         }
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
-    private fun checkIfAppIsInstalled() {
-        if (!hasInstalledAndroidSolidServices()) {
-            throw SolidException.SolidAppNotFoundException()
-        }
-    }
-
-    private fun checkServiceConnection() {
-        if (iASSAuthService == null) {
-            throw SolidException.SolidServiceConnectionException()
-        }
-    }
-
-    fun resourceServiceConnectionState(): Flow<Boolean> {
-        return connectionFlow
-    }
+    fun resourceServiceConnectionState(): Flow<Boolean> = connectionFlow
 
     private fun checkBasicConditions() {
-        checkIfAppIsInstalled()
-        checkServiceConnection()
+        if (!hasInstalledAndroidSolidServices()) throw SolidException.SolidAppNotFoundException()
+        if (iASSResourceService == null) throw SolidException.SolidServiceConnectionException()
     }
 
-    fun getWebId(
-        callback: SolidResourceCallback<WebId>
-    ) {
-        checkBasicConditions()
+    // ── Reconstruction helpers ────────────────────────────────────────────────
 
-        iASSAuthService!!.getWebId(object: IASSRdfResourceCallback.Stub() {
-            override fun onResult(webIdResult: RDFSource) {
-                val returnValue = WebId::class.java
-                    .getConstructor(
-                        URI::class.java,
-                        MediaType::class.java,
-                        RdfDataset::class.java,
-                    )
-                    .newInstance(
-                        webIdResult.getIdentifier(),
-                        MediaType.of(webIdResult.getContentType()),
-                        JsonLd.toRdf(JsonDocument.of(webIdResult.getEntity())).get(),
-                    )
-                callback.onResult(returnValue)
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : Resource> reconstructRdf(source: RDFSource, clazz: Class<T>): T {
+        if (clazz.isInstance(source)) return source as T
+        return clazz.getConstructor(
+            URI::class.java, MediaType::class.java, RdfDataset::class.java, Headers::class.java
+        ).newInstance(
+            source.getIdentifier(),
+            MediaType.of(source.getContentType()),
+            JsonLd.toRdf(JsonDocument.of(source.getEntity())).get(),
+            source.getHeaders()
+        )
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : Resource> reconstructNonRdf(source: NonRDFSource, clazz: Class<T>): T {
+        if (clazz.isInstance(source)) return source as T
+        return clazz.getConstructor(
+            URI::class.java, String::class.java, Headers::class.java, InputStream::class.java
+        ).newInstance(
+            source.getIdentifier(), source.getContentType(), source.getHeaders(), source.getEntity()
+        )
+    }
+
+    // ── Public suspend API ────────────────────────────────────────────────────
+
+    suspend fun getWebId(): WebId {
+        checkBasicConditions()
+        return suspendCoroutine { cont ->
+            iASSResourceService!!.getWebId(object : IASSRdfResourceCallback.Stub() {
+                override fun onResult(result: RDFSource) {
+                    try { cont.resume(reconstructRdf(result, WebId::class.java)) }
+                    catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                }
+                override fun onError(errorCode: Int, errorMessage: String) {
+                    cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                }
+            })
+        }
+    }
+
+    suspend fun <T : Resource> read(resourceUrl: String, clazz: Class<T>): T {
+        checkBasicConditions()
+        return suspendCoroutine { cont ->
+            when {
+                RDFSource::class.java.isAssignableFrom(clazz) -> {
+                    iASSResourceService!!.readRdf(resourceUrl, object : IASSRdfResourceCallback.Stub() {
+                        override fun onResult(result: RDFSource) {
+                            try { cont.resume(reconstructRdf(result, clazz)) }
+                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                        }
+                        override fun onError(errorCode: Int, errorMessage: String) {
+                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                        }
+                    })
+                }
+                NonRDFSource::class.java.isAssignableFrom(clazz) -> {
+                    iASSResourceService!!.read(resourceUrl, object : IASSNonRdfResourceCallback.Stub() {
+                        override fun onResult(result: NonRDFSource) {
+                            try { cont.resume(reconstructNonRdf(result, clazz)) }
+                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                        }
+                        override fun onError(errorCode: Int, errorMessage: String) {
+                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                        }
+                    })
+                }
+                else -> cont.resumeWithException(
+                    SolidResourceException.NotSupportedClassException("Class must extend RDFSource or NonRDFSource.")
+                )
             }
+        }
+    }
 
-            override fun onError(errorCode: Int, errorMessage: String) {
-                callback.onError(handleSolidResourceException(errorCode, errorMessage))
+    suspend fun <T : Resource> create(resource: T): T {
+        checkBasicConditions()
+        return suspendCoroutine { cont ->
+            when (resource) {
+                is RDFSource -> {
+                    iASSResourceService!!.createRdf(resource, object : IASSRdfResourceCallback.Stub() {
+                        override fun onResult(result: RDFSource) {
+                            try { cont.resume(reconstructRdf(result, resource.javaClass)) }
+                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                        }
+                        override fun onError(errorCode: Int, errorMessage: String) {
+                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                        }
+                    })
+                }
+                is NonRDFSource -> {
+                    iASSResourceService!!.create(resource, object : IASSNonRdfResourceCallback.Stub() {
+                        override fun onResult(result: NonRDFSource) {
+                            try { cont.resume(reconstructNonRdf(result, resource.javaClass)) }
+                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                        }
+                        override fun onError(errorCode: Int, errorMessage: String) {
+                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                        }
+                    })
+                }
+                else -> cont.resumeWithException(
+                    SolidResourceException.NotSupportedClassException("Resource must be RDFSource or NonRDFSource.")
+                )
             }
-        })
-    }
-
-    fun <T: Resource> create(
-        resource: T,
-        callback: SolidResourceCallback<T>
-    ) {
-        checkBasicConditions()
-
-        if (resource is RDFSource) {
-            iASSAuthService!!.createRdf(resource, object: IASSRdfResourceCallback.Stub() {
-                override fun onResult(result: RDFSource) {
-                    if (resource::class.isInstance(result)) {
-                        callback.onResult(result as T)
-                    } else {
-                        val returnValue = resource::class.java
-                            .getConstructor(
-                                URI::class.java,
-                                MediaType::class.java,
-                                RdfDataset::class.java,
-                                Headers::class.java
-                            )
-                            .newInstance(
-                                result.getIdentifier(),
-                                MediaType.of(result.getContentType()),
-                                JsonLd.toRdf(JsonDocument.of(result.getEntity())).get(),
-                                result.getHeaders()
-                            )
-                        callback.onResult(returnValue)
-                    }
-                }
-
-                override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
-                }
-
-            })
-        } else if (resource is NonRDFSource) {
-            iASSAuthService!!.create(resource, object: IASSNonRdfResourceCallback.Stub() {
-                override fun onResult(result: NonRDFSource) {
-                    if (resource::class.isInstance(result)) {
-                        callback.onResult(result as T)
-                    } else {
-                        val returnValue = resource::class.java
-                            .getConstructor(
-                                URI::class.java,
-                                String::class.java,
-                                Headers::class.java,
-                                InputStream::class.java
-                            )
-                            .newInstance(
-                                result.getIdentifier(),
-                                result.getContentType(),
-                                result.getHeaders(),
-                                result.getEntity()
-                            )
-                        callback.onResult(returnValue)
-                    }
-                }
-
-                override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
-                }
-            })
-        } else {
-            throw SolidResourceException.NotSupportedClassException("Objects which are RDFSource or NonRDFSource or inherited from them can be created.")
         }
     }
 
-    fun <T: Resource> read(
-        resourceUrl: String,
-        clazz: Class<T>,
-        callback: SolidResourceCallback<T>
-    ) {
+    suspend fun <T : Resource> update(resource: T): T {
         checkBasicConditions()
-
-        if (RDFSource::class.java.isAssignableFrom(clazz)) {
-            iASSAuthService!!.readRdf(resourceUrl, object: IASSRdfResourceCallback.Stub() {
-                override fun onResult(result: RDFSource) {
-                    if (clazz.isInstance(result)) {
-                        callback.onResult(result as T)
-                    } else {
-                        val returnValue = clazz
-                            .getConstructor(
-                                URI::class.java,
-                                MediaType::class.java,
-                                RdfDataset::class.java,
-                                Headers::class.java
-                            )
-                            .newInstance(
-                                result.getIdentifier(),
-                                MediaType.of(result.getContentType()),
-                                JsonLd.toRdf(JsonDocument.of(result.getEntity())).get(),
-                                result.getHeaders()
-                            )
-                        callback.onResult(returnValue)
-                    }
+        return suspendCoroutine { cont ->
+            when (resource) {
+                is RDFSource -> {
+                    iASSResourceService!!.updateRdf(resource, object : IASSRdfResourceCallback.Stub() {
+                        override fun onResult(result: RDFSource) {
+                            try { cont.resume(reconstructRdf(result, resource.javaClass)) }
+                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                        }
+                        override fun onError(errorCode: Int, errorMessage: String) {
+                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                        }
+                    })
                 }
-
-                override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
+                is NonRDFSource -> {
+                    iASSResourceService!!.update(resource, object : IASSNonRdfResourceCallback.Stub() {
+                        override fun onResult(result: NonRDFSource) {
+                            try { cont.resume(reconstructNonRdf(result, resource.javaClass)) }
+                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                        }
+                        override fun onError(errorCode: Int, errorMessage: String) {
+                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                        }
+                    })
                 }
-
-            })
-        } else if (NonRDFSource::class.java.isAssignableFrom(clazz)) {
-            iASSAuthService!!.read(resourceUrl, object: IASSNonRdfResourceCallback.Stub() {
-                override fun onResult(result: NonRDFSource) {
-                    if (clazz.isInstance(result)) {
-                        callback.onResult(result as T)
-                    } else {
-                        val returnValue = clazz
-                            .getConstructor(
-                                URI::class.java,
-                                String::class.java,
-                                Headers::class.java,
-                                InputStream::class.java
-                            )
-                            .newInstance(
-                                result.getIdentifier(),
-                                result.getContentType(),
-                                result.getHeaders(),
-                                result.getEntity()
-                            )
-                        callback.onResult(returnValue)
-                    }
-                }
-
-                override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
-                }
-            })
-        } else {
-            throw SolidResourceException.NotSupportedClassException("Objects which are RDFSource or NonRDFSource or inherited from them can be read.")
+                else -> cont.resumeWithException(
+                    SolidResourceException.NotSupportedClassException("Resource must be RDFSource or NonRDFSource.")
+                )
+            }
         }
     }
 
-    fun <T: Resource> update(
-        resource: T,
-        callback: SolidResourceCallback<T>
-    ) {
+    suspend fun <T : Resource> delete(resource: T): T {
         checkBasicConditions()
-
-        if (resource is RDFSource) {
-            iASSAuthService!!.updateRdf(resource, object: IASSRdfResourceCallback.Stub() {
-                override fun onResult(result: RDFSource) {
-                    if (resource::class.isInstance(result)) {
-                        callback.onResult(result as T)
-                    } else {
-                        val returnValue = resource::class.java
-                            .getConstructor(
-                                URI::class.java,
-                                MediaType::class.java,
-                                RdfDataset::class.java,
-                                Headers::class.java
-                            )
-                            .newInstance(
-                                result.getIdentifier(),
-                                MediaType.of(result.getContentType()),
-                                JsonLd.toRdf(JsonDocument.of(result.getEntity())).get(),
-                                result.getHeaders()
-                            )
-                        callback.onResult(returnValue)
-                    }
+        return suspendCoroutine { cont ->
+            when (resource) {
+                is RDFSource -> {
+                    iASSResourceService!!.deleteRdf(resource, object : IASSRdfResourceCallback.Stub() {
+                        override fun onResult(result: RDFSource) {
+                            try { cont.resume(reconstructRdf(result, resource.javaClass)) }
+                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                        }
+                        override fun onError(errorCode: Int, errorMessage: String) {
+                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                        }
+                    })
                 }
-
-                override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
+                is NonRDFSource -> {
+                    iASSResourceService!!.delete(resource, object : IASSNonRdfResourceCallback.Stub() {
+                        override fun onResult(result: NonRDFSource) {
+                            try { cont.resume(reconstructNonRdf(result, resource.javaClass)) }
+                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                        }
+                        override fun onError(errorCode: Int, errorMessage: String) {
+                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                        }
+                    })
                 }
-
-            })
-        } else if (resource is NonRDFSource) {
-            iASSAuthService!!.update(resource, object: IASSNonRdfResourceCallback.Stub() {
-                override fun onResult(result: NonRDFSource) {
-                    if (resource::class.isInstance(result)) {
-                        callback.onResult(result as T)
-                    } else {
-                        val returnValue = resource::class.java
-                            .getConstructor(
-                                URI::class.java,
-                                String::class.java,
-                                Headers::class.java,
-                                InputStream::class.java
-                            )
-                            .newInstance(
-                                result.getIdentifier(),
-                                result.getContentType(),
-                                result.getHeaders(),
-                                result.getEntity()
-                            )
-                        callback.onResult(returnValue)
-                    }
-                }
-
-                override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
-                }
-            })
-        } else {
-            throw SolidResourceException.NotSupportedClassException("Objects which are RDFSource or NonRDFSource or inherited from them can be updated.")
-        }
-    }
-
-    fun <T: Resource> delete(
-        resource: T,
-        callback: SolidResourceCallback<T>
-    ) {
-        checkBasicConditions()
-
-        if (resource is RDFSource) {
-            iASSAuthService!!.deleteRdf(resource, object: IASSRdfResourceCallback.Stub() {
-                override fun onResult(result: RDFSource) {
-                    if (resource::class.isInstance(result)) {
-                        callback.onResult(result as T)
-                    } else {
-                        val returnValue = resource::class.java
-                            .getConstructor(
-                                URI::class.java,
-                                MediaType::class.java,
-                                RdfDataset::class.java,
-                                Headers::class.java
-                            )
-                            .newInstance(
-                                result.getIdentifier(),
-                                MediaType.of(result.getContentType()),
-                                JsonLd.toRdf(JsonDocument.of(result.getEntity())).get(),
-                                result.getHeaders()
-                            )
-                        callback.onResult(returnValue)
-                    }
-                }
-
-                override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
-                }
-
-            })
-        } else if (resource is NonRDFSource) {
-            iASSAuthService!!.delete(resource, object: IASSNonRdfResourceCallback.Stub() {
-                override fun onResult(result: NonRDFSource) {
-                    if (resource::class.isInstance(result)) {
-                        callback.onResult(result as T)
-                    } else {
-                        val returnValue = resource::class.java
-                            .getConstructor(
-                                URI::class.java,
-                                String::class.java,
-                                Headers::class.java,
-                                InputStream::class.java
-                            )
-                            .newInstance(
-                                result.getIdentifier(),
-                                result.getContentType(),
-                                result.getHeaders(),
-                                result.getEntity()
-                            )
-                        callback.onResult(returnValue)
-                    }
-                }
-
-                override fun onError(errorCode: Int, errorMessage: String) {
-                    callback.onError(handleSolidResourceException(errorCode, errorMessage))
-                }
-            })
-        } else {
-            throw SolidResourceException.NotSupportedClassException("Objects which are RDFSource or NonRDFSource or inherited from them can be updated.")
+                else -> cont.resumeWithException(
+                    SolidResourceException.NotSupportedClassException("Resource must be RDFSource or NonRDFSource.")
+                )
+            }
         }
     }
 }

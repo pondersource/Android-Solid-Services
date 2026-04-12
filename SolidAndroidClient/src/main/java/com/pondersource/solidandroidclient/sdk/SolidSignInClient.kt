@@ -52,7 +52,7 @@ class SolidSignInClient {
 
         override fun onServiceDisconnected(className: ComponentName) {
             iASSAuthService = null
-            connectionFlow.value = true
+            connectionFlow.value = false
         }
     }
 
