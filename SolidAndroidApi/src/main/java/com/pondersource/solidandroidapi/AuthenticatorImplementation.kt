@@ -30,7 +30,6 @@ import com.pondersource.shared.util.toPlainString
 import com.pondersource.solidandroidapi.repository.UserRepository
 import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import io.jsonwebtoken.Jwts
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
@@ -53,7 +52,6 @@ import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver
 import java.io.InputStream
 import java.net.URI
 import java.time.Instant
-import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -225,27 +223,8 @@ class AuthenticatorImplementation : Authenticator {
                 ?: throw IllegalArgumentException("Auth object should be authenticated before interacting with resources.")
 
             client.session(OpenIdSession.ofIdToken(tokenResponse.idToken!!))
-            val headers = getAuthHeaders(
-                IN_PROGRESS_AUTH,
-                "GET",
-                resource.toString()
-            )
 
-            val request = Request.newBuilder()
-                .uri(resource)
-                .header(HTTPHeaderName.ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.OCTET_STREAM)
-                .apply {
-                    headers.forEach { (key, value) ->
-                        this.header(key, value)
-                    }
-                }
-                .GET()
-                .build()
-
-            val response: Response<InputStream> = client.send(
-                request,
-                Response.BodyHandlers.ofInputStream()
-            )
+            val response = sendWithDPoPRetry(client, IN_PROGRESS_AUTH, "GET", resource, clazz)
 
             return if (response.isSuccessful()) {
                 SolidNetworkResponse.Success(constructObject(response, clazz))
@@ -255,6 +234,53 @@ class AuthenticatorImplementation : Authenticator {
         } catch (e: Exception) {
             return SolidNetworkResponse.Exception(e)
         }
+    }
+
+    private suspend fun <T: Resource> sendWithDPoPRetry(
+        client: SolidSyncClient,
+        webId: String,
+        httpMethod: String,
+        resource: URI,
+        clazz: Class<T>,
+    ): Response<InputStream> {
+        val headers = getAuthHeaders(webId, httpMethod, resource.toString())
+
+        val request = Request.newBuilder()
+            .uri(resource)
+            .header(HTTPHeaderName.ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.OCTET_STREAM)
+            .apply {
+                headers.forEach { (key, value) ->
+                    this.header(key, value)
+                }
+            }
+            .GET()
+            .build()
+
+        val response: Response<InputStream> = client.send(
+            request,
+            Response.BodyHandlers.ofInputStream()
+        )
+
+        val dpopNonce = response.headers().firstValue(HTTPHeaderName.DPOP_NONCE).orElse(null)
+        if (dpopNonce != null) {
+            updateDPoPNonce(webId, dpopNonce)
+            if (response.statusCode() == 401) {
+                val retryHeaders = getAuthHeaders(webId, httpMethod, resource.toString())
+                val retryRequest = Request.newBuilder()
+                    .uri(resource)
+                    .header(HTTPHeaderName.ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.OCTET_STREAM)
+                    .apply {
+                        retryHeaders.forEach { (key, value) ->
+                            this.header(key, value)
+                        }
+                    }
+                    .GET()
+                    .build()
+
+                return client.send(retryRequest, Response.BodyHandlers.ofInputStream())
+            }
+        }
+        return response
     }
 
     private fun <T> constructObject(
@@ -380,6 +406,17 @@ class AuthenticatorImplementation : Authenticator {
                 .generateProof(httpMethod, uri, tokenResponse.accessToken)
         }
         return headers
+    }
+
+    override fun updateDPoPNonce(
+        webId: String,
+        nonce: String,
+    ) {
+        val profile = profiles.getProfileOrReturnDefault(webId)
+        val discoveryDoc = profile.authState.authorizationServiceConfiguration?.discoveryDoc
+        if (discoveryDoc != null && discoveryDoc.supportsDPop()) {
+            DPoPGenerator.getInstance(discoveryDoc).updateNonce(nonce)
+        }
     }
 
     private suspend fun checkTokenAndRefresh(

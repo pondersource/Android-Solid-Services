@@ -22,29 +22,37 @@ class DPoPGenerator private constructor(
     val authDiscovery: AuthorizationServiceDiscovery,
 ) {
     companion object {
-        @Volatile
-        private lateinit var INSTANCE: DPoPGenerator
+        private val instances: MutableMap<String, DPoPGenerator> = mutableMapOf()
 
         private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
-        private const val KEYSTORE_ALIAS = BuildConfig.KEY_GENERATOR_ALIAS
+        private const val KEYSTORE_ALIAS_PREFIX = BuildConfig.KEY_GENERATOR_ALIAS
 
         fun getInstance(
             authDiscovery: AuthorizationServiceDiscovery,
         ): DPoPGenerator {
-            return if (Companion::INSTANCE.isInitialized) {
-                INSTANCE
-            } else {
-                INSTANCE = DPoPGenerator(authDiscovery)
-                INSTANCE
+            val issuer = authDiscovery.issuer ?: authDiscovery.docJson.toString()
+            return synchronized(instances) {
+                instances.getOrPut(issuer) {
+                    DPoPGenerator(authDiscovery)
+                }
             }
         }
     }
 
+    private val selectedAlgo: DPopSupportedAlgo = selectCategory()
+
+    @Volatile
+    private var nonce: String? = null
+
     private val keyholder: KeyHolder = KeyPairHolderFactory.getKeyHolder(
         KEYSTORE_PROVIDER,
-        KEYSTORE_ALIAS,
-        selectCategory()
+        "${KEYSTORE_ALIAS_PREFIX}_${selectedAlgo.name}",
+        selectedAlgo
     )
+
+    fun updateNonce(newNonce: String) {
+        nonce = newNonce
+    }
 
     fun generateProof(
         httpMethod: String,
@@ -60,16 +68,12 @@ class DPoPGenerator private constructor(
         claims["jti"] = UUID.randomUUID().toString()
         claims["htm"] = httpMethod
         claims["htu"] = httpUri
-        claims["iat"] = Date().time
-        //claims["nonce"] = "" TODO(if response header has: DPoP-Nonce)
-        if(!accessToken.isNullOrEmpty()) {
-            claims["ath"] = java.util.Base64.getEncoder().encode(
-                MessageDigest
-                    .getInstance("SHA-256")
-                    .digest(accessToken.toByteArray())
-                    .fold("") { str, it -> str + "%02x".format(it) }
-                    .toByteArray()
-            ).toString()
+        claims["iat"] = Date().time / 1000
+        nonce?.let { claims["nonce"] = it }
+        if (!accessToken.isNullOrEmpty()) {
+            claims["ath"] = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(
+                MessageDigest.getInstance("SHA-256").digest(accessToken.toByteArray(Charsets.US_ASCII))
+            )
         }
 
         return Jwts.builder()

@@ -2,7 +2,6 @@ package com.pondersource.solidandroidapi
 
 import android.content.Intent
 import com.pondersource.shared.data.Profile
-import com.pondersource.shared.data.webid.WebId
 import net.openid.appauth.TokenResponse
 
 interface Authenticator {
@@ -32,6 +31,11 @@ interface Authenticator {
         httpMethod: String,
         uri: String
     ): Map<String, String>
+
+    fun updateDPoPNonce(
+        webId: String,
+        nonce: String,
+    )
 
     fun isUserAuthorized(): Boolean
 

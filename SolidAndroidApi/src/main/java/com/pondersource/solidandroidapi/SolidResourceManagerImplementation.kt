@@ -71,6 +71,17 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         return auth.getAuthHeaders(webId, httpMethod, uri)
     }
 
+    private fun checkAndUpdateDPoPNonce(
+        webId: String,
+        response: Response<InputStream>
+    ): String? {
+        val nonce = response.headers().firstValue(HTTPHeaderName.DPOP_NONCE).orElse(null)
+        if (nonce != null) {
+            auth.updateDPoPNonce(webId, nonce)
+        }
+        return nonce
+    }
+
     override suspend fun <T: Resource> read(
         webid: String,
         resource: URI,
@@ -78,11 +89,12 @@ class SolidResourceManagerImplementation: SolidResourceManager {
     ): SolidNetworkResponse<T> {
 
         try {
-            val authHeaders = getAuthenticationHeaders(webid, "GET", resource.toString())
+            val accept = if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.ANY
 
+            val authHeaders = getAuthenticationHeaders(webid, "GET", resource.toString())
             val request = Request.newBuilder()
                 .uri(resource)
-                .header(HTTPHeaderName.ACCEPT, if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.ANY)
+                .header(HTTPHeaderName.ACCEPT, accept)
                 .GET()
                 .also {
                     authHeaders.forEach { (key, value) ->
@@ -91,10 +103,27 @@ class SolidResourceManagerImplementation: SolidResourceManager {
                 }
                 .build()
 
-            val response: Response<InputStream> = client.send(
+            var response: Response<InputStream> = client.send(
                 request,
                 Response.BodyHandlers.ofInputStream()
             )
+
+            if (response.statusCode() == 401 && checkAndUpdateDPoPNonce(webid, response) != null) {
+                val retryHeaders = getAuthenticationHeaders(webid, "GET", resource.toString())
+                val retryRequest = Request.newBuilder()
+                    .uri(resource)
+                    .header(HTTPHeaderName.ACCEPT, accept)
+                    .GET()
+                    .also {
+                        retryHeaders.forEach { (key, value) ->
+                            it.header(key, value)
+                        }
+                    }
+                    .build()
+                response = client.send(retryRequest, Response.BodyHandlers.ofInputStream())
+            } else {
+                checkAndUpdateDPoPNonce(webid, response)
+            }
 
             return if (response.isSuccessful()) {
                 SolidNetworkResponse.Success(constructObject(response, clazz))
@@ -201,8 +230,6 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         resource: T
     ): SolidNetworkResponse<T> {
         try {
-            val authHeaders = getAuthenticationHeaders(webid, "PUT", resource.toString())
-
             val type = if (SolidContainer::class.java.isAssignableFrom(resource.javaClass)) {
                 "<${LDP.BasicContainer}>; rel=\"type\""
             } else if (RDFSource::class.java.isAssignableFrom(resource.javaClass)) {
@@ -211,6 +238,7 @@ class SolidResourceManagerImplementation: SolidResourceManager {
                 "<${LDP.NonRDFSource}>; rel=\"type\""
             }
 
+            val authHeaders = getAuthenticationHeaders(webid, "PUT", resource.getIdentifier().toString())
             val request: Request = Request.newBuilder()
                 .uri(resource.getIdentifier())
                 .type(resource.getContentType())
@@ -224,10 +252,30 @@ class SolidResourceManagerImplementation: SolidResourceManager {
                 .PUT(Request.BodyPublishers.ofInputStream(resource.getEntity()))
                 .build()
 
-            val response: Response<InputStream> = client.send(
+            var response: Response<InputStream> = client.send(
                 request,
                 Response.BodyHandlers.ofInputStream()
             )
+
+            if (response.statusCode() == 401 && checkAndUpdateDPoPNonce(webid, response) != null) {
+                val retryHeaders = getAuthenticationHeaders(webid, "PUT", resource.getIdentifier().toString())
+                val retryRequest: Request = Request.newBuilder()
+                    .uri(resource.getIdentifier())
+                    .type(resource.getContentType())
+                    .header(HTTPHeaderName.LINK, type)
+                    .header(HTTPHeaderName.ACCEPT, resource.getContentType())
+                    .also {
+                        retryHeaders.forEach { (key, value) ->
+                            it.header(key, value)
+                        }
+                    }
+                    .PUT(Request.BodyPublishers.ofInputStream(resource.getEntity()))
+                    .build()
+                response = client.send(retryRequest, Response.BodyHandlers.ofInputStream())
+            } else {
+                checkAndUpdateDPoPNonce(webid, response)
+            }
+
             if (response.isSuccessful()) {
                 return SolidNetworkResponse.Success(resource)
             }
@@ -245,8 +293,9 @@ class SolidResourceManagerImplementation: SolidResourceManager {
         resource: T
     ): SolidNetworkResponse<T> {
         try {
-            val authHeaders = getAuthenticationHeaders(webid, "DELETE", resource.toString())
+            val uri = resource.getIdentifier().toString()
 
+            val authHeaders = getAuthenticationHeaders(webid, "DELETE", uri)
             val request: Request = Request.newBuilder()
                 .uri(resource.getIdentifier())
                 .also {
@@ -257,10 +306,26 @@ class SolidResourceManagerImplementation: SolidResourceManager {
                 .DELETE()
                 .build()
 
-            val response: Response<InputStream> = client.send(
+            var response: Response<InputStream> = client.send(
                 request,
                 Response.BodyHandlers.ofInputStream()
             )
+
+            if (response.statusCode() == 401 && checkAndUpdateDPoPNonce(webid, response) != null) {
+                val retryHeaders = getAuthenticationHeaders(webid, "DELETE", uri)
+                val retryRequest: Request = Request.newBuilder()
+                    .uri(resource.getIdentifier())
+                    .also {
+                        retryHeaders.forEach { (key, value) ->
+                            it.header(key, value)
+                        }
+                    }
+                    .DELETE()
+                    .build()
+                response = client.send(retryRequest, Response.BodyHandlers.ofInputStream())
+            } else {
+                checkAndUpdateDPoPNonce(webid, response)
+            }
 
             if (response.isSuccessful()) {
                 return SolidNetworkResponse.Success(resource)
@@ -281,7 +346,6 @@ class SolidResourceManagerImplementation: SolidResourceManager {
     ): SolidNetworkResponse<Boolean> {
         try {
             val authHeaders = getAuthenticationHeaders(webid, "DELETE", uri.toString())
-
             val request: Request = Request.newBuilder()
                 .uri(uri)
                 .also {
@@ -292,10 +356,26 @@ class SolidResourceManagerImplementation: SolidResourceManager {
                 .DELETE()
                 .build()
 
-            val response: Response<InputStream> = client.send(
+            var response: Response<InputStream> = client.send(
                 request,
                 Response.BodyHandlers.ofInputStream()
             )
+
+            if (response.statusCode() == 401 && checkAndUpdateDPoPNonce(webid, response) != null) {
+                val retryHeaders = getAuthenticationHeaders(webid, "DELETE", uri.toString())
+                val retryRequest: Request = Request.newBuilder()
+                    .uri(uri)
+                    .also {
+                        retryHeaders.forEach { (key, value) ->
+                            it.header(key, value)
+                        }
+                    }
+                    .DELETE()
+                    .build()
+                response = client.send(retryRequest, Response.BodyHandlers.ofInputStream())
+            } else {
+                checkAndUpdateDPoPNonce(webid, response)
+            }
 
             if (response.isSuccessful()) {
                 return SolidNetworkResponse.Success(true)
