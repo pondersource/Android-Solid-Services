@@ -25,6 +25,18 @@ android {
         manifestPlaceholders["appAuthRedirectScheme"] = "com.pondersource.androidsolidservices"
     }
 
+    val keystorePath = System.getenv("RELEASE_KEYSTORE_PATH")
+    if (keystorePath != null) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -32,6 +44,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (keystorePath != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isMinifyEnabled = false
@@ -156,4 +171,19 @@ dependencies {
     implementation(project(":SolidAndroidApi"))
     implementation(project(":SolidAndroidClient"))
 
+}
+
+afterEvaluate {
+    if (project.hasProperty("android.injected.signing.store.file")) {
+        println("key store path: ${project.property("android.injected.signing.store.file")}")
+    }
+    if (project.hasProperty("android.injected.signing.store.password")) {
+        println("key store password: ${project.property("android.injected.signing.store.password")}")
+    }
+    if (project.hasProperty("android.injected.signing.key.alias")) {
+        println("key alias: ${project.property("android.injected.signing.key.alias")}")
+    }
+    if (project.hasProperty("android.injected.signing.key.password")) {
+        println("key password: ${project.property("android.injected.signing.key.password")}")
+    }
 }
