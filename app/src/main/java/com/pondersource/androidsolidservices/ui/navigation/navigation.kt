@@ -8,7 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.pondersource.androidsolidservices.ui.login.Login
+import com.pondersource.androidsolidservices.ui.login.Login as LoginScreen
 import com.pondersource.androidsolidservices.ui.login.LoginViewModel
 import com.pondersource.androidsolidservices.ui.main.MainPage
 import com.pondersource.androidsolidservices.ui.startup.Startup
@@ -29,7 +29,7 @@ fun ASSAppNavHost(
             Startup(navController, hiltViewModel<StartupViewModel>())
         }
         composable<Login> {
-            Login(navController, hiltViewModel<LoginViewModel>())
+            LoginScreen(navController, hiltViewModel<LoginViewModel>())
         }
         composable<MainPage> {
             MainPage(navController)
@@ -41,7 +41,7 @@ fun ASSAppNavHost(
 object Startup
 
 @Serializable
-object Login
+data class Login(val isAddingAccount: Boolean = false)
 
 @Serializable
 object MainPage {

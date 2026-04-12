@@ -5,10 +5,15 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.pondersource.shared.data.Profile
 import com.pondersource.shared.data.ProfileList
 import com.pondersource.shared.data.contains
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -22,6 +27,8 @@ class UserRepositoryImplementation private constructor(
     companion object {
 
         private const val PROFILES_FILE_NAME = "profiles.json"
+        private const val PREFERENCES_FILE_NAME = "user_preferences"
+        private val ACTIVE_WEB_ID_KEY = stringPreferencesKey("active_web_id")
 
         @Volatile
         private lateinit var INSTANCE: UserRepository
@@ -68,8 +75,16 @@ class UserRepositoryImplementation private constructor(
         serializer = ProfileListSerializer,
     )
 
+    private val Context.preferencesDataStore by preferencesDataStore(
+        name = PREFERENCES_FILE_NAME
+    )
+
     override fun readAllProfiles(): Flow<ProfileList> {
         return context.profilesDataStore.data
+    }
+
+    override suspend fun readAllProfilesOnce(): ProfileList {
+        return context.profilesDataStore.data.first()
     }
 
     override suspend fun writeProfile(webid: String, profile: Profile) {
@@ -88,6 +103,28 @@ class UserRepositoryImplementation private constructor(
                 })
             } else {
                 it
+            }
+        }
+    }
+
+    override suspend fun removeAllProfiles() {
+        context.profilesDataStore.updateData {
+            ProfileList()
+        }
+    }
+
+    override suspend fun getActiveWebId(): String? {
+        return context.preferencesDataStore.data
+            .map { it[ACTIVE_WEB_ID_KEY] }
+            .first()
+    }
+
+    override suspend fun setActiveWebId(webId: String?) {
+        context.preferencesDataStore.edit { prefs ->
+            if (webId != null) {
+                prefs[ACTIVE_WEB_ID_KEY] = webId
+            } else {
+                prefs.remove(ACTIVE_WEB_ID_KEY)
             }
         }
     }

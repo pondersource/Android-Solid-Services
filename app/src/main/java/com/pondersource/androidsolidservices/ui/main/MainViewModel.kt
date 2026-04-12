@@ -18,31 +18,31 @@ class MainViewModel @Inject constructor(
     @Named(Constants.ASS_ACCOUNT_NAME) private val aSSAccountName: String,
 ): BaseViewModel() {
 
-    private lateinit var account: Account
-    val webId : MutableState<String> = mutableStateOf(authenticator.getProfile().userInfo!!.webId)
-
-    val storages = mutableStateOf(authenticator.getProfile().webId!!.getStorages().map { it.toString() })
+    val activeProfile = mutableStateOf(authenticator.getProfile())
+    val webId: MutableState<String> = mutableStateOf(activeProfile.value.userInfo!!.webId)
+    val storages = mutableStateOf(activeProfile.value.webId!!.getStorages().map { it.toString() })
+    val allProfiles = mutableStateOf(authenticator.getAllLoggedInProfiles())
 
     init {
-        handleAccountManagement()
+        syncAccountManager()
     }
 
-    private fun handleAccountManagement() {
-        account = Account(
-            authenticator.getProfile().userInfo!!.webId,
-            aSSAccountName
-        )
+    private fun syncAccountManager() {
+        // Ensure all logged-in profiles have an Android Account entry
+        val existingAccounts = accountManager.accounts
+            .filter { it.type == aSSAccountName }
+            .map { it.name }
+            .toSet()
 
-        var hasAddedBefore = false
-        accountManager.accounts.forEach { acc ->
-            if (acc.type == account.type && acc.name == account.name) {
-                hasAddedBefore = true
+        authenticator.getAllLoggedInProfiles().forEach { profile ->
+            val profileWebId = profile.userInfo!!.webId
+            if (profileWebId !in existingAccounts) {
+                accountManager.addAccountExplicitly(
+                    Account(profileWebId, aSSAccountName),
+                    "password",
+                    null
+                )
             }
         }
-
-        if (!hasAddedBefore) {
-            accountManager.addAccountExplicitly(account, "password", null)
-        }
-
     }
 }

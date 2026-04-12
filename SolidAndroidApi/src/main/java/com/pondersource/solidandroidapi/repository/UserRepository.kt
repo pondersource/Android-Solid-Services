@@ -8,7 +8,15 @@ interface UserRepository {
 
     fun readAllProfiles(): Flow<ProfileList>
 
+    suspend fun readAllProfilesOnce(): ProfileList
+
     suspend fun writeProfile(webid: String, profile: Profile)
 
     suspend fun removeProfile(webid: String)
+
+    suspend fun removeAllProfiles()
+
+    suspend fun getActiveWebId(): String?
+
+    suspend fun setActiveWebId(webId: String?)
 }

@@ -77,6 +77,7 @@ dependencies {
     //Local storage for saving profiles
     implementation(libs.jetbrains.kotlinx.serialization.json)
     implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore.preferences)
 
     api(project(":Shared"))
 }

@@ -2,8 +2,11 @@ package com.pondersource.androidsolidservices.ui.login
 
 import android.content.Intent
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.pondersource.androidsolidservices.base.BaseViewModel
+import com.pondersource.androidsolidservices.ui.navigation.Login
 import com.pondersource.solidandroidapi.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -13,8 +16,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    val authenticator : Authenticator
+    val authenticator: Authenticator,
+    savedStateHandle: SavedStateHandle,
 ): BaseViewModel() {
+
+    val isAddingAccount: Boolean = savedStateHandle.toRoute<Login>().isAddingAccount
 
     companion object {
         private const val AUTH_APP_REDIRECT_URL = "com.pondersource.androidsolidservices:/oauth2redirect"
@@ -61,6 +67,19 @@ class LoginViewModel @Inject constructor(
             val intentRes =
                 authenticator.createAuthenticationIntentWithOidcIssuer(
                     OIDC_ISSUER_SOLIDCOMMIUNITY,
+                    AUTH_APP_REDIRECT_URL,
+                )
+            loginBrowserIntentErrorMessage.value = intentRes.second
+            loginBrowserIntent.value = intentRes.first
+        }
+    }
+
+    fun loginWithCustomIssuer(issuerUrl: String) {
+        viewModelScope.launch {
+            loginLoading.value = true
+            val intentRes =
+                authenticator.createAuthenticationIntentWithOidcIssuer(
+                    issuerUrl,
                     AUTH_APP_REDIRECT_URL,
                 )
             loginBrowserIntentErrorMessage.value = intentRes.second

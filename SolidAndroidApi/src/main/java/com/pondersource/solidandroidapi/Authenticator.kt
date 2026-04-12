@@ -45,7 +45,16 @@ interface Authenticator {
         webId: String,
     ): Profile
 
+    /**
+     * Returns the active (currently selected) profile.
+     * Falls back to the first authorized profile if no active account is set.
+     * @throws NoSuchElementException if no authorized profiles exist.
+     */
     fun getProfile(): Profile
+
+    suspend fun getActiveWebId(): String?
+
+    suspend fun setActiveWebId(webId: String)
 
     suspend fun resetProfile()
 

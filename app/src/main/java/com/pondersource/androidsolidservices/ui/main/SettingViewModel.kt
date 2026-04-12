@@ -6,9 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.pondersource.androidsolidservices.base.BaseViewModel
 import com.pondersource.androidsolidservices.base.Constants
+import com.pondersource.shared.data.Profile
 import com.pondersource.solidandroidapi.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -19,44 +21,56 @@ class SettingViewModel @Inject constructor(
     @Named(Constants.ASS_ACCOUNT_NAME) private val aSSAccountName: String,
 ): BaseViewModel() {
 
-    companion object {
-        private const val AUTH_END_REDIRECT_URL = "com.pondersource.androidsolidservices:/oauth2logout"
-    }
-
-    private lateinit var account: Account
+    val accounts = mutableStateOf<List<Profile>>(authenticator.getAllLoggedInProfiles())
+    val activeWebId = mutableStateOf(runBlocking { authenticator.getActiveWebId() ?: "" })
     val logoutLoading = mutableStateOf(false)
-    val logoutResult = mutableStateOf(false)
+    /** True when there are no accounts left — navigate to Login. */
+    val navigateToLogin = mutableStateOf(false)
 
-    init {
-        handleAccountManagement()
+    fun switchAccount(webId: String) {
+        viewModelScope.launch {
+            authenticator.setActiveWebId(webId)
+            activeWebId.value = webId
+        }
     }
 
     fun logout() {
         viewModelScope.launch {
             logoutLoading.value = true
-            authenticator.resetProfile()
-            val deleteRes = accountManager.removeAccountExplicitly(account)
+            val webId = activeWebId.value
+            authenticator.resetProfile(webId)
+            accountManager.removeAccountExplicitly(Account(webId, aSSAccountName))
+            // Refresh reactive state
+            accounts.value = authenticator.getAllLoggedInProfiles()
+            val remaining = accounts.value
+            if (remaining.isNotEmpty()) {
+                activeWebId.value = authenticator.getActiveWebId() ?: ""
+            } else {
+                navigateToLogin.value = true
+            }
             logoutLoading.value = false
-            logoutResult.value = true
         }
     }
 
-    private fun handleAccountManagement() {
-        account = Account(
-            authenticator.getProfile().userInfo!!.webId,
-            aSSAccountName
-        )
-
-        var hasAddedBefore = false
-        accountManager.accounts.forEach { acc ->
-            if (acc.type == account.type && acc.name == account.name) {
-                hasAddedBefore = true
+    fun logoutAll() {
+        viewModelScope.launch {
+            logoutLoading.value = true
+            authenticator.getAllLoggedInProfiles().forEach { profile ->
+                accountManager.removeAccountExplicitly(
+                    Account(profile.userInfo!!.webId, aSSAccountName)
+                )
             }
+            authenticator.resetProfile()
+            accounts.value = emptyList()
+            logoutLoading.value = false
+            navigateToLogin.value = true
         }
+    }
 
-        if (!hasAddedBefore) {
-            accountManager.addAccountExplicitly(account, "password", null)
+    fun refreshAccounts() {
+        accounts.value = authenticator.getAllLoggedInProfiles()
+        viewModelScope.launch {
+            activeWebId.value = authenticator.getActiveWebId() ?: ""
         }
-
     }
 }

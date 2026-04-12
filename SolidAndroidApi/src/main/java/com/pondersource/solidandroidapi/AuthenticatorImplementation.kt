@@ -30,6 +30,7 @@ import com.pondersource.shared.util.toPlainString
 import com.pondersource.solidandroidapi.repository.UserRepository
 import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import io.jsonwebtoken.Jwts
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
@@ -81,13 +82,23 @@ class AuthenticatorImplementation : Authenticator {
 
     private val userRepository: UserRepository
     private val authService: AuthorizationService
-    private lateinit var profiles: ProfileList
+    private var profiles: ProfileList
+    private var activeWebId: String?
 
     private constructor(
         context: Context,
     ) {
         this.userRepository = UserRepositoryImplementation.getInstance(context)
         this.authService = AuthorizationService(context)
+        // Load persisted state into memory on startup
+        runBlocking {
+            profiles = userRepository.readAllProfilesOnce()
+            activeWebId = userRepository.getActiveWebId()
+        }
+    }
+
+    private suspend fun refreshProfiles() {
+        profiles = userRepository.readAllProfilesOnce()
     }
 
     private suspend fun updateRegistrationResponse(
@@ -97,6 +108,7 @@ class AuthenticatorImplementation : Authenticator {
             authState.update(regResponse)
         }
         userRepository.writeProfile(IN_PROGRESS_AUTH, profile)
+        refreshProfiles()
     }
 
     private suspend fun updateAuthorizationResponse(
@@ -107,6 +119,7 @@ class AuthenticatorImplementation : Authenticator {
             authState.update(authResponse, authException)
         }
         userRepository.writeProfile(IN_PROGRESS_AUTH, profile)
+        refreshProfiles()
     }
 
     private suspend fun updateTokenResponse(
@@ -118,6 +131,7 @@ class AuthenticatorImplementation : Authenticator {
             authState.update(tokenResponse, authException)
         }
         userRepository.writeProfile(webid, profile)
+        refreshProfiles()
     }
 
     private fun getUserInfoFromIdToken(webId: String): UserInfo? {
@@ -370,9 +384,14 @@ class AuthenticatorImplementation : Authenticator {
                     this.webId = webId
                 }
 
-                userRepository.writeProfile(loggedInProfile.userInfo!!.webId, loggedInProfile)
+                val newWebId = loggedInProfile.userInfo!!.webId
+                userRepository.writeProfile(newWebId, loggedInProfile)
                 userRepository.removeProfile(IN_PROGRESS_AUTH)
-                return loggedInProfile.userInfo!!.webId
+                // Set the newly logged-in account as active
+                userRepository.setActiveWebId(newWebId)
+                activeWebId = newWebId
+                refreshProfiles()
+                return newWebId
             } else {
                 return ""
             }
@@ -448,19 +467,56 @@ class AuthenticatorImplementation : Authenticator {
     ) = profiles.getProfileOrReturnDefault(webId)
 
     override fun getProfile(): Profile {
-        return getAllLoggedInProfiles().first()
+        val allProfiles = getAllLoggedInProfiles()
+        // Return the active profile if set and still valid
+        if (activeWebId != null) {
+            val activeProfile = allProfiles.find { it.userInfo?.webId == activeWebId }
+            if (activeProfile != null) return activeProfile
+        }
+        // Fallback to first authorized profile
+        return allProfiles.first()
+    }
+
+    override suspend fun getActiveWebId(): String? {
+        return activeWebId
+    }
+
+    override suspend fun setActiveWebId(webId: String) {
+        val profile = profiles.getProfileOrReturnDefault(webId)
+        if (profile.authState.isAuthorized && profile.userInfo != null) {
+            activeWebId = webId
+            userRepository.setActiveWebId(webId)
+        } else {
+            throw IllegalArgumentException("Cannot set active account: profile for $webId is not authorized or incomplete.")
+        }
     }
 
     override suspend fun resetProfile() {
-        profiles.profiles.keys.forEach {
-            userRepository.removeProfile(it)
-        }
+        userRepository.removeAllProfiles()
+        userRepository.setActiveWebId(null)
+        activeWebId = null
+        refreshProfiles()
     }
 
     override suspend fun resetProfile(
         webId: String,
     ) {
         userRepository.removeProfile(webId)
+        // If the removed profile was the active one, switch to another or clear
+        if (activeWebId == webId) {
+            refreshProfiles()
+            val remaining = getAllLoggedInProfiles()
+            if (remaining.isNotEmpty()) {
+                val newActiveWebId = remaining.first().userInfo!!.webId
+                activeWebId = newActiveWebId
+                userRepository.setActiveWebId(newActiveWebId)
+            } else {
+                activeWebId = null
+                userRepository.setActiveWebId(null)
+            }
+        } else {
+            refreshProfiles()
+        }
     }
 
     override suspend fun getTerminationSessionIntent(

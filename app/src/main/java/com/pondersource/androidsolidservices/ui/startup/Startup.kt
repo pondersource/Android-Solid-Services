@@ -37,7 +37,7 @@ fun Startup(
                     }
                 }
             } else {
-                navController.navigate(Login) {
+                navController.navigate(Login()) {
                     popUpTo(navController.graph.id) {
                         inclusive = true
                     }
