@@ -28,14 +28,14 @@ class SolidDataModulesService : LifecycleService() {
     @Inject
     lateinit var auth : Authenticator
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
         return binder
     }
 
     //One service for all data modules
     private val binder = object : IASSDataModulesService.Stub() {
-        override fun getContactsDataModuleInterface(): IASSContactsModuleInterface? {
+        override fun getContactsDataModuleInterface(): IASSContactsModuleInterface {
            return contactsModuleInterface
         }
 
@@ -43,11 +43,11 @@ class SolidDataModulesService : LifecycleService() {
 
     private val contactsModuleInterface = object : IASSContactsModuleInterface.Stub() {
 
-        private fun getProfile() = auth.getProfile()
+        private fun getProfile() = auth.getActiveProfile()
 
         override fun getAddressBooks(callback: IASSContactModuleAddressBookListCallback) {
             lifecycleScope.launch(Dispatchers.IO) {
-                callback.valueChanged(solidContactsDataModule.getAddressBooks(auth.getProfile().userInfo!!.webId).getOrNull())
+                callback.valueChanged(solidContactsDataModule.getAddressBooks(getProfile().userInfo!!.webId).getOrNull())
             }
         }
 
@@ -65,7 +65,7 @@ class SolidDataModulesService : LifecycleService() {
                         ownerWebId ?: getProfile().userInfo!!.webId, //TODO
                         title,
                         isPrivate,
-                        storage ?: auth.getProfile().webId!!.getStorages().get(0).toString(), //TODO
+                        storage ?: getProfile().webId!!.getStorages()[0].toString(), //TODO
 
                         container
                     ).getOrNull()
@@ -96,7 +96,7 @@ class SolidDataModulesService : LifecycleService() {
                 callback.valueChanged(
                     solidContactsDataModule.deleteAddressBook(
                         uri,
-                        ownerWebId ?:  auth.getProfile().userInfo!!.webId,
+                        ownerWebId ?: getProfile().userInfo!!.webId,
                     ).getOrNull()
                 )
             }

@@ -18,7 +18,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-        manifestPlaceholders["appAuthRedirectScheme"] = namespace.toString()
     }
 
     buildTypes {

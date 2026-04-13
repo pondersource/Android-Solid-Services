@@ -72,7 +72,7 @@ fun Login(
     }
 
     LaunchedEffect(viewModel.loginResult.value) {
-        if (viewModel.loginResult.value == true) {
+        if (viewModel.loginResult.value) {
             if (viewModel.isAddingAccount) {
                 navController.popBackStack()
             } else {
@@ -95,7 +95,7 @@ fun Login(
         LoginContent(
             errorMessage = viewModel.loginBrowserIntentErrorMessage.value,
             onLoginInrupt = { viewModel.loginWithInruptCom() },
-            onLoginSolidCommunity = { viewModel.loginWithSolidcommunity() },
+            onLoginSolidCommunity = { viewModel.loginWithSolidCommunity() },
             onLoginCustomUrl = { viewModel.loginWithCustomIssuer(it) },
         )
     }

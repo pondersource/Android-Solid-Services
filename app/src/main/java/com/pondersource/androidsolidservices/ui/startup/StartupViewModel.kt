@@ -10,10 +10,7 @@ class StartupViewModel @Inject constructor(
     val authenticator: Authenticator,
 ) : BaseViewModel(){
 
-    suspend fun isLoggedIn(): Boolean {
-        // getActiveWebId() awaits Authenticator init, ensuring profiles are loaded
-        // before checking authorization state.
-        authenticator.getActiveWebId()
+    fun isLoggedIn(): Boolean {
         return authenticator.isUserAuthorized()
     }
 }

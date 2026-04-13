@@ -24,13 +24,18 @@ class SettingViewModel @Inject constructor(
     @Named(Constants.ASS_ACCOUNT_NAME) private val aSSAccountName: String,
 ): BaseViewModel() {
 
-    val accounts = mutableStateOf<List<Profile>>(authenticator.getAllLoggedInProfiles())
-    val activeWebId: StateFlow<String> = authenticator.activeProfileFlow
-        .map { it.userInfo?.webId ?: "" }
+    val accounts: StateFlow<List<Profile>> = authenticator.loggedInProfilesFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val activeWebId: StateFlow<String> = authenticator.activeWebIdFlow
+        .map { it ?: "" }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
+
     val logoutLoading = mutableStateOf(false)
-    /** True when there are no accounts left — navigate to Login. */
-    val navigateToLogin = mutableStateOf(false)
+
+    val navigateToLogin: StateFlow<Boolean> = authenticator.isAuthorizedFlow
+        .map { !it }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     fun switchAccount(webId: String) {
         viewModelScope.launch {
@@ -42,16 +47,8 @@ class SettingViewModel @Inject constructor(
         viewModelScope.launch {
             logoutLoading.value = true
             val webId = activeWebId.value
-            authenticator.resetProfile(webId)
+            authenticator.removeProfile(webId)
             accountManager.removeAccountExplicitly(Account(webId, aSSAccountName))
-            // Refresh reactive state
-            accounts.value = authenticator.getAllLoggedInProfiles()
-            val remaining = accounts.value
-            if (remaining.isNotEmpty()) {
-                // activeWebId updates reactively via activeProfileFlow
-            } else {
-                navigateToLogin.value = true
-            }
             logoutLoading.value = false
         }
     }
@@ -64,14 +61,8 @@ class SettingViewModel @Inject constructor(
                     Account(profile.userInfo!!.webId, aSSAccountName)
                 )
             }
-            authenticator.resetProfile()
-            accounts.value = emptyList()
+            authenticator.removeAllProfiles()
             logoutLoading.value = false
-            navigateToLogin.value = true
         }
-    }
-
-    fun refreshAccounts() {
-        accounts.value = authenticator.getAllLoggedInProfiles()
     }
 }

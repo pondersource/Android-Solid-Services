@@ -27,7 +27,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ASSResourceService: LifecycleService() {
 
-    private val TAG = "ASSResourceService"
     @Inject
     lateinit var authenticator : Authenticator
     @Inject
@@ -36,7 +35,7 @@ class ASSResourceService: LifecycleService() {
     @Inject
     lateinit var resourcePermissionRepository: ResourcePermissionRepository
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
         return binder
     }
@@ -61,7 +60,7 @@ class ASSResourceService: LifecycleService() {
             }
         }
 
-        private fun getProfile() = authenticator.getProfile()
+        private fun getProfile() = authenticator.getActiveProfile()
 
         override fun getWebId(callback: IASSRdfResourceCallback) {
 

@@ -11,9 +11,11 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.pondersource.shared.data.Profile
 import com.pondersource.shared.data.ProfileList
 import com.pondersource.shared.data.contains
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.io.InputStream
@@ -50,10 +52,12 @@ internal class UserRepositoryImplementation private constructor(
                 t: ProfileList,
                 output: OutputStream
             ) {
-                output.write(
-                    Json.encodeToString(t)
-                        .encodeToByteArray()
-                )
+                withContext(Dispatchers.IO) {
+                    output.write(
+                        Json.encodeToString(t)
+                            .encodeToByteArray()
+                    )
+                }
             }
         }
 
@@ -79,8 +83,8 @@ internal class UserRepositoryImplementation private constructor(
         return context.profilesDataStore.data
     }
 
-    override suspend fun readAllProfilesOnce(): ProfileList {
-        return context.profilesDataStore.data.first()
+    override fun activeWebIdFlow(): Flow<String?> {
+        return context.preferencesDataStore.data.map { it[ACTIVE_WEB_ID_KEY] }
     }
 
     override suspend fun writeProfile(webid: String, profile: Profile) {

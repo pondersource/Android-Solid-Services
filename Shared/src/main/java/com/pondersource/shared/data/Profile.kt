@@ -24,15 +24,15 @@ fun ProfileList.contains(webId: String): Boolean {
     return profiles.containsKey(webId)
 }
 
-fun ProfileList.getProfileOrReturnDefault(webId: String): Profile {
-    return profiles.getOrDefault(webId, Profile())
+fun ProfileList.getProfileOrNull(webId: String): Profile? {
+    return profiles[webId]
 }
 
 @Serializable(with = ProfileSerializer::class)
 data class Profile(
-    var authState: AuthState = AuthState(),
-    var userInfo: UserInfo? = null,
-    var webId: WebId? = null
+    val authState: AuthState = AuthState(),
+    val userInfo: UserInfo? = null,
+    val webId: WebId? = null
 )
 
 @Serializer(forClass = Map::class)
@@ -60,17 +60,13 @@ class ProfileSerializer: KSerializer<Profile> {
     }
 
     override fun deserialize(decoder: Decoder): Profile {
-        val profile = Profile()
         val stateString = decoder.decodeString()
         val userInfoString = decoder.decodeString()
         val webIdString = decoder.decodeString()
-        if (stateString.isNotEmpty()) {
-            profile.authState =  AuthState.jsonDeserialize(stateString)
-        }
-        profile.userInfo = if (userInfoString.isNotEmpty()) Json.decodeFromString<UserInfo>(userInfoString) else null
-        if (webIdString.isNotEmpty()) {
-            profile.webId = readFromString(webIdString)
-        }
-        return profile
+        return Profile(
+            authState = if (stateString.isNotEmpty()) AuthState.jsonDeserialize(stateString) else AuthState(),
+            userInfo = if (userInfoString.isNotEmpty()) Json.decodeFromString<UserInfo>(userInfoString) else null,
+            webId = if (webIdString.isNotEmpty()) readFromString(webIdString) else null,
+        )
     }
 }

@@ -9,9 +9,10 @@ import com.pondersource.solidandroidapi.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -23,13 +24,13 @@ class MainViewModel @Inject constructor(
 ): BaseViewModel() {
 
     val webId: StateFlow<String> = authenticator.activeProfileFlow
-        .filter { it.userInfo != null }
-        .map { it.userInfo!!.webId }
+        .filterNotNull()
+        .map { it.userInfo?.webId ?: "" }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 
     val storages: StateFlow<List<String>> = authenticator.activeProfileFlow
-        .filter { it.webId != null }
-        .map { it.webId!!.getStorages().map { uri -> uri.toString() } }
+        .filterNotNull()
+        .map { it.webId?.getStorages()?.map { uri -> uri.toString() } ?: emptyList() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     init {
@@ -37,20 +38,22 @@ class MainViewModel @Inject constructor(
     }
 
     private fun syncAccountManager() {
-        // Ensure all logged-in profiles have an Android Account entry
-        val existingAccounts = accountManager.accounts
-            .filter { it.type == aSSAccountName }
-            .map { it.name }
-            .toSet()
+        viewModelScope.launch {
+            authenticator.getActiveWebId()
+            val existingAccounts = accountManager.accounts
+                .filter { it.type == aSSAccountName }
+                .map { it.name }
+                .toSet()
 
-        authenticator.getAllLoggedInProfiles().forEach { profile ->
-            val profileWebId = profile.userInfo!!.webId
-            if (profileWebId !in existingAccounts) {
-                accountManager.addAccountExplicitly(
-                    Account(profileWebId, aSSAccountName),
-                    "password",
-                    null
-                )
+            authenticator.getAllLoggedInProfiles().forEach { profile ->
+                val profileWebId = profile.userInfo!!.webId
+                if (profileWebId !in existingAccounts) {
+                    accountManager.addAccountExplicitly(
+                        Account(profileWebId, aSSAccountName),
+                        "password",
+                        null
+                    )
+                }
             }
         }
     }

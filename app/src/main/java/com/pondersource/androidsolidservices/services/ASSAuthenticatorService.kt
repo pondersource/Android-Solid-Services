@@ -73,7 +73,7 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
                     )
                 ).toString()
                 if (hasLoggedIn()) {
-                    if (isAppAuthorized()) {
+                    if (isAppAuthorized) {
                         callback.onResult(true)
                     } else {
                         showLoginDialog(
@@ -105,7 +105,7 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
         callback: IASSLoginCallback
     ) {
 
-        ContextCompat.getMainExecutor(this).execute( {
+        ContextCompat.getMainExecutor(this).execute {
             alertDialog
                 .setTitle("Permission Request")
                 .setMessage("$appName wants to access your Solid pod. Do you allow?")
@@ -121,9 +121,15 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
                 }
                 .create().apply {
                     window!!.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY)
-                    window!!.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
-                    window!!.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND, WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                    window!!.setLayout(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT
+                    )
+                    window!!.setFlags(
+                        WindowManager.LayoutParams.FLAG_DIM_BEHIND,
+                        WindowManager.LayoutParams.FLAG_DIM_BEHIND
+                    )
                 }.show()
-        })
+        }
     }
 }

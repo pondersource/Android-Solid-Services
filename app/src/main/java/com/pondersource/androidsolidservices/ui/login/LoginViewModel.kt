@@ -23,9 +23,10 @@ class LoginViewModel @Inject constructor(
     val isAddingAccount: Boolean = savedStateHandle.toRoute<Login>().isAddingAccount
 
     companion object {
+        private const val APP_NAME = "Android Solid Service"
         private const val AUTH_APP_REDIRECT_URL = "com.pondersource.androidsolidservices:/oauth2redirect"
         private const val OIDC_ISSUER_INRUPT_COM = "https://login.inrupt.com"
-        private const val OIDC_ISSUER_SOLIDCOMMIUNITY = "https://solidcommunity.net"
+        private const val OIDC_ISSUER_SOLID_COMMUNITY = "https://solidcommunity.net"
     }
 
     val loginBrowserIntent = mutableStateOf<Intent?>(null)
@@ -52,25 +53,25 @@ class LoginViewModel @Inject constructor(
 
     fun loginWithWebId(webId: String) {
         launchLogin {
-            authenticator.createAuthenticationIntentWithWebId(webId, AUTH_APP_REDIRECT_URL)
+            authenticator.createAuthenticationIntent(webId = webId, appName = APP_NAME, redirectUri = AUTH_APP_REDIRECT_URL)
         }
     }
 
     fun loginWithInruptCom() {
         launchLogin {
-            authenticator.createAuthenticationIntentWithOidcIssuer(OIDC_ISSUER_INRUPT_COM, AUTH_APP_REDIRECT_URL)
+            authenticator.createAuthenticationIntent(oidcIssuer = OIDC_ISSUER_INRUPT_COM, appName = APP_NAME, redirectUri = AUTH_APP_REDIRECT_URL)
         }
     }
 
-    fun loginWithSolidcommunity() {
+    fun loginWithSolidCommunity() {
         launchLogin {
-            authenticator.createAuthenticationIntentWithOidcIssuer(OIDC_ISSUER_SOLIDCOMMIUNITY, AUTH_APP_REDIRECT_URL)
+            authenticator.createAuthenticationIntent(oidcIssuer = OIDC_ISSUER_SOLID_COMMUNITY, appName = APP_NAME, redirectUri = AUTH_APP_REDIRECT_URL)
         }
     }
 
     fun loginWithCustomIssuer(issuerUrl: String) {
         launchLogin {
-            authenticator.createAuthenticationIntentWithOidcIssuer(issuerUrl, AUTH_APP_REDIRECT_URL)
+            authenticator.createAuthenticationIntent(oidcIssuer = issuerUrl, appName = APP_NAME, redirectUri = AUTH_APP_REDIRECT_URL)
         }
     }
 
@@ -104,9 +105,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    suspend fun isLoggedIn(): Boolean {
-        // getActiveWebId() awaits Authenticator init, ensuring profiles are loaded.
-        authenticator.getActiveWebId()
+    fun isLoggedIn(): Boolean {
         return authenticator.isUserAuthorized()
     }
 }

@@ -50,20 +50,17 @@ fun Setting(
     navController: NavController,
     viewModel: SettingViewModel,
 ) {
-    LaunchedEffect(viewModel.navigateToLogin.value) {
-        if (viewModel.navigateToLogin.value) {
+    val navigateToLogin by viewModel.navigateToLogin.collectAsState()
+    val accounts by viewModel.accounts.collectAsState()
+    val activeWebId by viewModel.activeWebId.collectAsState()
+
+    LaunchedEffect(navigateToLogin) {
+        if (navigateToLogin) {
             navController.navigate(Login()) {
                 popUpTo(navController.graph.id) { inclusive = true }
             }
         }
     }
-
-    // Refresh accounts when returning from adding a new account
-    LaunchedEffect(Unit) {
-        viewModel.refreshAccounts()
-    }
-
-    val activeWebId by viewModel.activeWebId.collectAsState()
 
     Scaffold(
         topBar = {
@@ -106,7 +103,7 @@ fun Setting(
                         .clip(RoundedCornerShape(12.dp)),
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
-                    items(viewModel.accounts.value) { profile ->
+                    items(accounts) { profile ->
                         AccountRow(
                             profile = profile,
                             isActive = profile.userInfo?.webId == activeWebId,
@@ -116,7 +113,7 @@ fun Setting(
                                 }
                             },
                         )
-                        if (profile != viewModel.accounts.value.last()) {
+                        if (profile != accounts.last()) {
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }

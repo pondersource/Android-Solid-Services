@@ -34,13 +34,13 @@
         </service>
         <service
             android:name=".services.ASSAuthenticatorService"
-            android:exported="true"></service>
+            android:exported="true" />
         <service
             android:name=".services.ASSResourceService"
-            android:exported="true"></service>
+            android:exported="true" />
         <service
             android:name=".services.SolidDataModulesService"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".ui.MainActivity"
@@ -54,8 +54,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:host="com.pondersource.androidsolidservices"
-                    android:path="/oauth2redirect"
+                    android:host="@string/app_host_name"
+                    android:path="@string/app_auth_redirect_path"
                     android:scheme="https" />
             </intent-filter>
         </activity>
