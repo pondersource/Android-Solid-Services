@@ -68,6 +68,7 @@ internal class ProfileManager private constructor(
     init {
         scope.launch {
             userRepository.readAllProfiles().first()
+            userRepository.activeWebIdFlow().first()
             initDeferred.complete(Unit)
         }
     }

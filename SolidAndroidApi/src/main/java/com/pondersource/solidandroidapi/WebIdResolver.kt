@@ -7,6 +7,7 @@ import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.rdf.RdfDataset
 import com.inrupt.client.Request
 import com.inrupt.client.Response
+import com.inrupt.client.auth.Session
 import com.inrupt.client.openid.OpenIdSession
 import com.inrupt.client.solid.SolidSyncClient
 import com.pondersource.shared.HTTPAcceptType
@@ -52,17 +53,32 @@ internal class WebIdResolver {
     ): SolidNetworkResponse<T> {
         val client: SolidSyncClient = SolidSyncClient.getClient()
         try {
+
             val tokenResponse = tokenProvider()
-                ?: throw IllegalArgumentException("Auth object should be authenticated before interacting with resources.")
+            val response = if(tokenResponse != null) {
 
-            client.session(OpenIdSession.ofIdToken(tokenResponse.idToken!!))
+                client.session(OpenIdSession.ofIdToken(tokenResponse.idToken!!))
 
-            val response = sendWithDPoPRetry(client, resource, clazz, authHeadersProvider, nonceSink)
+                sendWithDPoPRetry(client, resource, clazz, authHeadersProvider, nonceSink)
+            } else {
+                client.session(Session.anonymous())
+                val accept = if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.OCTET_STREAM
 
+                val request = Request.newBuilder()
+                    .uri(resource)
+                    .header(HTTPHeaderName.ACCEPT, accept)
+                    .GET()
+                    .build()
+
+                client.send(request, Response.BodyHandlers.ofInputStream())
+            }
             return if (response.isSuccessful()) {
                 SolidNetworkResponse.Success(constructObject(response, clazz))
             } else {
-                SolidNetworkResponse.Error(response.statusCode(), response.body().toPlainString())
+                SolidNetworkResponse.Error(
+                    response.statusCode(),
+                    response.body().toPlainString()
+                )
             }
         } catch (e: Exception) {
             return SolidNetworkResponse.Exception(e)
