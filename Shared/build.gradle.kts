@@ -78,7 +78,7 @@ dependencies {
 
 mavenPublishing {
     configure(AndroidSingleVariantLibrary(
-        javadocJar = JavadocJar.Javadoc(),
+        javadocJar = JavadocJar.Empty(),
         sourcesJar = SourcesJar.Sources(),
         variant = "release",
     ))
