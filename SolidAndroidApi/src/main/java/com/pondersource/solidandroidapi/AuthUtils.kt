@@ -35,7 +35,7 @@ private fun AuthorizationServiceDiscovery.get(field: String): List<String>? {
         return values
     } catch (e: JSONException) {
         // all appropriate steps are taken above to avoid a JSONException. If it is still
-        // thrown, indicating an implementation change, throw an excpetion
+        // thrown, indicating an implementation change, throw an exception
         throw IllegalStateException("unexpected JSONException", e)
     }
 }

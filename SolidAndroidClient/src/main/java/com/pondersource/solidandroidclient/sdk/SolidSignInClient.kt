@@ -178,7 +178,7 @@ class SolidSignInClient {
                     callBack(granted)
                 }
 
-                override fun onError(errorCode: kotlin.Int, errorMessage: kotlin.String?) {
+                override fun onError(errorCode: Int, errorMessage: String?) {
                     //TODO("Not yet implemented")
                 }
             })

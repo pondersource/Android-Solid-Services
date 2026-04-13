@@ -86,8 +86,7 @@ class LoginViewModel @Inject constructor(
                     authorizationException
                 )
             } catch (_: Exception) {
-                // Token exchange may have succeeded even if a later step (e.g. WebID
-                // profile fetch) failed. Fall through to the isLoggedIn() check.
+                //Fall through to the isLoggedIn() check.
             }
             loginLoading.value = false
             loginBrowserIntent.value = null

@@ -4,7 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,8 +48,8 @@ object MainPage {
 
     @Serializable
     data class MainNavBottomItem<T: Any>(
-        @StringRes val title: Int,
-        @DrawableRes val icon: Int,
+        @field:StringRes val title: Int,
+        @field:DrawableRes val icon: Int,
         val route: T,
     )
 

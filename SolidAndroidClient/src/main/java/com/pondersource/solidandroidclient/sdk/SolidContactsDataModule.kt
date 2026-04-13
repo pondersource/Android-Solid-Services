@@ -20,6 +20,7 @@ import com.pondersource.solidandroidclient.contacts.IASSContactModuleFullGroupCa
 import com.pondersource.solidandroidclient.contacts.IASSContactsModuleInterface
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -40,19 +41,19 @@ class SolidContactsDataModule {
 
     private var iASSDataModulesService: IASSDataModulesService? = null
     private var iASSContactsModuleInterface: IASSContactsModuleInterface? = null
-    private val ContactsConnectionFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val contactsConnectionFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             iASSDataModulesService = IASSDataModulesService.Stub.asInterface(service)
             iASSContactsModuleInterface = iASSDataModulesService!!.contactsDataModuleInterface
-            ContactsConnectionFlow.value = true
+            contactsConnectionFlow.value = true
 
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
             iASSDataModulesService = null
             iASSContactsModuleInterface = null
-            ContactsConnectionFlow.value = false
+            contactsConnectionFlow.value = false
         }
     }
 
@@ -75,13 +76,14 @@ class SolidContactsDataModule {
     }
 
     fun contactsDataModuleServiceConnectionState(): Flow<Boolean> {
-        return ContactsConnectionFlow
+        return contactsConnectionFlow
     }
 
     suspend fun getAddressBooks(): AddressBookList? {
         checkService()
-        return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.getAddressBooks(object: IASSContactModuleAddressBookListCallback.Stub() {
+        return suspendCancellableCoroutine { continuation ->
+            iASSContactsModuleInterface!!.getAddressBooks(object :
+                IASSContactModuleAddressBookListCallback.Stub() {
                 override fun valueChanged(addressBookList: AddressBookList?) {
                     continuation.resume(addressBookList)
                 }
@@ -97,7 +99,7 @@ class SolidContactsDataModule {
         container: String? = null,
     ) : AddressBook? {
         checkService()
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             iASSContactsModuleInterface!!.createAddressBook(
                 title,
                 isPrivate,

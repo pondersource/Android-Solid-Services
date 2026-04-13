@@ -35,6 +35,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
 import com.pondersource.androidsolidservices.model.GrantedApp
 import com.pondersource.androidsolidservices.ui.elements.RevokePermissionDialog
+import androidx.core.graphics.createBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +74,7 @@ fun AccessGrants(
                 }
             }
             if (viewModel.grantedApps.value.isEmpty()) {
-                item() {
+                item {
                     Text(
                         text = "No app granted",
                         modifier = Modifier.padding(16.dp)
@@ -112,7 +113,7 @@ private fun GrantedAppItem(
         try {
             context.packageManager.getApplicationIcon(app.packageName)
                 .toBitmap(config = Bitmap.Config.ARGB_8888).asImageBitmap()
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (_: PackageManager.NameNotFoundException) {
             null
         }
     }
@@ -132,7 +133,7 @@ private fun GrantedAppItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                bitmap = icon ?: Bitmap.createBitmap(32.dp.value.toInt(), 32.dp.value.toInt(), Bitmap.Config.ARGB_8888).asImageBitmap(),
+                bitmap = icon ?: createBitmap(32.dp.value.toInt(), 32.dp.value.toInt()).asImageBitmap(),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(8.dp)

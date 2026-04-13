@@ -21,10 +21,6 @@ import com.pondersource.shared.data.webid.WebId
 interface SolidContactsDataModule {
 
     companion object {
-        /**
-         * Returns the application-scoped singleton [SolidContactsDataModule].
-         * @param context Any [Context]; the application context is used internally.
-         */
         fun getInstance(context: Context): SolidContactsDataModule = SolidContactsDataModuleImplementation.getInstance(context)
     }
 

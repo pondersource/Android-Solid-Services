@@ -21,12 +21,12 @@ import com.pondersource.solidandroidclient.IASSResourceService
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidResourceException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Reads, creates, updates and deletes resources on the authenticated user's Solid pod by
@@ -125,8 +125,6 @@ class SolidResourceClient {
         )
     }
 
-    // ── Public suspend API ────────────────────────────────────────────────────
-
     /**
      * Fetches and parses the authenticated user's WebID document from their pod.
      * @throws SolidException if the app is not installed, the service is not connected,
@@ -134,12 +132,20 @@ class SolidResourceClient {
      */
     suspend fun getWebId(): WebId {
         checkBasicConditions()
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             iASSResourceService!!.getWebId(object : IASSRdfResourceCallback.Stub() {
                 override fun onResult(result: RDFSource) {
-                    try { cont.resume(reconstructRdf(result, WebId::class.java)) }
-                    catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
+                    try {
+                        cont.resume(reconstructRdf(result, WebId::class.java))
+                    } catch (e: Exception) {
+                        cont.resumeWithException(
+                            SolidResourceException.UnknownException(
+                                e.message ?: ""
+                            )
+                        )
+                    }
                 }
+
                 override fun onError(errorCode: Int, errorMessage: String) {
                     cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
                 }
@@ -155,33 +161,67 @@ class SolidResourceClient {
      */
     suspend fun <T : Resource> read(resourceUrl: String, clazz: Class<T>): T {
         checkBasicConditions()
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             when {
                 RDFSource::class.java.isAssignableFrom(clazz) -> {
-                    iASSResourceService!!.readRdf(resourceUrl, object : IASSRdfResourceCallback.Stub() {
-                        override fun onResult(result: RDFSource) {
-                            try { cont.resume(reconstructRdf(result, clazz)) }
-                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
-                        }
-                        override fun onError(errorCode: Int, errorMessage: String) {
-                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
-                        }
-                    })
+                    iASSResourceService!!.readRdf(
+                        resourceUrl,
+                        object : IASSRdfResourceCallback.Stub() {
+                            override fun onResult(result: RDFSource) {
+                                try {
+                                    cont.resume(reconstructRdf(result, clazz))
+                                } catch (e: Exception) {
+                                    cont.resumeWithException(
+                                        SolidResourceException.UnknownException(
+                                            e.message ?: ""
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onError(errorCode: Int, errorMessage: String) {
+                                cont.resumeWithException(
+                                    handleSolidResourceException(
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                )
+                            }
+                        })
                 }
+
                 NonRDFSource::class.java.isAssignableFrom(clazz) -> {
-                    iASSResourceService!!.read(resourceUrl, object : IASSNonRdfResourceCallback.Stub() {
-                        override fun onResult(result: NonRDFSource) {
-                            try { cont.resume(reconstructNonRdf(result, clazz)) }
-                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
-                        }
-                        override fun onError(errorCode: Int, errorMessage: String) {
-                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
-                        }
-                    })
+                    iASSResourceService!!.read(
+                        resourceUrl,
+                        object : IASSNonRdfResourceCallback.Stub() {
+                            override fun onResult(result: NonRDFSource) {
+                                try {
+                                    cont.resume(reconstructNonRdf(result, clazz))
+                                } catch (e: Exception) {
+                                    cont.resumeWithException(
+                                        SolidResourceException.UnknownException(
+                                            e.message ?: ""
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onError(errorCode: Int, errorMessage: String) {
+                                cont.resumeWithException(
+                                    handleSolidResourceException(
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                )
+                            }
+                        })
                 }
-                else -> cont.resumeWithException(
-                    SolidResourceException.NotSupportedClassException("Class must extend RDFSource or NonRDFSource.")
-                )
+
+                else -> {
+                    cont.resumeWithException(
+                        SolidResourceException.NotSupportedClassException("Class must extend RDFSource or NonRDFSource.")
+                    )
+                }
             }
         }
     }
@@ -192,30 +232,62 @@ class SolidResourceClient {
      */
     suspend fun <T : Resource> create(resource: T): T {
         checkBasicConditions()
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             when (resource) {
                 is RDFSource -> {
-                    iASSResourceService!!.createRdf(resource, object : IASSRdfResourceCallback.Stub() {
-                        override fun onResult(result: RDFSource) {
-                            try { cont.resume(reconstructRdf(result, resource.javaClass)) }
-                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
-                        }
-                        override fun onError(errorCode: Int, errorMessage: String) {
-                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
-                        }
-                    })
+                    iASSResourceService!!.createRdf(
+                        resource,
+                        object : IASSRdfResourceCallback.Stub() {
+                            override fun onResult(result: RDFSource) {
+                                try {
+                                    cont.resume(reconstructRdf(result, resource.javaClass))
+                                } catch (e: Exception) {
+                                    cont.resumeWithException(
+                                        SolidResourceException.UnknownException(
+                                            e.message ?: ""
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onError(errorCode: Int, errorMessage: String) {
+                                cont.resumeWithException(
+                                    handleSolidResourceException(
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                )
+                            }
+                        })
                 }
+
                 is NonRDFSource -> {
-                    iASSResourceService!!.create(resource, object : IASSNonRdfResourceCallback.Stub() {
-                        override fun onResult(result: NonRDFSource) {
-                            try { cont.resume(reconstructNonRdf(result, resource.javaClass)) }
-                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
-                        }
-                        override fun onError(errorCode: Int, errorMessage: String) {
-                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
-                        }
-                    })
+                    iASSResourceService!!.create(
+                        resource,
+                        object : IASSNonRdfResourceCallback.Stub() {
+                            override fun onResult(result: NonRDFSource) {
+                                try {
+                                    cont.resume(reconstructNonRdf(result, resource.javaClass))
+                                } catch (e: Exception) {
+                                    cont.resumeWithException(
+                                        SolidResourceException.UnknownException(
+                                            e.message ?: ""
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onError(errorCode: Int, errorMessage: String) {
+                                cont.resumeWithException(
+                                    handleSolidResourceException(
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                )
+                            }
+                        })
                 }
+
                 else -> cont.resumeWithException(
                     SolidResourceException.NotSupportedClassException("Resource must be RDFSource or NonRDFSource.")
                 )
@@ -229,30 +301,62 @@ class SolidResourceClient {
      */
     suspend fun <T : Resource> update(resource: T): T {
         checkBasicConditions()
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             when (resource) {
                 is RDFSource -> {
-                    iASSResourceService!!.updateRdf(resource, object : IASSRdfResourceCallback.Stub() {
-                        override fun onResult(result: RDFSource) {
-                            try { cont.resume(reconstructRdf(result, resource.javaClass)) }
-                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
-                        }
-                        override fun onError(errorCode: Int, errorMessage: String) {
-                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
-                        }
-                    })
+                    iASSResourceService!!.updateRdf(
+                        resource,
+                        object : IASSRdfResourceCallback.Stub() {
+                            override fun onResult(result: RDFSource) {
+                                try {
+                                    cont.resume(reconstructRdf(result, resource.javaClass))
+                                } catch (e: Exception) {
+                                    cont.resumeWithException(
+                                        SolidResourceException.UnknownException(
+                                            e.message ?: ""
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onError(errorCode: Int, errorMessage: String) {
+                                cont.resumeWithException(
+                                    handleSolidResourceException(
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                )
+                            }
+                        })
                 }
+
                 is NonRDFSource -> {
-                    iASSResourceService!!.update(resource, object : IASSNonRdfResourceCallback.Stub() {
-                        override fun onResult(result: NonRDFSource) {
-                            try { cont.resume(reconstructNonRdf(result, resource.javaClass)) }
-                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
-                        }
-                        override fun onError(errorCode: Int, errorMessage: String) {
-                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
-                        }
-                    })
+                    iASSResourceService!!.update(
+                        resource,
+                        object : IASSNonRdfResourceCallback.Stub() {
+                            override fun onResult(result: NonRDFSource) {
+                                try {
+                                    cont.resume(reconstructNonRdf(result, resource.javaClass))
+                                } catch (e: Exception) {
+                                    cont.resumeWithException(
+                                        SolidResourceException.UnknownException(
+                                            e.message ?: ""
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onError(errorCode: Int, errorMessage: String) {
+                                cont.resumeWithException(
+                                    handleSolidResourceException(
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                )
+                            }
+                        })
                 }
+
                 else -> cont.resumeWithException(
                     SolidResourceException.NotSupportedClassException("Resource must be RDFSource or NonRDFSource.")
                 )
@@ -266,30 +370,62 @@ class SolidResourceClient {
      */
     suspend fun <T : Resource> delete(resource: T): T {
         checkBasicConditions()
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             when (resource) {
                 is RDFSource -> {
-                    iASSResourceService!!.deleteRdf(resource, object : IASSRdfResourceCallback.Stub() {
-                        override fun onResult(result: RDFSource) {
-                            try { cont.resume(reconstructRdf(result, resource.javaClass)) }
-                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
-                        }
-                        override fun onError(errorCode: Int, errorMessage: String) {
-                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
-                        }
-                    })
+                    iASSResourceService!!.deleteRdf(
+                        resource,
+                        object : IASSRdfResourceCallback.Stub() {
+                            override fun onResult(result: RDFSource) {
+                                try {
+                                    cont.resume(reconstructRdf(result, resource.javaClass))
+                                } catch (e: Exception) {
+                                    cont.resumeWithException(
+                                        SolidResourceException.UnknownException(
+                                            e.message ?: ""
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onError(errorCode: Int, errorMessage: String) {
+                                cont.resumeWithException(
+                                    handleSolidResourceException(
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                )
+                            }
+                        })
                 }
+
                 is NonRDFSource -> {
-                    iASSResourceService!!.delete(resource, object : IASSNonRdfResourceCallback.Stub() {
-                        override fun onResult(result: NonRDFSource) {
-                            try { cont.resume(reconstructNonRdf(result, resource.javaClass)) }
-                            catch (e: Exception) { cont.resumeWithException(SolidResourceException.UnknownException(e.message ?: "")) }
-                        }
-                        override fun onError(errorCode: Int, errorMessage: String) {
-                            cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
-                        }
-                    })
+                    iASSResourceService!!.delete(
+                        resource,
+                        object : IASSNonRdfResourceCallback.Stub() {
+                            override fun onResult(result: NonRDFSource) {
+                                try {
+                                    cont.resume(reconstructNonRdf(result, resource.javaClass))
+                                } catch (e: Exception) {
+                                    cont.resumeWithException(
+                                        SolidResourceException.UnknownException(
+                                            e.message ?: ""
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onError(errorCode: Int, errorMessage: String) {
+                                cont.resumeWithException(
+                                    handleSolidResourceException(
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                )
+                            }
+                        })
                 }
+
                 else -> cont.resumeWithException(
                     SolidResourceException.NotSupportedClassException("Resource must be RDFSource or NonRDFSource.")
                 )

@@ -30,7 +30,7 @@ class DPoPGenerator private constructor(
         fun getInstance(
             authDiscovery: AuthorizationServiceDiscovery,
         ): DPoPGenerator {
-            val issuer = authDiscovery.issuer ?: authDiscovery.docJson.toString()
+            val issuer = authDiscovery.issuer
             return synchronized(instances) {
                 instances.getOrPut(issuer) {
                     DPoPGenerator(authDiscovery)
@@ -182,8 +182,8 @@ private abstract class RSKeyHolder(
         if(keyStore.containsAlias(alias)) {
             val entry: KeyStore.Entry = keyStore.getEntry(alias, null)
             val privateKeyEntry: KeyStore.PrivateKeyEntry = (entry as KeyStore.PrivateKeyEntry)
-            val privateKey: PrivateKey = privateKeyEntry.privateKey;
-            val publicKey: PublicKey = privateKeyEntry.certificate.publicKey;
+            val privateKey: PrivateKey = privateKeyEntry.privateKey
+            val publicKey: PublicKey = privateKeyEntry.certificate.publicKey
             localKeyPair = KeyPair(publicKey, privateKey)
         } else {
             val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
@@ -227,8 +227,8 @@ private abstract class ESKeyHolder(
         if(keyStore.containsAlias(alias)) {
             val entry: KeyStore.Entry = keyStore.getEntry(alias, null)
             val privateKeyEntry: KeyStore.PrivateKeyEntry = (entry as KeyStore.PrivateKeyEntry)
-            val privateKey: PrivateKey = privateKeyEntry.privateKey;
-            val publicKey: PublicKey = privateKeyEntry.certificate.publicKey;
+            val privateKey: PrivateKey = privateKeyEntry.privateKey
+            val publicKey: PublicKey = privateKeyEntry.certificate.publicKey
             localKeyPair = KeyPair(publicKey, privateKey)
         } else {
             val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(

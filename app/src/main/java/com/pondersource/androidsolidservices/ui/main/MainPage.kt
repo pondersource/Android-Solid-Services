@@ -15,7 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -34,16 +34,16 @@ fun MainPage(
 
     val bottomItems = remember {
         listOf (
-            MainPage.MainNavBottomItem<MainPage.AccessGrants>(R.string.access_grant, R.drawable.ic_access_grant,
+            MainPage.MainNavBottomItem(R.string.access_grant, R.drawable.ic_access_grant,
                 MainPage.AccessGrants),
-            MainPage.MainNavBottomItem<MainPage.Main>(R.string.main, R.drawable.ic_main,
+            MainPage.MainNavBottomItem(R.string.main, R.drawable.ic_main,
                 MainPage.Main),
-            MainPage.MainNavBottomItem<MainPage.Setting>(R.string.setting, R.drawable.ic_setting,
+            MainPage.MainNavBottomItem(R.string.setting, R.drawable.ic_setting,
                 MainPage.Setting),
         )
     }
 
-    val changeTab : (T: Any) -> Unit = { tabRoute ->
+    val changeTab : (_: Any) -> Unit = { tabRoute ->
         nestedNavController.navigate(tabRoute) {
 
             popUpTo(nestedNavController.graph.findStartDestination().id) {
