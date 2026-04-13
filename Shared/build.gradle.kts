@@ -1,4 +1,6 @@
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SourcesJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -76,16 +78,16 @@ dependencies {
 
 mavenPublishing {
     configure(AndroidSingleVariantLibrary(
+        javadocJar = JavadocJar.Javadoc(),
+        sourcesJar = SourcesJar.Sources(),
         variant = "release",
-        sourcesJar = true,
-        publishJavadocJar = true,
     ))
     coordinates("com.pondersource.shared", "shared", "0.3.0")
 
     pom {
         name.set("SolidAndroidShared")
         description.set("A set of classes needed for SolidAndroidServices and it's dependencies.")
-        inceptionYear.set("2024")
+        inceptionYear.set("2026")
         url.set("https://github.com/pondersource/Android-Solid-Services/")
         licenses {
             license {

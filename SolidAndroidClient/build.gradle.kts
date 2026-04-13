@@ -1,4 +1,6 @@
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SourcesJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -84,16 +86,16 @@ dependencies {
 
 mavenPublishing {
     configure(AndroidSingleVariantLibrary(
+        javadocJar = JavadocJar.Javadoc(),
+        sourcesJar = SourcesJar.Sources(),
         variant = "release",
-        sourcesJar = true,
-        publishJavadocJar = true,
     ))
     coordinates("com.pondersource.solidandroidclient", "solidandroidclient", "0.3.0")
 
     pom {
         name.set("SolidAndroidClient")
         description.set("An Android library to connect to Solid pods without authentication and based on connecting to Android Solid Services app as a single source of truth.")
-        inceptionYear.set("2024")
+        inceptionYear.set("2026")
         url.set("https://github.com/pondersource/Android-Solid-Services/")
         licenses {
             license {
