@@ -1,4 +1,4 @@
-// IASSContactModuleAddressBookListCallback.aidl
+// IASSContactModuleFullGroupCallback.aidl
 package com.pondersource.solidandroidclient.contacts;
 
 import com.pondersource.shared.data.datamodule.contact.AddressBook;
