@@ -3,6 +3,9 @@ This project consists of three parts:
 - [Solid Android Client library](#solid-android-client-library)
 - [Solid Android API library](#solid-android-api-library)
 
+## What's New in v0.3.1
+- Fix saving accounts bug
+
 ## What's New in v0.3.0
 
 - **Multi-account support**: Log in with multiple Solid accounts and switch between them from the Settings page.
@@ -45,7 +48,7 @@ You can add this library to your android project by adding this line to your mod
 ```gradle
 dependencies {
     ...
-    implementation("com.pondersource.solidandroidclient:solidandroidclient:0.3.0")
+    implementation("com.pondersource.solidandroidclient:solidandroidclient:0.3.1")
 }
 ```
 or if you are using another building system, check [here](https://central.sonatype.com/artifact/com.pondersource.solidandroidclient/solidandroidclient).
@@ -142,7 +145,7 @@ This library is used in the Android Solid Services app to interact with Solid. I
 ```gradle
 dependencies {
     ...
-    implementation("com.pondersource.solidandroidapi:solidandroidapi:0.3.0")
+    implementation("com.pondersource.solidandroidapi:solidandroidapi:0.3.1")
 }
 ```
 or if you are using another building system, check [here](https://central.sonatype.com/artifact/com.pondersource.solidandroidapi/solidandroidapi).
