@@ -90,7 +90,7 @@ mavenPublishing {
         sourcesJar = SourcesJar.Sources(),
         variant = "release",
     ))
-    coordinates("com.pondersource.solidandroidclient", "solidandroidclient", "0.3.0")
+    coordinates("com.pondersource.solidandroidclient", "solidandroidclient", "0.3.1")
 
     pom {
         name.set("SolidAndroidClient")

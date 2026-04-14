@@ -82,7 +82,7 @@ mavenPublishing {
         sourcesJar = SourcesJar.Sources(),
         variant = "release",
     ))
-    coordinates("com.pondersource.shared", "shared", "0.3.0")
+    coordinates("com.pondersource.shared", "shared", "0.3.1")
 
     pom {
         name.set("SolidAndroidShared")
