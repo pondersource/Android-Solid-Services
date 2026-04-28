@@ -5,11 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import com.pondersource.shared.data.datamodule.contact.AddressBook
-import com.pondersource.shared.data.datamodule.contact.AddressBookList
-import com.pondersource.shared.data.datamodule.contact.FullContact
-import com.pondersource.shared.data.datamodule.contact.FullGroup
-import com.pondersource.shared.data.datamodule.contact.NewContact
+import com.pondersource.shared.domain.datamodule.contact.AddressBook
+import com.pondersource.shared.domain.datamodule.contact.AddressBookList
+import com.pondersource.shared.domain.datamodule.contact.FullContact
+import com.pondersource.shared.domain.datamodule.contact.FullGroup
+import com.pondersource.shared.domain.datamodule.contact.NewContact
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_DATA_MODULES_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
 import com.pondersource.solidandroidclient.IASSDataModulesService

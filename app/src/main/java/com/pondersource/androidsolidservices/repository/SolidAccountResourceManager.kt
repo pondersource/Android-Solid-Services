@@ -1,7 +1,7 @@
 package com.pondersource.androidsolidservices.repository
 
-import com.pondersource.shared.SolidNetworkResponse
-import com.pondersource.shared.resource.Resource
+import com.pondersource.shared.domain.network.SolidNetworkResponse
+import com.pondersource.shared.domain.resource.Resource
 import java.net.URI
 
 interface SolidAccountResourceManager {

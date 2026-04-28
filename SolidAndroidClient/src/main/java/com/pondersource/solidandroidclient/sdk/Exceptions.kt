@@ -1,5 +1,6 @@
 package com.pondersource.solidandroidclient.sdk
 
+import com.pondersource.shared.domain.error.ExceptionsErrorCode
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidNotLoggedInException
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidResourceException
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidServicesDrawPermissionDeniedException
@@ -18,44 +19,13 @@ sealed class SolidException(message: String): Exception(message) {
     }
 }
 
-object ExceptionsErrorCode {
-
-    const val DRAW_OVERLAY_NOT_PERMITTED = 1
-    const val SOLID_NOT_LOGGED_IN = 2
-
-    const val NOT_SUPPORTED_CLASS = 100
-    const val NOT_PERMISSION = 101
-    const val NULL_WEBID = 102
-    const val UNKNOWN = 103
-}
-
-fun handleSolidResourceException(errorCode: Int, errorMessage: String): SolidResourceException {
-    return when (errorCode) {
-        ExceptionsErrorCode.NOT_SUPPORTED_CLASS -> {
-            SolidResourceException.NotSupportedClassException(errorMessage)
-        }
-        ExceptionsErrorCode.NOT_PERMISSION -> {
-            SolidResourceException.NotPermissionException(errorMessage)
-        }
-        ExceptionsErrorCode.NULL_WEBID -> {
-            SolidResourceException.NullWebIdException(errorMessage)
-        }
-        else -> {
-            SolidResourceException.UnknownException(errorMessage)
-        }
-    }
-}
-
 fun handleSolidException(errorCode: Int, errorMessage: String): SolidException {
     return when (errorCode) {
-        ExceptionsErrorCode.DRAW_OVERLAY_NOT_PERMITTED -> {
-            SolidServicesDrawPermissionDeniedException(errorMessage)
-        }
-        ExceptionsErrorCode.SOLID_NOT_LOGGED_IN -> {
-            SolidNotLoggedInException(errorMessage)
-        }
-        else -> {
-            handleSolidResourceException(errorCode, errorMessage)
-        }
+        ExceptionsErrorCode.DRAW_OVERLAY_NOT_PERMITTED -> SolidServicesDrawPermissionDeniedException(errorMessage)
+        ExceptionsErrorCode.SOLID_NOT_LOGGED_IN -> SolidNotLoggedInException(errorMessage)
+        ExceptionsErrorCode.NOT_SUPPORTED_CLASS -> SolidResourceException.NotSupportedClassException(errorMessage)
+        ExceptionsErrorCode.NOT_PERMISSION -> SolidResourceException.NotPermissionException(errorMessage)
+        ExceptionsErrorCode.NULL_WEBID -> SolidResourceException.NullWebIdException(errorMessage)
+        else -> SolidResourceException.UnknownException(errorMessage)
     }
 }

@@ -5,20 +5,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import com.apicatalog.jsonld.JsonLd
-import com.apicatalog.jsonld.document.JsonDocument
 import com.apicatalog.jsonld.http.media.MediaType
-import com.apicatalog.rdf.RdfDataset
-import com.pondersource.shared.NonRDFSource
-import com.pondersource.shared.RDFSource
-import com.pondersource.shared.data.webid.WebId
-import com.pondersource.shared.resource.Resource
+import com.pondersource.shared.domain.crud.N3Patch
+import com.pondersource.shared.domain.network.SolidNetworkResponse
+import com.pondersource.shared.domain.profile.WebId
+import com.pondersource.shared.domain.resource.NonRDFResource
+import com.pondersource.shared.domain.resource.RDFResource
+import com.pondersource.shared.domain.resource.SolidNonRDFResource
+import com.pondersource.shared.domain.resource.SolidRDFResource
+import com.pondersource.shared.domain.resource.SolidResource
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_CRUD_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
-import com.pondersource.solidandroidclient.IASSNonRdfResourceCallback
-import com.pondersource.solidandroidclient.IASSRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSResourceService
-import com.pondersource.solidandroidclient.sdk.SolidException.SolidResourceException
+import com.pondersource.solidandroidclient.IASSUnitCallback
+import com.pondersource.solidandroidclient.IASSSolidNonRdfResourceCallback
+import com.pondersource.solidandroidclient.IASSSolidRdfResourceCallback
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -26,7 +27,6 @@ import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * Reads, creates, updates and deletes resources on the authenticated user's Solid pod by
@@ -34,9 +34,11 @@ import kotlin.coroutines.resumeWithException
  *
  * Obtain an instance via [Solid.getResourceClient].
  *
- * All public methods are `suspend` functions and must be called from a coroutine.  They throw
- * a subclass of [SolidException.SolidResourceException] on failure rather than returning a
- * result wrapper, so callers should wrap calls in `try/catch` or use `runCatching`.
+ * All public methods are `suspend` functions and must be called from a coroutine.  Results are
+ * wrapped in [SolidNetworkResponse] — callers can use `when`, [SolidNetworkResponse.getOrThrow],
+ * [SolidNetworkResponse.getOrNull], or [SolidNetworkResponse.getOrDefault] to handle outcomes.
+ * Precondition failures (app not installed, service not connected) are returned as
+ * [SolidNetworkResponse.Exception].
  *
  * @see Solid.getResourceClient
  */
@@ -95,28 +97,31 @@ class SolidResourceClient {
      */
     fun resourceServiceConnectionState(): Flow<Boolean> = connectionFlow
 
-    private fun checkBasicConditions() {
-        if (!hasInstalledAndroidSolidServices()) throw SolidException.SolidAppNotFoundException()
-        if (iASSResourceService == null) throw SolidException.SolidServiceConnectionException()
+    private fun checkBasicConditions(): SolidNetworkResponse<Nothing>? {
+        if (!hasInstalledAndroidSolidServices())
+            return SolidNetworkResponse.Exception(SolidException.SolidAppNotFoundException())
+        if (iASSResourceService == null)
+            return SolidNetworkResponse.Exception(SolidException.SolidServiceConnectionException())
+        return null
     }
 
     // ── Reconstruction helpers ────────────────────────────────────────────────
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : Resource> reconstructRdf(source: RDFSource, clazz: Class<T>): T {
+    private fun <T : SolidResource> reconstructRdf(source: SolidRDFResource, clazz: Class<T>): T {
         if (clazz.isInstance(source)) return source as T
         return clazz.getConstructor(
-            URI::class.java, MediaType::class.java, RdfDataset::class.java, Headers::class.java
+            URI::class.java, MediaType::class.java, List::class.java, Headers::class.java
         ).newInstance(
             source.getIdentifier(),
             MediaType.of(source.getContentType()),
-            JsonLd.toRdf(JsonDocument.of(source.getEntity())).get(),
+            source.getAllQuads(),
             source.getHeaders()
         )
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : Resource> reconstructNonRdf(source: NonRDFSource, clazz: Class<T>): T {
+    private fun <T : SolidResource> reconstructNonRdf(source: SolidNonRDFResource, clazz: Class<T>): T {
         if (clazz.isInstance(source)) return source as T
         return clazz.getConstructor(
             URI::class.java, String::class.java, Headers::class.java, InputStream::class.java
@@ -125,29 +130,29 @@ class SolidResourceClient {
         )
     }
 
+    // ── Public API ────────────────────────────────────────────────────────────
+
     /**
      * Fetches and parses the authenticated user's WebID document from their pod.
-     * @throws SolidException if the app is not installed, the service is not connected,
-     *   or the server returns an error.
+     * @return [SolidNetworkResponse.Success] with the [WebId], or an error/exception variant.
      */
-    suspend fun getWebId(): WebId {
-        checkBasicConditions()
+    suspend fun getWebId(): SolidNetworkResponse<WebId> {
+        checkBasicConditions()?.let {
+            @Suppress("UNCHECKED_CAST")
+            return it as SolidNetworkResponse<WebId>
+        }
         return suspendCancellableCoroutine { cont ->
-            iASSResourceService!!.getWebId(object : IASSRdfResourceCallback.Stub() {
-                override fun onResult(result: RDFSource) {
+            iASSResourceService!!.getWebId(object : IASSSolidRdfResourceCallback.Stub() {
+                override fun onResult(result: SolidRDFResource) {
                     try {
-                        cont.resume(reconstructRdf(result, WebId::class.java))
+                        cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, WebId::class.java)))
                     } catch (e: Exception) {
-                        cont.resumeWithException(
-                            SolidResourceException.UnknownException(
-                                e.message ?: ""
-                            )
-                        )
+                        cont.resume(SolidNetworkResponse.Exception(e))
                     }
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
-                    cont.resumeWithException(handleSolidResourceException(errorCode, errorMessage))
+                    cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                 }
             })
         }
@@ -156,70 +161,57 @@ class SolidResourceClient {
     /**
      * Reads a resource from the pod.
      * @param resourceUrl The full URL of the resource.
-     * @param clazz The expected resource type; must extend [RDFSource] or [NonRDFSource].
-     * @throws SolidException on connection or server errors.
+     * @param clazz The expected resource type; must extend [RDFResource] or [NonRDFResource].
+     * @return [SolidNetworkResponse.Success] with the resource, or an error/exception variant.
      */
-    suspend fun <T : Resource> read(resourceUrl: String, clazz: Class<T>): T {
-        checkBasicConditions()
+    suspend fun <T : SolidResource> read(resourceUrl: String, clazz: Class<T>): SolidNetworkResponse<T> {
+        checkBasicConditions()?.let {
+            @Suppress("UNCHECKED_CAST")
+            return it as SolidNetworkResponse<T>
+        }
         return suspendCancellableCoroutine { cont ->
             when {
-                RDFSource::class.java.isAssignableFrom(clazz) -> {
+                RDFResource::class.java.isAssignableFrom(clazz) -> {
                     iASSResourceService!!.readRdf(
                         resourceUrl,
-                        object : IASSRdfResourceCallback.Stub() {
-                            override fun onResult(result: RDFSource) {
+                        object : IASSSolidRdfResourceCallback.Stub() {
+                            override fun onResult(result: SolidRDFResource) {
                                 try {
-                                    cont.resume(reconstructRdf(result, clazz))
+                                    cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, clazz)))
                                 } catch (e: Exception) {
-                                    cont.resumeWithException(
-                                        SolidResourceException.UnknownException(
-                                            e.message ?: ""
-                                        )
-                                    )
+                                    cont.resume(SolidNetworkResponse.Exception(e))
                                 }
                             }
 
                             override fun onError(errorCode: Int, errorMessage: String) {
-                                cont.resumeWithException(
-                                    handleSolidResourceException(
-                                        errorCode,
-                                        errorMessage
-                                    )
-                                )
+                                cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                             }
                         })
                 }
 
-                NonRDFSource::class.java.isAssignableFrom(clazz) -> {
+                NonRDFResource::class.java.isAssignableFrom(clazz) -> {
                     iASSResourceService!!.read(
                         resourceUrl,
-                        object : IASSNonRdfResourceCallback.Stub() {
-                            override fun onResult(result: NonRDFSource) {
+                        object : IASSSolidNonRdfResourceCallback.Stub() {
+                            override fun onResult(result: SolidNonRDFResource) {
                                 try {
-                                    cont.resume(reconstructNonRdf(result, clazz))
+                                    cont.resume(SolidNetworkResponse.Success(reconstructNonRdf(result, clazz)))
                                 } catch (e: Exception) {
-                                    cont.resumeWithException(
-                                        SolidResourceException.UnknownException(
-                                            e.message ?: ""
-                                        )
-                                    )
+                                    cont.resume(SolidNetworkResponse.Exception(e))
                                 }
                             }
 
                             override fun onError(errorCode: Int, errorMessage: String) {
-                                cont.resumeWithException(
-                                    handleSolidResourceException(
-                                        errorCode,
-                                        errorMessage
-                                    )
-                                )
+                                cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                             }
                         })
                 }
 
                 else -> {
-                    cont.resumeWithException(
-                        SolidResourceException.NotSupportedClassException("Class must extend RDFSource or NonRDFSource.")
+                    cont.resume(
+                        SolidNetworkResponse.Exception(
+                            IllegalArgumentException("Class must extend RDFResource or NonRDFResource.")
+                        )
                     )
                 }
             }
@@ -228,208 +220,242 @@ class SolidResourceClient {
 
     /**
      * Creates a new resource on the pod at the URI specified by [resource].
-     * @throws SolidException on connection or server errors.
+     * @return [SolidNetworkResponse.Success] with the created resource.
      */
-    suspend fun <T : Resource> create(resource: T): T {
-        checkBasicConditions()
+    suspend fun <T : SolidResource> create(resource: T): SolidNetworkResponse<T> {
+        checkBasicConditions()?.let {
+            @Suppress("UNCHECKED_CAST")
+            return it as SolidNetworkResponse<T>
+        }
         return suspendCancellableCoroutine { cont ->
             when (resource) {
-                is RDFSource -> {
+                is SolidRDFResource -> {
                     iASSResourceService!!.createRdf(
                         resource,
-                        object : IASSRdfResourceCallback.Stub() {
-                            override fun onResult(result: RDFSource) {
+                        object : IASSSolidRdfResourceCallback.Stub() {
+                            override fun onResult(result: SolidRDFResource) {
                                 try {
-                                    cont.resume(reconstructRdf(result, resource.javaClass))
+                                    cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, resource.javaClass)))
                                 } catch (e: Exception) {
-                                    cont.resumeWithException(
-                                        SolidResourceException.UnknownException(
-                                            e.message ?: ""
-                                        )
-                                    )
+                                    cont.resume(SolidNetworkResponse.Exception(e))
                                 }
                             }
 
                             override fun onError(errorCode: Int, errorMessage: String) {
-                                cont.resumeWithException(
-                                    handleSolidResourceException(
-                                        errorCode,
-                                        errorMessage
-                                    )
-                                )
+                                cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                             }
                         })
                 }
 
-                is NonRDFSource -> {
+                is SolidNonRDFResource -> {
                     iASSResourceService!!.create(
                         resource,
-                        object : IASSNonRdfResourceCallback.Stub() {
-                            override fun onResult(result: NonRDFSource) {
+                        object : IASSSolidNonRdfResourceCallback.Stub() {
+                            override fun onResult(result: SolidNonRDFResource) {
                                 try {
-                                    cont.resume(reconstructNonRdf(result, resource.javaClass))
+                                    cont.resume(SolidNetworkResponse.Success(reconstructNonRdf(result, resource.javaClass)))
                                 } catch (e: Exception) {
-                                    cont.resumeWithException(
-                                        SolidResourceException.UnknownException(
-                                            e.message ?: ""
-                                        )
-                                    )
+                                    cont.resume(SolidNetworkResponse.Exception(e))
                                 }
                             }
 
                             override fun onError(errorCode: Int, errorMessage: String) {
-                                cont.resumeWithException(
-                                    handleSolidResourceException(
-                                        errorCode,
-                                        errorMessage
-                                    )
-                                )
+                                cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                             }
                         })
                 }
 
-                else -> cont.resumeWithException(
-                    SolidResourceException.NotSupportedClassException("Resource must be RDFSource or NonRDFSource.")
+                else -> cont.resume(
+                    SolidNetworkResponse.Exception(
+                        IllegalArgumentException("Resource must be SolidRDFResource or SolidNonRDFResource.")
+                    )
                 )
             }
         }
     }
 
     /**
-     * Replaces an existing resource on the pod.
-     * @throws SolidException on connection or server errors.
+     * Replaces an existing resource on the pod via HTTP PUT.
+     *
+     * Pass [ifMatch] (the ETag from a previous [read]) to issue a conditional PUT that fails
+     * with a 412 error if the resource was modified concurrently.  This is the safe update
+     * pattern for [SolidNonRDFResource] (binary files, plain text, etc.).
+     *
+     * For RDF resources, prefer [patch] when only a subset of triples changes — it is atomic
+     * and avoids a full read-modify-write cycle.
+     *
+     * @param resource    The updated resource; its identifier determines the target URI.
+     * @param ifMatch     Optional ETag for a conditional PUT.
+     * @return [SolidNetworkResponse.Success] with the updated resource.
      */
-    suspend fun <T : Resource> update(resource: T): T {
-        checkBasicConditions()
+    suspend fun <T : SolidResource> update(resource: T, ifMatch: String? = null): SolidNetworkResponse<T> {
+        checkBasicConditions()?.let {
+            @Suppress("UNCHECKED_CAST")
+            return it as SolidNetworkResponse<T>
+        }
         return suspendCancellableCoroutine { cont ->
             when (resource) {
-                is RDFSource -> {
+                is SolidRDFResource -> {
                     iASSResourceService!!.updateRdf(
                         resource,
-                        object : IASSRdfResourceCallback.Stub() {
-                            override fun onResult(result: RDFSource) {
+                        ifMatch,
+                        object : IASSSolidRdfResourceCallback.Stub() {
+                            override fun onResult(result: SolidRDFResource) {
                                 try {
-                                    cont.resume(reconstructRdf(result, resource.javaClass))
+                                    cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, resource.javaClass)))
                                 } catch (e: Exception) {
-                                    cont.resumeWithException(
-                                        SolidResourceException.UnknownException(
-                                            e.message ?: ""
-                                        )
-                                    )
+                                    cont.resume(SolidNetworkResponse.Exception(e))
                                 }
                             }
 
                             override fun onError(errorCode: Int, errorMessage: String) {
-                                cont.resumeWithException(
-                                    handleSolidResourceException(
-                                        errorCode,
-                                        errorMessage
-                                    )
-                                )
+                                cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                             }
                         })
                 }
 
-                is NonRDFSource -> {
+                is SolidNonRDFResource -> {
                     iASSResourceService!!.update(
                         resource,
-                        object : IASSNonRdfResourceCallback.Stub() {
-                            override fun onResult(result: NonRDFSource) {
+                        ifMatch,
+                        object : IASSSolidNonRdfResourceCallback.Stub() {
+                            override fun onResult(result: SolidNonRDFResource) {
                                 try {
-                                    cont.resume(reconstructNonRdf(result, resource.javaClass))
+                                    cont.resume(SolidNetworkResponse.Success(reconstructNonRdf(result, resource.javaClass)))
                                 } catch (e: Exception) {
-                                    cont.resumeWithException(
-                                        SolidResourceException.UnknownException(
-                                            e.message ?: ""
-                                        )
-                                    )
+                                    cont.resume(SolidNetworkResponse.Exception(e))
                                 }
                             }
 
                             override fun onError(errorCode: Int, errorMessage: String) {
-                                cont.resumeWithException(
-                                    handleSolidResourceException(
-                                        errorCode,
-                                        errorMessage
-                                    )
-                                )
+                                cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                             }
                         })
                 }
 
-                else -> cont.resumeWithException(
-                    SolidResourceException.NotSupportedClassException("Resource must be RDFSource or NonRDFSource.")
+                else -> cont.resume(
+                    SolidNetworkResponse.Exception(
+                        IllegalArgumentException("Resource must be SolidRDFResource or SolidNonRDFResource.")
+                    )
                 )
             }
+        }
+    }
+
+    /**
+     * Applies an N3 Patch to an RDF resource on the pod via HTTP PATCH.
+     *
+     * This is the preferred method for partial updates to RDF resources — it is atomic and
+     * does not require reading the full resource first.  Use [N3Patch.build] or
+     * [N3Patch.fromDiff] to construct the patch without writing raw N3 strings.
+     *
+     * Not applicable to [SolidNonRDFResource] — use [update] for binary resources.
+     *
+     * @param uri   The URI of the RDF resource to patch.
+     * @param patch The patch to apply.
+     * @return [SolidNetworkResponse.Success] with [Unit] on success.
+     */
+    suspend fun patch(uri: URI, patch: N3Patch): SolidNetworkResponse<Unit> {
+        checkBasicConditions()?.let {
+            @Suppress("UNCHECKED_CAST")
+            return it as SolidNetworkResponse<Unit>
+        }
+        return suspendCancellableCoroutine { cont ->
+            iASSResourceService!!.patch(
+                uri.toString(),
+                patch.toN3String(),
+                object : IASSUnitCallback.Stub() {
+                    override fun onResult() {
+                        cont.resume(SolidNetworkResponse.Success(Unit))
+                    }
+
+                    override fun onError(errorCode: Int, errorMessage: String) {
+                        cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
+                    }
+                }
+            )
         }
     }
 
     /**
      * Deletes a resource from the pod.
-     * @throws SolidException on connection or server errors.
+     * @return [SolidNetworkResponse.Success] with the deleted resource.
      */
-    suspend fun <T : Resource> delete(resource: T): T {
-        checkBasicConditions()
+    suspend fun <T : SolidResource> delete(resource: T): SolidNetworkResponse<T> {
+        checkBasicConditions()?.let {
+            @Suppress("UNCHECKED_CAST")
+            return it as SolidNetworkResponse<T>
+        }
         return suspendCancellableCoroutine { cont ->
             when (resource) {
-                is RDFSource -> {
+                is SolidRDFResource -> {
                     iASSResourceService!!.deleteRdf(
                         resource,
-                        object : IASSRdfResourceCallback.Stub() {
-                            override fun onResult(result: RDFSource) {
+                        object : IASSSolidRdfResourceCallback.Stub() {
+                            override fun onResult(result: SolidRDFResource) {
                                 try {
-                                    cont.resume(reconstructRdf(result, resource.javaClass))
+                                    cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, resource.javaClass)))
                                 } catch (e: Exception) {
-                                    cont.resumeWithException(
-                                        SolidResourceException.UnknownException(
-                                            e.message ?: ""
-                                        )
-                                    )
+                                    cont.resume(SolidNetworkResponse.Exception(e))
                                 }
                             }
 
                             override fun onError(errorCode: Int, errorMessage: String) {
-                                cont.resumeWithException(
-                                    handleSolidResourceException(
-                                        errorCode,
-                                        errorMessage
-                                    )
-                                )
+                                cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                             }
                         })
                 }
 
-                is NonRDFSource -> {
+                is SolidNonRDFResource -> {
                     iASSResourceService!!.delete(
                         resource,
-                        object : IASSNonRdfResourceCallback.Stub() {
-                            override fun onResult(result: NonRDFSource) {
+                        object : IASSSolidNonRdfResourceCallback.Stub() {
+                            override fun onResult(result: SolidNonRDFResource) {
                                 try {
-                                    cont.resume(reconstructNonRdf(result, resource.javaClass))
+                                    cont.resume(SolidNetworkResponse.Success(reconstructNonRdf(result, resource.javaClass)))
                                 } catch (e: Exception) {
-                                    cont.resumeWithException(
-                                        SolidResourceException.UnknownException(
-                                            e.message ?: ""
-                                        )
-                                    )
+                                    cont.resume(SolidNetworkResponse.Exception(e))
                                 }
                             }
 
                             override fun onError(errorCode: Int, errorMessage: String) {
-                                cont.resumeWithException(
-                                    handleSolidResourceException(
-                                        errorCode,
-                                        errorMessage
-                                    )
-                                )
+                                cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                             }
                         })
                 }
 
-                else -> cont.resumeWithException(
-                    SolidResourceException.NotSupportedClassException("Resource must be RDFSource or NonRDFSource.")
+                else -> cont.resume(
+                    SolidNetworkResponse.Exception(
+                        IllegalArgumentException("Resource must be SolidRDFResource or SolidNonRDFResource.")
+                    )
                 )
             }
+        }
+    }
+
+    /**
+     * Recursively deletes a container and all of its contents.
+     * @param containerUri The URI of the LDP container to delete (must end with `/`).
+     * @return [SolidNetworkResponse.Success] with `true` on success.
+     */
+    suspend fun deleteContainer(containerUri: URI): SolidNetworkResponse<Boolean> {
+        checkBasicConditions()?.let {
+            @Suppress("UNCHECKED_CAST")
+            return it as SolidNetworkResponse<Boolean>
+        }
+        return suspendCancellableCoroutine { cont ->
+            iASSResourceService!!.deleteContainer(
+                containerUri.toString(),
+                object : IASSUnitCallback.Stub() {
+                    override fun onResult() {
+                        cont.resume(SolidNetworkResponse.Success(true))
+                    }
+
+                    override fun onError(errorCode: Int, errorMessage: String) {
+                        cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
+                    }
+                }
+            )
         }
     }
 }
