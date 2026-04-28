@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import com.pondersource.shared.data.datamodule.contact.NewContact
-import com.pondersource.shared.data.datamodule.getOrNull
+import com.pondersource.shared.domain.datamodule.contact.NewContact
+import com.pondersource.shared.domain.datamodule.getOrNull
 import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
 import com.pondersource.solidandroidclient.IASSDataModulesService

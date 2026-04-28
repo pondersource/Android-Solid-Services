@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.pondersource.androidsolidservices.R
 import com.pondersource.androidsolidservices.ui.navigation.Login
-import com.pondersource.shared.data.Profile
+import com.pondersource.shared.domain.profile.Profile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
