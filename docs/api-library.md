@@ -14,6 +14,11 @@ The **Solid Android API** library lets your app communicate with a Solid pod ser
 
 ```kotlin
 // build.gradle.kts (module level)
+android {
+    defaultConfig {
+        manifestPlaceholders["appAuthRedirectScheme"] = "YOUR_APP_PACKAGE_NAME"
+    }
+}
 dependencies {
     implementation("com.pondersource.solidandroidapi:solidandroidapi:0.3.1")
 }
@@ -33,12 +38,12 @@ val authenticator = Authenticator.getInstance(context)
 
 ### State flows
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `activeProfileFlow` | `StateFlow<Profile?>` | The currently active user profile |
-| `loggedInProfilesFlow` | `StateFlow<List<Profile>>` | All signed-in profiles |
-| `isAuthorizedFlow` | `StateFlow<Boolean>` | Whether the active user is authorized |
-| `activeWebIdFlow` | `StateFlow<String?>` | The active user's WebID |
+| Property               | Type                       | Description                           |
+|------------------------|----------------------------|---------------------------------------|
+| `activeProfileFlow`    | `StateFlow<Profile?>`      | The currently active user profile     |
+| `loggedInProfilesFlow` | `StateFlow<List<Profile>>` | All signed-in profiles                |
+| `isAuthorizedFlow`     | `StateFlow<Boolean>`       | Whether the active user is authorized |
+| `activeWebIdFlow`      | `StateFlow<String?>`       | The active user's WebID               |
 
 ### Authentication flow
 
@@ -170,11 +175,11 @@ suspend fun deleteContainer(
 
 Your data classes must extend one of:
 
-| Class | Use for |
-|-------|---------|
-| `RDFSource` | Structured RDF data (Turtle, JSON-LD, etc.) |
-| `NonRDFSource` | Raw files — images, text, binary |
-| `SolidContainer` | LDP containers (directories on the pod) |
+| Class            | Use for                                     |
+|------------------|---------------------------------------------|
+| `RDFSource`      | Structured RDF data (Turtle, JSON-LD, etc.) |
+| `NonRDFSource`   | Raw files — images, text, binary            |
+| `SolidContainer` | LDP containers (directories on the pod)     |
 
 ### Example
 

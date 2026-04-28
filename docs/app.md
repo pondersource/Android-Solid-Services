@@ -39,15 +39,15 @@ Download the latest APK from the [GitHub Releases page](https://github.com/ponde
 
 ## Technology Stack
 
-| Area | Technology |
-|------|-----------|
-| UI | Jetpack Compose, Navigation Compose |
-| State / architecture | MVVM, ViewModel, StateFlow |
-| Dependency injection | Hilt |
-| IPC | Android AIDL bound services |
-| Authentication | OpenID Connect + DPoP (`net.openid:appauth`) |
-| Persistence | DataStore + Protocol Buffers (access grants, user profiles) |
-| Solid protocol | Inrupt Java Client SDK |
-| Min SDK | 26 |
-| Target SDK | 33 |
-| Compile SDK | 35 |
+| Area                 | Technology                                                  |
+|----------------------|-------------------------------------------------------------|
+| UI                   | Jetpack Compose, Navigation Compose                         |
+| State / architecture | MVVM, ViewModel, StateFlow                                  |
+| Dependency injection | Hilt                                                        |
+| IPC                  | Android AIDL bound services                                 |
+| Authentication       | OpenID Connect + DPoP (`net.openid:appauth`)                |
+| Persistence          | DataStore + Protocol Buffers (access grants, user profiles) |
+| Solid protocol       | Inrupt Java Client SDK                                      |
+| Min SDK              | 26                                                          |
+| Target SDK           | 33                                                          |
+| Compile SDK          | 35                                                          |

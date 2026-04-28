@@ -13,6 +13,11 @@ The **Solid Android Client** library lets third-party Android apps plug into the
 
 ```kotlin
 // build.gradle.kts (module level)
+android {
+    defaultConfig {
+        manifestPlaceholders["appAuthRedirectScheme"] = "YOUR_APP_PACKAGE_NAME"
+    }
+}
 dependencies {
     implementation("com.pondersource.solidandroidclient:solidandroidclient:0.3.1")
 }
@@ -121,10 +126,10 @@ suspend fun <T : Resource> delete(resource: T): T
 
 ### Resource types
 
-| Base class | Use for |
-|-----------|---------|
-| `RDFSource` | Structured RDF data (Turtle, JSON-LD, etc.) |
-| `NonRDFSource` | Raw files — images, text, binary |
+| Base class     | Use for                                     |
+|----------------|---------------------------------------------|
+| `RDFSource`    | Structured RDF data (Turtle, JSON-LD, etc.) |
+| `NonRDFSource` | Raw files — images, text, binary            |
 
 ### Example
 

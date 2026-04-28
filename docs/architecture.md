@@ -57,67 +57,68 @@ Multi-account state (profiles, tokens) is persisted with **DataStore + Protocol 
 
 Common types shared across all modules. Published implicitly as a transitive dependency.
 
-| Area | Contents |
-|------|----------|
-| Resource model | `Resource` → `RDFSource` / `NonRDFSource` → `SolidRDFSource` / `SolidNonRDFSource` / `SolidContainer` |
-| Response type | `SolidNetworkResponse<T>` — sealed class: `Success`, `Error`, `Exception` |
-| Data module types | `AddressBook`, `AddressBookList`, `Contact`, `FullContact`, `NewContact`, `FullGroup` |
-| Vocabulary | `LDP`, `VCARD`, `ACL`, `OWL`, `DC`, `RDFS`, `Solid` constants |
-| AIDL parcelables | Parcelable wrappers for cross-process data transfer |
+| Area              | Contents                                                                                              |
+|-------------------|-------------------------------------------------------------------------------------------------------|
+| Resource model    | `Resource` → `RDFSource` / `NonRDFSource` → `SolidRDFSource` / `SolidNonRDFSource` / `SolidContainer` |
+| Response type     | `SolidNetworkResponse<T>` — sealed class: `Success`, `Error`, `Exception`                             |
+| Data module types | `AddressBook`, `AddressBookList`, `Contact`, `FullContact`, `NewContact`, `FullGroup`                 |
+| Vocabulary        | `LDP`, `VCARD`, `ACL`, `OWL`, `DC`, `RDFS`, `Solid` constants                                         |
+| AIDL parcelables  | Parcelable wrappers for cross-process data transfer                                                   |
 
 ### SolidAndroidApi (`com.pondersource.solidandroidapi`)
 
 Direct Solid server communication. Used internally by the ASS app and available as a standalone library.
 
-| Class | Role |
-|-------|------|
-| `Authenticator` / `AuthenticatorImplementation` | OIDC + DPoP auth, multi-account |
-| `SolidResourceManager` / `SolidResourceManagerImplementation` | CRUD on pod resources |
-| `SolidContactsDataModule` / `SolidContactsDataModuleImplementation` | Contacts data module |
-| `DPoPGenerator` | Signs DPoP proof JWTs |
-| `ProfileManager` | Persists and retrieves user profiles |
-| `WebIdResolver` | Resolves OIDC issuer from a WebID document |
+| Class                                                               | Role                                       |
+|---------------------------------------------------------------------|--------------------------------------------|
+| `Authenticator` / `AuthenticatorImplementation`                     | OIDC + DPoP auth, multi-account            |
+| `SolidResourceManager` / `SolidResourceManagerImplementation`       | CRUD on pod resources                      |
+| `SolidContactsDataModule` / `SolidContactsDataModuleImplementation` | Contacts data module                       |
+| `DPoPGenerator`                                                     | Signs DPoP proof JWTs                      |
+| `ProfileManager`                                                    | Persists and retrieves user profiles       |
+| `WebIdResolver`                                                     | Resolves OIDC issuer from a WebID document |
 
 ### SolidAndroidClient (`com.pondersource.solidandroidclient`)
 
 IPC client library. No direct pod access — all calls are proxied through the ASS app.
 
-| Class | Role |
-|-------|------|
-| `Solid` | Entry point: `getSignInClient()`, `getResourceClient()`, `getContactsDataModule()` |
-| `SolidSignInClient` | Auth IPC client |
-| `SolidResourceClient` | Resource CRUD IPC client |
-| `SolidContactsDataModule` | Contacts IPC client |
-| `SolidException` hierarchy | Typed exceptions for all failure modes |
+| Class                      | Role                                                                               |
+|----------------------------|------------------------------------------------------------------------------------|
+| `Solid`                    | Entry point: `getSignInClient()`, `getResourceClient()`, `getContactsDataModule()` |
+| `SolidSignInClient`        | Auth IPC client                                                                    |
+| `SolidResourceClient`      | Resource CRUD IPC client                                                           |
+| `SolidContactsDataModule`  | Contacts IPC client                                                                |
+| `SolidException` hierarchy | Typed exceptions for all failure modes                                             |
 
 ### app (`com.pondersource.androidsolidservices`)
 
 The host application. Users interact with this; third-party apps bind to its services.
 
-| Area | Technology |
-|------|-----------|
-| UI | Jetpack Compose, Navigation Compose |
-| Architecture | MVVM, ViewModel, Kotlin StateFlow |
-| DI | Hilt |
-| Services | `ASSAuthenticatorService`, `ASSResourceService`, `SolidDataModulesService` |
-| Persistence | DataStore + Protocol Buffers |
-| Auth | `net.openid:appauth` + DPoP |
-| Solid protocol | Inrupt Java Client SDK (`com.inrupt.client.*`) |
+| Area           | Technology                                                                 |
+|----------------|----------------------------------------------------------------------------|
+| UI             | Jetpack Compose, Navigation Compose                                        |
+| Architecture   | MVVM, ViewModel, Kotlin StateFlow                                          |
+| DI             | Hilt                                                                       |
+| Services       | `ASSAuthenticatorService`, `ASSResourceService`, `SolidDataModulesService` |
+| Persistence    | DataStore + Protocol Buffers                                               |
+| Auth           | `net.openid:appauth` + DPoP                                                |
+| Solid protocol | Inrupt Java Client SDK (`com.inrupt.client.*`)                             |
 
 ---
 
 ## Technology Summary
 
-| Technology | Version / Notes |
-|------------|----------------|
-| Kotlin | Coroutines, Flow, serialization |
-| Jetpack Compose | UI — no XML views |
-| Hilt | Dependency injection (app module only) |
-| AIDL | Cross-process communication |
-| AppAuth (`net.openid:appauth`) | OpenID Connect |
-| Inrupt Java Client SDK | Solid protocol + RDF parsing |
-| DataStore + Protobuf | Local persistence |
-| kotlinx.serialization | JSON serialization (replaced Gson in v0.3.0) |
-| Min SDK | 26 (Android 8.0) |
-| Target / Compile SDK | 33 / 35 |
-| JVM target | 17 |
+| Technology                     | Version / Notes                              |
+|--------------------------------|----------------------------------------------|
+| Kotlin                         | Coroutines, Flow, serialization              |
+| Jetpack Compose                | UI — no XML views                            |
+| Hilt                           | Dependency injection (app module only)       |
+| AIDL                           | Cross-process communication                  |
+| AppAuth (`net.openid:appauth`) | OpenID Connect                               |
+| Inrupt Java Client SDK         | Solid protocol                               |
+| Titanium JSON-LD               | RDF, JSON-LD parsing                         |
+| DataStore + Protobuf           | Local persistence                            |
+| kotlinx.serialization          | JSON serialization (replaced Gson in v0.3.0) |
+| Min SDK                        | 26 (Android 8.0)                             |
+| Target / Compile SDK           | 33 / 35                                      |
+| JVM target                     | 17                                           |
