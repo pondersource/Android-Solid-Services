@@ -1,0 +1,1099 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Single Solid sign-in for the Android ecosystem — SDK and app for accessing Solid pods.">
+      
+      
+        <meta name="author" content="Erfan Gholami">
+      
+      
+        <link rel="canonical" href="https://androidsolidservices.erfangholami.com/architecture/">
+      
+      
+        <link rel="prev" href="../client-library/">
+      
+      
+        <link rel="next" href="../release/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>Architecture - Android Solid Services</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Android Solid Services" class="md-header__button md-logo" aria-label="Android Solid Services" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Android Solid Services
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pondersource/Android-Solid-Services" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Android-Solid-Services
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api-library/" class="md-tabs__link">
+          
+  
+  Components
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../release/" class="md-tabs__link">
+        
+  
+    
+  
+  Releases
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Android Solid Services" class="md-nav__button md-logo" aria-label="Android Solid Services" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Android Solid Services
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pondersource/Android-Solid-Services" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Android-Solid-Services
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Components
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Components
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-library/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Solid Android API Library
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../app/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Android Solid Services App
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../client-library/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Solid Android Client Library
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#module-dependency-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      Module Dependency Graph
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ipc-how-apps-communicate" class="md-nav__link">
+    <span class="md-ellipsis">
+      IPC: How Apps Communicate
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-openid-connect-dpop" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication: OpenID Connect + DPoP
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      Module Breakdown
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shared-compondersourceshared" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared (com.pondersource.shared)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solidandroidapi-compondersourcesolidandroidapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      SolidAndroidApi (com.pondersource.solidandroidapi)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solidandroidclient-compondersourcesolidandroidclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      SolidAndroidClient (com.pondersource.solidandroidclient)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#app-compondersourceandroidsolidservices" class="md-nav__link">
+    <span class="md-ellipsis">
+      app (com.pondersource.androidsolidservices)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technology Summary
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Releases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#module-dependency-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      Module Dependency Graph
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ipc-how-apps-communicate" class="md-nav__link">
+    <span class="md-ellipsis">
+      IPC: How Apps Communicate
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-openid-connect-dpop" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication: OpenID Connect + DPoP
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      Module Breakdown
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shared-compondersourceshared" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared (com.pondersource.shared)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solidandroidapi-compondersourcesolidandroidapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      SolidAndroidApi (com.pondersource.solidandroidapi)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solidandroidclient-compondersourcesolidandroidclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      SolidAndroidClient (com.pondersource.solidandroidclient)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#app-compondersourceandroidsolidservices" class="md-nav__link">
+    <span class="md-ellipsis">
+      app (com.pondersource.androidsolidservices)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technology Summary
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h1>
+<h2 id="module-dependency-graph">Module Dependency Graph<a class="headerlink" href="#module-dependency-graph" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>app  (com.pondersource.androidsolidservices)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a> ├── SolidAndroidApi   (com.pondersource.solidandroidapi)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a> │    └── Shared       (com.pondersource.shared)
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a> └── SolidAndroidClient (com.pondersource.solidandroidclient)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>      └── Shared
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Third-party apps
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a> └── SolidAndroidClient
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      └── Shared
+</code></pre></div>
+<p><img alt="Architecture diagram" src="https://github.com/user-attachments/assets/1b953cc9-3334-4827-9aac-63c29b4f7203" /></p>
+<hr />
+<h2 id="ipc-how-apps-communicate">IPC: How Apps Communicate<a class="headerlink" href="#ipc-how-apps-communicate" title="Permanent link">&para;</a></h2>
+<p>Third-party apps <strong>never talk directly to the Solid pod</strong>. They bind to one of three AIDL services in the ASS app:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Third-party app                Android Solid Services app
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>─────────────────              ──────────────────────────────────
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Solid.getSignInClient()   ──►  ASSAuthenticatorService   (login, grants)
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>Solid.getResourceClient() ──►  ASSResourceService        (CRUD on pod resources)
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Solid.getContactsDataModule()  SolidDataModulesService   (contacts, address books)
+</code></pre></div>
+<p>Each service is an Android <strong>bound service</strong>. The client libraries expose <code>Flow&lt;Boolean&gt;</code> connection state so apps can react to connect/disconnect events in real time.</p>
+<p>AIDL interface definitions live in <code>Shared/src/main/aidl/</code> (parcelable types) and <code>SolidAndroidClient/src/main/aidl/</code> (service contracts).</p>
+<hr />
+<h2 id="authentication-openid-connect-dpop">Authentication: OpenID Connect + DPoP<a class="headerlink" href="#authentication-openid-connect-dpop" title="Permanent link">&para;</a></h2>
+<p>The auth flow uses the <strong>AppAuth</strong> library (<code>net.openid:appauth</code>) and adds DPoP (Demonstration of Proof-of-Possession) token binding:</p>
+<ol>
+<li>User enters their WebID or selects an OpenID provider.</li>
+<li>ASS resolves the OIDC issuer from the WebID document.</li>
+<li>A browser intent opens the provider's login page.</li>
+<li>The provider redirects back to ASS with an authorization code.</li>
+<li>ASS exchanges the code for access + refresh tokens.</li>
+<li>Every subsequent pod request includes an <code>Authorization: DPoP &lt;token&gt;</code> header and a signed DPoP proof — preventing token replay attacks.</li>
+</ol>
+<p>Multi-account state (profiles, tokens) is persisted with <strong>DataStore + Protocol Buffers</strong>.</p>
+<hr />
+<h2 id="module-breakdown">Module Breakdown<a class="headerlink" href="#module-breakdown" title="Permanent link">&para;</a></h2>
+<h3 id="shared-compondersourceshared">Shared (<code>com.pondersource.shared</code>)<a class="headerlink" href="#shared-compondersourceshared" title="Permanent link">&para;</a></h3>
+<p>Common types shared across all modules. Published implicitly as a transitive dependency.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resource model</td>
+<td><code>Resource</code> → <code>RDFSource</code> / <code>NonRDFSource</code> → <code>SolidRDFSource</code> / <code>SolidNonRDFSource</code> / <code>SolidContainer</code></td>
+</tr>
+<tr>
+<td>Response type</td>
+<td><code>SolidNetworkResponse&lt;T&gt;</code> — sealed class: <code>Success</code>, <code>Error</code>, <code>Exception</code></td>
+</tr>
+<tr>
+<td>Data module types</td>
+<td><code>AddressBook</code>, <code>AddressBookList</code>, <code>Contact</code>, <code>FullContact</code>, <code>NewContact</code>, <code>FullGroup</code></td>
+</tr>
+<tr>
+<td>Vocabulary</td>
+<td><code>LDP</code>, <code>VCARD</code>, <code>ACL</code>, <code>OWL</code>, <code>DC</code>, <code>RDFS</code>, <code>Solid</code> constants</td>
+</tr>
+<tr>
+<td>AIDL parcelables</td>
+<td>Parcelable wrappers for cross-process data transfer</td>
+</tr>
+</tbody>
+</table>
+<h3 id="solidandroidapi-compondersourcesolidandroidapi">SolidAndroidApi (<code>com.pondersource.solidandroidapi</code>)<a class="headerlink" href="#solidandroidapi-compondersourcesolidandroidapi" title="Permanent link">&para;</a></h3>
+<p>Direct Solid server communication. Used internally by the ASS app and available as a standalone library.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Authenticator</code> / <code>AuthenticatorImplementation</code></td>
+<td>OIDC + DPoP auth, multi-account</td>
+</tr>
+<tr>
+<td><code>SolidResourceManager</code> / <code>SolidResourceManagerImplementation</code></td>
+<td>CRUD on pod resources</td>
+</tr>
+<tr>
+<td><code>SolidContactsDataModule</code> / <code>SolidContactsDataModuleImplementation</code></td>
+<td>Contacts data module</td>
+</tr>
+<tr>
+<td><code>DPoPGenerator</code></td>
+<td>Signs DPoP proof JWTs</td>
+</tr>
+<tr>
+<td><code>ProfileManager</code></td>
+<td>Persists and retrieves user profiles</td>
+</tr>
+<tr>
+<td><code>WebIdResolver</code></td>
+<td>Resolves OIDC issuer from a WebID document</td>
+</tr>
+</tbody>
+</table>
+<h3 id="solidandroidclient-compondersourcesolidandroidclient">SolidAndroidClient (<code>com.pondersource.solidandroidclient</code>)<a class="headerlink" href="#solidandroidclient-compondersourcesolidandroidclient" title="Permanent link">&para;</a></h3>
+<p>IPC client library. No direct pod access — all calls are proxied through the ASS app.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Solid</code></td>
+<td>Entry point: <code>getSignInClient()</code>, <code>getResourceClient()</code>, <code>getContactsDataModule()</code></td>
+</tr>
+<tr>
+<td><code>SolidSignInClient</code></td>
+<td>Auth IPC client</td>
+</tr>
+<tr>
+<td><code>SolidResourceClient</code></td>
+<td>Resource CRUD IPC client</td>
+</tr>
+<tr>
+<td><code>SolidContactsDataModule</code></td>
+<td>Contacts IPC client</td>
+</tr>
+<tr>
+<td><code>SolidException</code> hierarchy</td>
+<td>Typed exceptions for all failure modes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="app-compondersourceandroidsolidservices">app (<code>com.pondersource.androidsolidservices</code>)<a class="headerlink" href="#app-compondersourceandroidsolidservices" title="Permanent link">&para;</a></h3>
+<p>The host application. Users interact with this; third-party apps bind to its services.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UI</td>
+<td>Jetpack Compose, Navigation Compose</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td>MVVM, ViewModel, Kotlin StateFlow</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>Hilt</td>
+</tr>
+<tr>
+<td>Services</td>
+<td><code>ASSAuthenticatorService</code>, <code>ASSResourceService</code>, <code>SolidDataModulesService</code></td>
+</tr>
+<tr>
+<td>Persistence</td>
+<td>DataStore + Protocol Buffers</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td><code>net.openid:appauth</code> + DPoP</td>
+</tr>
+<tr>
+<td>Solid protocol</td>
+<td>Inrupt Java Client SDK (<code>com.inrupt.client.*</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="technology-summary">Technology Summary<a class="headerlink" href="#technology-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Version / Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kotlin</td>
+<td>Coroutines, Flow, serialization</td>
+</tr>
+<tr>
+<td>Jetpack Compose</td>
+<td>UI — no XML views</td>
+</tr>
+<tr>
+<td>Hilt</td>
+<td>Dependency injection (app module only)</td>
+</tr>
+<tr>
+<td>AIDL</td>
+<td>Cross-process communication</td>
+</tr>
+<tr>
+<td>AppAuth (<code>net.openid:appauth</code>)</td>
+<td>OpenID Connect</td>
+</tr>
+<tr>
+<td>Inrupt Java Client SDK</td>
+<td>Solid protocol</td>
+</tr>
+<tr>
+<td>Titanium JSON-LD</td>
+<td>RDF, JSON-LD parsing</td>
+</tr>
+<tr>
+<td>DataStore + Protobuf</td>
+<td>Local persistence</td>
+</tr>
+<tr>
+<td>kotlinx.serialization</td>
+<td>JSON serialization (replaced Gson in v0.3.0)</td>
+</tr>
+<tr>
+<td>Min SDK</td>
+<td>26 (Android 8.0)</td>
+</tr>
+<tr>
+<td>Target / Compile SDK</td>
+<td>33 / 35</td>
+</tr>
+<tr>
+<td>JVM target</td>
+<td>17</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.highlight", "search.suggest", "content.code.copy"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>
