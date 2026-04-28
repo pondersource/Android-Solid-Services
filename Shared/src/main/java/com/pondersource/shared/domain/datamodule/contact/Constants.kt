@@ -1,4 +1,4 @@
-package com.pondersource.shared.data.datamodule.contact
+package com.pondersource.shared.domain.datamodule.contact
 
 const val CONTACTS_DIRECTORY_SUFFIX = "contacts/"
 const val PEOPLE_DIRECTORY_SUFFIX = "Person/"

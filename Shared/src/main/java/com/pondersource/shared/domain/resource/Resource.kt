@@ -1,4 +1,4 @@
-package com.pondersource.shared.resource
+package com.pondersource.shared.domain.resource
 
 import android.os.Parcelable
 import okhttp3.Headers

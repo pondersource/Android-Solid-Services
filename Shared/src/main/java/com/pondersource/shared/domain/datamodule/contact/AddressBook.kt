@@ -1,9 +1,9 @@
-package com.pondersource.shared.data.datamodule.contact
+package com.pondersource.shared.domain.datamodule.contact
 
 import android.os.Parcelable
-import com.pondersource.shared.data.datamodule.contact.rdf.AddressBookRDF
-import com.pondersource.shared.data.datamodule.contact.rdf.GroupsIndexRDF
-import com.pondersource.shared.data.datamodule.contact.rdf.NameEmailIndexRDF
+import com.pondersource.shared.domain.datamodule.contact.rdf.AddressBookRDF
+import com.pondersource.shared.domain.datamodule.contact.rdf.GroupsIndexRDF
+import com.pondersource.shared.domain.datamodule.contact.rdf.NameEmailIndexRDF
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

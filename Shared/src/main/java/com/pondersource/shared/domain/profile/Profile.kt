@@ -1,9 +1,7 @@
-package com.pondersource.shared.data
+package com.pondersource.shared.domain.profile
 
-import com.pondersource.shared.data.webid.WebId
 import kotlinx.serialization.json.Json
-import com.pondersource.shared.data.webid.WebId.Companion.readFromString
-import com.pondersource.shared.data.webid.WebId.Companion.writeToString
+import com.pondersource.shared.domain.profile.WebId.Companion.readFromString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -69,7 +67,7 @@ class ProfileSerializer: KSerializer<Profile> {
         encoder.encodeStructure(descriptor) {
             encodeStringElement(descriptor, 0, value.authState.jsonSerializeString())
             encodeStringElement(descriptor, 1, if (value.userInfo != null) Json.encodeToString(value.userInfo) else "")
-            encodeStringElement(descriptor, 2, writeToString(value.webId) ?: "")
+            encodeStringElement(descriptor, 2, WebId.Companion.writeToString(value.webId) ?: "")
         }
     }
 

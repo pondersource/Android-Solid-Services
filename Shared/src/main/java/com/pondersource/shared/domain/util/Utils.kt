@@ -1,4 +1,4 @@
-package com.pondersource.shared.util
+package com.pondersource.shared.domain.util
 
 import java.io.InputStream
 

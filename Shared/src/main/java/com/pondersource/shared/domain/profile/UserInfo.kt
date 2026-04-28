@@ -1,4 +1,4 @@
-package com.pondersource.shared.data
+package com.pondersource.shared.domain.profile
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

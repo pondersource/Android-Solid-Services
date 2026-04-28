@@ -1,8 +1,7 @@
-package com.pondersource.shared
+package com.pondersource.shared.domain.resource
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.pondersource.shared.resource.Resource
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okio.IOException
@@ -10,7 +9,7 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 import java.net.URI
 
-open class NonRDFSource : Resource {
+open class NonRDFResource : Resource {
 
     private val identifier: URI
     private val contentType: String
@@ -19,19 +18,19 @@ open class NonRDFSource : Resource {
 
     companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<NonRDFSource> {
-            override fun createFromParcel(parcel: Parcel): NonRDFSource {
-                return NonRDFSource(parcel)
+        val CREATOR = object : Parcelable.Creator<NonRDFResource> {
+            override fun createFromParcel(parcel: Parcel): NonRDFResource {
+                return NonRDFResource(parcel)
             }
 
-            override fun newArray(size: Int): Array<NonRDFSource?> {
+            override fun newArray(size: Int): Array<NonRDFResource?> {
                 return Array(size) { null }
             }
         }
     }
 
 
-    private constructor(inParcel: Parcel) {
+    protected constructor(inParcel: Parcel) {
         this.identifier = URI.create(inParcel.readString())
         this.contentType = inParcel.readString()!!
         val headersMap = Json.decodeFromString<Map<String, List<String>>>(inParcel.readString()!!)

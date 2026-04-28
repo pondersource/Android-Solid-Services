@@ -1,5 +1,5 @@
 // AddressBook.aidl
-package com.pondersource.shared.data.datamodule.contact;
+package com.pondersource.shared.domain.datamodule.contact;
 
 parcelable AddressBook;
 parcelable AddressBookList;
