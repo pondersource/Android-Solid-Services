@@ -1,28 +1,24 @@
 package com.pondersource.solidandroidapi
 
-import com.apicatalog.jsonld.JsonLd
-import com.apicatalog.jsonld.JsonLdOptions
-import com.apicatalog.jsonld.document.JsonDocument
-import com.apicatalog.jsonld.http.media.MediaType
-import com.apicatalog.rdf.RdfDataset
-import com.inrupt.client.Request
-import com.inrupt.client.Response
-import com.inrupt.client.auth.Session
-import com.inrupt.client.openid.OpenIdSession
-import com.inrupt.client.solid.SolidSyncClient
-import com.pondersource.shared.HTTPAcceptType
-import com.pondersource.shared.HTTPHeaderName
-import com.pondersource.shared.RDFSource
-import com.pondersource.shared.SolidNetworkResponse
-import com.pondersource.shared.data.webid.WebId
-import com.pondersource.shared.resource.Resource
-import com.pondersource.shared.util.isSuccessful
-import com.pondersource.shared.util.toPlainString
+import com.pondersource.shared.domain.network.HTTPAcceptType
+import com.pondersource.shared.domain.network.HTTPHeaderName
+import com.pondersource.shared.domain.profile.WebId
 import net.openid.appauth.TokenResponse
-import java.io.InputStream
 import java.net.URI
 
+/**
+ * Resolves a WebID document from a Solid pod.
+ *
+ * Uses a plain [SolidHttpClient] (no embedded auth) because this resolver is called
+ * during the login flow, before the main [Authenticator] state is ready. Auth headers
+ * are provided via callbacks from the caller's in-progress auth state.
+ *
+ * Spec: https://solid.github.io/webid-profile/
+ *       https://solidproject.org/TR/oidc — WebID claim extraction
+ */
 internal class WebIdResolver {
+
+    private val solidHttpClient = SolidHttpClient()
 
     suspend fun resolve(
         webIdUri: String,
@@ -30,117 +26,37 @@ internal class WebIdResolver {
         authHeadersProvider: suspend (httpMethod: String, uri: String) -> Map<String, String>,
         nonceSink: (String) -> Unit,
     ): WebId {
-        val response = read(
-            URI.create(webIdUri),
-            WebId::class.java,
-            tokenProvider,
-            authHeadersProvider,
-            nonceSink,
+        val uri = URI.create(webIdUri)
+        val hasToken = tokenProvider() != null
+        val headers = if (hasToken) authHeadersProvider("GET", webIdUri) else emptyMap()
+
+        var response = solidHttpClient.send(
+            method = "GET",
+            uri = uri,
+            accept = HTTPAcceptType.JSON_LD,
+            headers = headers,
         )
-        if (response is SolidNetworkResponse.Success) {
-            return response.data
-        } else {
-            throw Exception("Could not get the WebID details.")
-        }
-    }
 
-    private suspend fun <T : Resource> read(
-        resource: URI,
-        clazz: Class<T>,
-        tokenProvider: suspend () -> TokenResponse?,
-        authHeadersProvider: suspend (httpMethod: String, uri: String) -> Map<String, String>,
-        nonceSink: (String) -> Unit,
-    ): SolidNetworkResponse<T> {
-        val client: SolidSyncClient = SolidSyncClient.getClient()
-        try {
-
-            val tokenResponse = tokenProvider()
-            val response = if(tokenResponse != null) {
-
-                client.session(OpenIdSession.ofIdToken(tokenResponse.idToken!!))
-
-                sendWithDPoPRetry(client, resource, clazz, authHeadersProvider, nonceSink)
-            } else {
-                client.session(Session.anonymous())
-                val accept = if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.OCTET_STREAM
-
-                val request = Request.newBuilder()
-                    .uri(resource)
-                    .header(HTTPHeaderName.ACCEPT, accept)
-                    .GET()
-                    .build()
-
-                client.send(request, Response.BodyHandlers.ofInputStream())
-            }
-            return if (response.isSuccessful()) {
-                SolidNetworkResponse.Success(constructObject(response, clazz))
-            } else {
-                SolidNetworkResponse.Error(
-                    response.statusCode(),
-                    response.body().toPlainString()
+        // Handle DPoP-Nonce challenge per Solid-OIDC spec:
+        // store the server-issued nonce and retry once so the DPoP proof includes it.
+        val nonce = response.headers[HTTPHeaderName.DPOP_NONCE]
+        if (nonce != null && hasToken) {
+            nonceSink(nonce)
+            if (response.statusCode == 401) {
+                val retryHeaders = authHeadersProvider("GET", webIdUri)
+                response = solidHttpClient.send(
+                    method = "GET",
+                    uri = uri,
+                    accept = HTTPAcceptType.JSON_LD,
+                    headers = retryHeaders,
                 )
             }
-        } catch (e: Exception) {
-            return SolidNetworkResponse.Exception(e)
         }
-    }
 
-    private suspend fun <T : Resource> sendWithDPoPRetry(
-        client: SolidSyncClient,
-        resource: URI,
-        clazz: Class<T>,
-        authHeadersProvider: suspend (httpMethod: String, uri: String) -> Map<String, String>,
-        nonceSink: (String) -> Unit,
-    ): Response<InputStream> {
-        val accept = if (RDFSource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.OCTET_STREAM
-        val headers = authHeadersProvider("GET", resource.toString())
-
-        val request = Request.newBuilder()
-            .uri(resource)
-            .header(HTTPHeaderName.ACCEPT, accept)
-            .apply { headers.forEach { (key, value) -> header(key, value) } }
-            .GET()
-            .build()
-
-        val response: Response<InputStream> = client.send(request, Response.BodyHandlers.ofInputStream())
-
-        val dpopNonce = response.headers().firstValue(HTTPHeaderName.DPOP_NONCE).orElse(null)
-        if (dpopNonce != null) {
-            nonceSink(dpopNonce)
-            if (response.statusCode() == 401) {
-                val retryHeaders = authHeadersProvider("GET", resource.toString())
-                val retryRequest = Request.newBuilder()
-                    .uri(resource)
-                    .header(HTTPHeaderName.ACCEPT, accept)
-                    .apply { retryHeaders.forEach { (key, value) -> header(key, value) } }
-                    .GET()
-                    .build()
-                return client.send(retryRequest, Response.BodyHandlers.ofInputStream())
-            }
+        if (!response.isSuccessful()) {
+            throw Exception("Could not resolve WebID '$webIdUri'. HTTP ${response.statusCode}")
         }
-        return response
-    }
 
-    private fun <T> constructObject(
-        response: Response<InputStream>,
-        clazz: Class<T>,
-    ): T {
-        val type = response.headers().firstValue(HTTPHeaderName.CONTENT_TYPE)
-            .orElse(HTTPAcceptType.OCTET_STREAM)
-        val string = response.body().toPlainString()
-        if (RDFSource::class.java.isAssignableFrom(clazz)) {
-            val options = JsonLdOptions().apply { isRdfStar = true }
-            return clazz
-                .getConstructor(URI::class.java, MediaType::class.java, RdfDataset::class.java)
-                .newInstance(
-                    response.uri(),
-                    MediaType.of(type),
-                    JsonLd.toRdf(JsonDocument.of(string.byteInputStream())).options(options).get(),
-                )
-        } else {
-            return clazz
-                .getConstructor(URI::class.java, String::class.java, InputStream::class.java)
-                .newInstance(response.uri(), type, string.byteInputStream())
-        }
+        return SolidResourceParser.parse(response, WebId::class.java)
     }
 }

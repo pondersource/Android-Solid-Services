@@ -421,18 +421,21 @@ internal class SolidContactsDataModuleHelper {
         var privateTypeIndexUri = webId.getPrivateTypeIndex()
 
         if (privateTypeIndexUri == null) {
-            val webIdProfile = solidResourceManager.read(webIdString, URI.create(webId.getProfileUrl()),
-                WebIdProfile::class.java).getOrThrow()
-            privateTypeIndexUri = webIdProfile.getPrivateTypeIndex()
+            val extendedProfile = solidResourceManager.read(
+                webIdString,
+                webId.getPrimaryTopicDocuments().firstOrNull() ?: URI.create(webIdString),
+                WebId::class.java
+            ).getOrThrow()
+            privateTypeIndexUri = extendedProfile.getPrivateTypeIndex()
 
             if (privateTypeIndexUri == null) {
-                webIdProfile.setPrivateTypeIndex(webIdString, webId.getStorages()[0].toString())
-                solidResourceManager.update(webIdString, webIdProfile).getOrThrow()
-                privateTypeIndexUri = webIdProfile.getPrivateTypeIndex()
+                extendedProfile.setPrivateTypeIndex(webIdString, webId.getStorages()[0].toString())
+                solidResourceManager.update(webIdString, extendedProfile).getOrThrow()
+                privateTypeIndexUri = extendedProfile.getPrivateTypeIndex()
                 solidResourceManager.create(
                     webIdString,
                     PrivateTypeIndex(
-                        URI.create(privateTypeIndexUri),
+                        privateTypeIndexUri!!,
                         MediaType.JSON_LD,
                         null,
                         null
@@ -443,7 +446,7 @@ internal class SolidContactsDataModuleHelper {
 
         return solidResourceManager.read(
             webIdString,
-            URI.create(privateTypeIndexUri),
+            privateTypeIndexUri!!,
             PrivateTypeIndex::class.java
         ).getOrThrow()
     }
@@ -453,18 +456,21 @@ internal class SolidContactsDataModuleHelper {
         var publicTypeIndexUri = webId.getPublicTypeIndex()
 
         if (publicTypeIndexUri == null) {
-            val webIdProfile = solidResourceManager.read(webIdString, URI.create(webId.getProfileUrl()),
-                WebIdProfile::class.java).getOrThrow()
-            publicTypeIndexUri = webIdProfile.getPublicTypeIndex()
+            val extendedProfile = solidResourceManager.read(
+                webIdString,
+                webId.getPrimaryTopicDocuments().firstOrNull() ?: URI.create(webIdString),
+                WebId::class.java
+            ).getOrThrow()
+            publicTypeIndexUri = extendedProfile.getPublicTypeIndex()
 
             if (publicTypeIndexUri == null) {
-                webIdProfile.setPublicTypeIndex(webIdString, webId.getStorages()[0].toString())
-                solidResourceManager.update(webIdString, webIdProfile).getOrThrow()
-                publicTypeIndexUri = webIdProfile.getPublicTypeIndex()
+                extendedProfile.setPublicTypeIndex(webIdString, webId.getStorages()[0].toString())
+                solidResourceManager.update(webIdString, extendedProfile).getOrThrow()
+                publicTypeIndexUri = extendedProfile.getPublicTypeIndex()
                 solidResourceManager.create(
                     webIdString,
                     PublicTypeIndex(
-                        URI.create(publicTypeIndexUri),
+                        publicTypeIndexUri!!,
                         MediaType.JSON_LD,
                         null,
                         null
@@ -475,7 +481,7 @@ internal class SolidContactsDataModuleHelper {
 
         return solidResourceManager.read(
             webIdString,
-            URI.create(publicTypeIndexUri),
+            publicTypeIndexUri!!,
             PublicTypeIndex::class.java
         ).getOrThrow()
     }
