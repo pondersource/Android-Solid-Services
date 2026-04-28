@@ -1,7 +1,7 @@
 package com.pondersource.solidandroidapi
 
 import android.util.Base64
-import com.pondersource.shared.HTTPHeaderName
+import com.pondersource.shared.domain.network.HTTPHeaderName
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ClientAuthentication
 import net.openid.appauth.internal.UriUtil

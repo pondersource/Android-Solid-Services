@@ -2,21 +2,20 @@ package com.pondersource.solidandroidapi.datamodule
 
 import android.content.Context
 import com.apicatalog.jsonld.http.media.MediaType
-import com.pondersource.shared.data.webid.PrivateTypeIndex
-import com.pondersource.shared.data.webid.PublicTypeIndex
-import com.pondersource.shared.data.webid.WebId
-import com.pondersource.shared.data.webid.WebIdProfile
-import com.pondersource.shared.data.datamodule.contact.NewContact
-import com.pondersource.shared.data.datamodule.contact.rdf.AddressBookRDF
-import com.pondersource.shared.data.datamodule.contact.rdf.ContactRDF
-import com.pondersource.shared.data.datamodule.contact.rdf.GroupRDF
-import com.pondersource.shared.data.datamodule.contact.rdf.GroupsIndexRDF
-import com.pondersource.shared.data.datamodule.contact.rdf.NameEmailIndexRDF
-import com.pondersource.shared.data.datamodule.contact.GROUPS_FILE_NAME
-import com.pondersource.shared.data.datamodule.contact.GROUP_DIRECTORY_SUFFIX
-import com.pondersource.shared.data.datamodule.contact.INDEX_FILE_NAME
-import com.pondersource.shared.data.datamodule.contact.PEOPLE_DIRECTORY_SUFFIX
-import com.pondersource.shared.data.datamodule.contact.PEOPLE_FILE_NAME
+import com.pondersource.shared.domain.PrivateTypeIndex
+import com.pondersource.shared.domain.PublicTypeIndex
+import com.pondersource.shared.domain.profile.WebId
+import com.pondersource.shared.domain.datamodule.contact.NewContact
+import com.pondersource.shared.domain.datamodule.contact.rdf.AddressBookRDF
+import com.pondersource.shared.domain.datamodule.contact.rdf.ContactRDF
+import com.pondersource.shared.domain.datamodule.contact.rdf.GroupRDF
+import com.pondersource.shared.domain.datamodule.contact.rdf.GroupsIndexRDF
+import com.pondersource.shared.domain.datamodule.contact.rdf.NameEmailIndexRDF
+import com.pondersource.shared.domain.datamodule.contact.GROUPS_FILE_NAME
+import com.pondersource.shared.domain.datamodule.contact.GROUP_DIRECTORY_SUFFIX
+import com.pondersource.shared.domain.datamodule.contact.INDEX_FILE_NAME
+import com.pondersource.shared.domain.datamodule.contact.PEOPLE_DIRECTORY_SUFFIX
+import com.pondersource.shared.domain.datamodule.contact.PEOPLE_FILE_NAME
 import com.pondersource.solidandroidapi.SolidResourceManager
 import com.pondersource.solidandroidapi.SolidResourceManagerImplementation
 import java.net.URI
@@ -58,21 +57,21 @@ internal class SolidContactsDataModuleHelper {
         val nemEmailIndex = NameEmailIndexRDF(
             identifier = URI.create(nameEmailIndex),
             mediaType = MediaType.JSON_LD,
-            dataset = null,
+            quads = null,
             headers = null
         )
 
         val groupsIndexRDF = GroupsIndexRDF(
             identifier = URI.create(groupIndex),
             mediaType = MediaType.JSON_LD,
-            dataset = null,
+            quads = null,
             headers = null
         )
 
         val addressBook = AddressBookRDF(
             identifier = URI.create(uri),
             mediaType = MediaType.JSON_LD,
-            dataset = null,
+            quads = null,
             headers = null
         ).apply {
             setOwner(ownerWebId)
@@ -183,7 +182,7 @@ internal class SolidContactsDataModuleHelper {
         val newContactRDF = ContactRDF(
             identifier = contactUri,
             mediaType = MediaType.JSON_LD,
-            dataset = null,
+            quads = null,
             headers = null
         ).apply {
             setFullName(newContact.name)
@@ -288,7 +287,7 @@ internal class SolidContactsDataModuleHelper {
         val groupRdf = GroupRDF(
             identifier = groupUri,
             mediaType = MediaType.JSON_LD,
-            dataset = null,
+            quads = null,
             headers = null
         ).apply {
             setTitle(groupName)

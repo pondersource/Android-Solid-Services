@@ -3,12 +3,9 @@ package com.pondersource.solidandroidapi
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
-import com.inrupt.client.openid.OpenIdConfig
-import com.inrupt.client.openid.OpenIdException
-import com.pondersource.shared.HTTPHeaderName
-import com.pondersource.shared.data.Profile
-import com.pondersource.shared.data.UserInfo
-import io.jsonwebtoken.Jwts
+import com.pondersource.shared.domain.network.HTTPHeaderName
+import com.pondersource.shared.domain.profile.Profile
+import com.pondersource.shared.domain.profile.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthState
@@ -23,13 +20,6 @@ import net.openid.appauth.RegistrationRequest
 import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.TokenRequest
 import net.openid.appauth.TokenResponse
-import org.jose4j.jwk.HttpsJwks
-import org.jose4j.jwt.JwtClaims
-import org.jose4j.jwt.NumericDate
-import org.jose4j.jwt.consumer.InvalidJwtException
-import org.jose4j.jwt.consumer.JwtConsumerBuilder
-import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver
-import java.time.Instant
 import kotlin.coroutines.resume
 
 internal class AuthenticatorImplementation private constructor(
@@ -320,43 +310,16 @@ internal class AuthenticatorImplementation private constructor(
     }
 
     private fun getWebIdFromToken(idToken: String): String {
-        Jwts.builder()
-        val claims = parseIdToken(idToken, OpenIdConfig())
-        return claims.getClaimValueAsString("webid")
-            ?: claims.getClaimValueAsString("sub")
-    }
-
-    private fun parseIdToken(idToken: String, config: OpenIdConfig): JwtClaims {
         return try {
-            val builder = JwtConsumerBuilder()
-            builder.setRequireExpirationTime()
-            builder.setExpectedIssuers(true, *arrayOfNulls<String>(0))
-            builder.setRequireSubject()
-            builder.setRequireIssuedAt()
-
-            if (config.expGracePeriodSecs > 0) {
-                builder.setAllowedClockSkewInSeconds(config.expGracePeriodSecs)
-            } else {
-                builder.setEvaluationTime(NumericDate.fromSeconds(Instant.now().epochSecond))
-            }
-
-            if (config.expectedAudience != null) {
-                builder.setExpectedAudience(true, config.expectedAudience)
-            } else {
-                builder.setSkipDefaultAudienceValidation()
-            }
-
-            if (config.publicKeyLocation != null) {
-                val jwks = HttpsJwks(config.publicKeyLocation.toString())
-                val resolver = HttpsJwksVerificationKeyResolver(jwks)
-                builder.setVerificationKeyResolver(resolver)
-            } else {
-                builder.setSkipSignatureVerification()
-            }
-
-            builder.build().processToClaims(idToken)
-        } catch (ex: InvalidJwtException) {
-            throw OpenIdException("Unable to parse ID token", ex)
+            val payload = idToken.split(".")[1]
+            val decoded = android.util.Base64.decode(
+                payload,
+                android.util.Base64.URL_SAFE or android.util.Base64.NO_PADDING,
+            )
+            val json = org.json.JSONObject(String(decoded))
+            json.optString("webid").takeIf { it.isNotEmpty() } ?: json.getString("sub")
+        } catch (ex: Exception) {
+            throw IllegalStateException("Unable to parse ID token", ex)
         }
     }
 

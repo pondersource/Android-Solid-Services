@@ -1,13 +1,13 @@
 package com.pondersource.solidandroidapi.datamodule
 
 import android.content.Context
-import com.pondersource.shared.data.datamodule.DataModuleResult
-import com.pondersource.shared.data.datamodule.contact.AddressBook
-import com.pondersource.shared.data.datamodule.contact.AddressBookList
-import com.pondersource.shared.data.datamodule.contact.FullContact
-import com.pondersource.shared.data.datamodule.contact.FullGroup
-import com.pondersource.shared.data.datamodule.contact.NewContact
-import com.pondersource.shared.data.datamodule.contact.CONTACTS_DIRECTORY_SUFFIX
+import com.pondersource.shared.domain.datamodule.DataModuleResult
+import com.pondersource.shared.domain.datamodule.contact.AddressBook
+import com.pondersource.shared.domain.datamodule.contact.AddressBookList
+import com.pondersource.shared.domain.datamodule.contact.FullContact
+import com.pondersource.shared.domain.datamodule.contact.FullGroup
+import com.pondersource.shared.domain.datamodule.contact.NewContact
+import com.pondersource.shared.domain.datamodule.contact.CONTACTS_DIRECTORY_SUFFIX
 import java.net.URI
 
 internal class SolidContactsDataModuleImplementation: SolidContactsDataModule {

@@ -1,7 +1,7 @@
 [versions]
 android = "9.1.0"
 appauth = "0.11.1"
-inruptClient = "1.2.0"
+okhttp = "4.12.0"
 ktx = "1.18.0"
 lifecucle-ktx = "2.10.0"
 lifecycleCompose = "2.10.0"
@@ -106,15 +106,9 @@ androidx-legacy-support = {group = "androidx.legacy", name = "legacy-support-v4"
 androidx-exifInterface = {group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifInterface"}
 
 openid-appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 titanium-json-ld-jre8 = { group = "com.apicatalog", name = "titanium-json-ld-jre8", version.ref = "titaniumJsonLdJre8" }
 glassfish-jakarta-json = { group = "org.glassfish", name = "jakarta.json", version.ref = "jakartaJson" }
-
-inrupt-client-bom = { group = "com.inrupt.client", name = "inrupt-client-bom", version.ref = "inruptClient" }
-inrupt-client-core = { group = "com.inrupt.client", name = "inrupt-client-core" }
-inrupt-client-okhttp = { group = "com.inrupt.client", name = "inrupt-client-okhttp" }
-inrupt-client-openid = { group = "com.inrupt.client", name = "inrupt-client-openid" }
-inrupt-client-solid = { group = "com.inrupt.client", name = "inrupt-client-solid" }
-inrupt-client-vocabulary = { group = "com.inrupt.client", name = "inrupt-client-vocabulary" }
 
 
 io-jsonwebtoken-api = { group = "io.jsonwebtoken", name = "jjwt-api", version.ref = "jjwt" }

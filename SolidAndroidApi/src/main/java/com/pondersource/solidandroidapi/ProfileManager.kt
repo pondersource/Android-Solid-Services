@@ -1,8 +1,8 @@
 package com.pondersource.solidandroidapi
 
 import android.content.Context
-import com.pondersource.shared.data.Profile
-import com.pondersource.shared.data.ProfileList
+import com.pondersource.shared.domain.profile.Profile
+import com.pondersource.shared.domain.profile.ProfileList
 import com.pondersource.solidandroidapi.repository.UserRepository
 import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import kotlinx.coroutines.CompletableDeferred

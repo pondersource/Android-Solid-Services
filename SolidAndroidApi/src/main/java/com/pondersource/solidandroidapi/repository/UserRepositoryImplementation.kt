@@ -8,9 +8,9 @@ import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.pondersource.shared.data.Profile
-import com.pondersource.shared.data.ProfileList
-import com.pondersource.shared.data.contains
+import com.pondersource.shared.domain.profile.Profile
+import com.pondersource.shared.domain.profile.ProfileList
+import com.pondersource.shared.domain.profile.contains
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

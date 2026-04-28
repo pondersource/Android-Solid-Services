@@ -65,13 +65,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
 
     api(libs.openid.appauth)
-
-    api(platform(libs.inrupt.client.bom))
-    api(libs.inrupt.client.solid)
-    api(libs.inrupt.client.core)
-    api(libs.inrupt.client.okhttp)
-    api(libs.inrupt.client.openid)
-    api(libs.inrupt.client.vocabulary)
+    api(libs.okhttp)
     api(libs.titanium.json.ld.jre8)
     api(libs.glassfish.jakarta.json)
 }

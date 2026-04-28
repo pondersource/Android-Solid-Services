@@ -1,8 +1,9 @@
 package com.pondersource.solidandroidapi
 
 import android.content.Context
-import com.pondersource.shared.SolidNetworkResponse
-import com.pondersource.shared.resource.Resource
+import com.pondersource.shared.domain.crud.N3Patch
+import com.pondersource.shared.domain.network.SolidNetworkResponse
+import com.pondersource.shared.domain.resource.Resource
 import java.net.URI
 
 /**
@@ -28,7 +29,7 @@ interface SolidResourceManager {
      * Reads a resource from the pod.
      * @param webid The WebID of the authenticated user making the request.
      * @param resource The URI of the resource to read.
-     * @param clazz The expected resource type (e.g. [com.pondersource.shared.RDFSource]).
+     * @param clazz The expected resource type (e.g. [com.pondersource.shared.domain.resource.RDFResource]).
      * @return [SolidNetworkResponse.Success] with the resource, or an error/exception variant.
      */
     suspend fun <T: Resource> read(

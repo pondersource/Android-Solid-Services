@@ -2,7 +2,7 @@ package com.pondersource.solidandroidapi
 
 import android.content.Context
 import android.content.Intent
-import com.pondersource.shared.data.Profile
+import com.pondersource.shared.domain.profile.Profile
 import kotlinx.coroutines.flow.StateFlow
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse

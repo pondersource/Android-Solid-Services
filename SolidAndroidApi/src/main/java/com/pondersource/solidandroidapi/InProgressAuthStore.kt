@@ -1,6 +1,6 @@
 package com.pondersource.solidandroidapi
 
-import com.pondersource.shared.data.Profile
+import com.pondersource.shared.domain.profile.Profile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

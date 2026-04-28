@@ -1,8 +1,8 @@
 package com.pondersource.solidandroidapi.repository
 
 import android.content.Context
-import com.pondersource.shared.data.Profile
-import com.pondersource.shared.data.ProfileList
+import com.pondersource.shared.domain.profile.Profile
+import com.pondersource.shared.domain.profile.ProfileList
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
