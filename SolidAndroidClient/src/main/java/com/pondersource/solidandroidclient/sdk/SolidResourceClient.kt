@@ -17,9 +17,9 @@ import com.pondersource.shared.domain.resource.SolidResource
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_CRUD_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
 import com.pondersource.solidandroidclient.IASSResourceService
-import com.pondersource.solidandroidclient.IASSUnitCallback
 import com.pondersource.solidandroidclient.IASSSolidNonRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSSolidRdfResourceCallback
+import com.pondersource.solidandroidclient.IASSUnitCallback
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -59,7 +59,10 @@ class SolidResourceClient {
             hasInstalledAndroidSolidServices: () -> Boolean
         ): SolidResourceClient {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: SolidResourceClient(context, hasInstalledAndroidSolidServices).also { INSTANCE = it }
+                INSTANCE ?: SolidResourceClient(
+                    context,
+                    hasInstalledAndroidSolidServices
+                ).also { INSTANCE = it }
             }
         }
     }
@@ -121,7 +124,10 @@ class SolidResourceClient {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : SolidResource> reconstructNonRdf(source: SolidNonRDFResource, clazz: Class<T>): T {
+    private fun <T : SolidResource> reconstructNonRdf(
+        source: SolidNonRDFResource,
+        clazz: Class<T>
+    ): T {
         if (clazz.isInstance(source)) return source as T
         return clazz.getConstructor(
             URI::class.java, String::class.java, Headers::class.java, InputStream::class.java
@@ -145,7 +151,14 @@ class SolidResourceClient {
             iASSResourceService!!.getWebId(object : IASSSolidRdfResourceCallback.Stub() {
                 override fun onResult(result: SolidRDFResource) {
                     try {
-                        cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, WebId::class.java)))
+                        cont.resume(
+                            SolidNetworkResponse.Success(
+                                reconstructRdf(
+                                    result,
+                                    WebId::class.java
+                                )
+                            )
+                        )
                     } catch (e: Exception) {
                         cont.resume(SolidNetworkResponse.Exception(e))
                     }
@@ -164,7 +177,10 @@ class SolidResourceClient {
      * @param clazz The expected resource type; must extend [RDFResource] or [NonRDFResource].
      * @return [SolidNetworkResponse.Success] with the resource, or an error/exception variant.
      */
-    suspend fun <T : SolidResource> read(resourceUrl: String, clazz: Class<T>): SolidNetworkResponse<T> {
+    suspend fun <T : SolidResource> read(
+        resourceUrl: String,
+        clazz: Class<T>
+    ): SolidNetworkResponse<T> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<T>
@@ -177,7 +193,14 @@ class SolidResourceClient {
                         object : IASSSolidRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidRDFResource) {
                                 try {
-                                    cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, clazz)))
+                                    cont.resume(
+                                        SolidNetworkResponse.Success(
+                                            reconstructRdf(
+                                                result,
+                                                clazz
+                                            )
+                                        )
+                                    )
                                 } catch (e: Exception) {
                                     cont.resume(SolidNetworkResponse.Exception(e))
                                 }
@@ -195,7 +218,14 @@ class SolidResourceClient {
                         object : IASSSolidNonRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidNonRDFResource) {
                                 try {
-                                    cont.resume(SolidNetworkResponse.Success(reconstructNonRdf(result, clazz)))
+                                    cont.resume(
+                                        SolidNetworkResponse.Success(
+                                            reconstructNonRdf(
+                                                result,
+                                                clazz
+                                            )
+                                        )
+                                    )
                                 } catch (e: Exception) {
                                     cont.resume(SolidNetworkResponse.Exception(e))
                                 }
@@ -235,7 +265,14 @@ class SolidResourceClient {
                         object : IASSSolidRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidRDFResource) {
                                 try {
-                                    cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, resource.javaClass)))
+                                    cont.resume(
+                                        SolidNetworkResponse.Success(
+                                            reconstructRdf(
+                                                result,
+                                                resource.javaClass
+                                            )
+                                        )
+                                    )
                                 } catch (e: Exception) {
                                     cont.resume(SolidNetworkResponse.Exception(e))
                                 }
@@ -253,7 +290,14 @@ class SolidResourceClient {
                         object : IASSSolidNonRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidNonRDFResource) {
                                 try {
-                                    cont.resume(SolidNetworkResponse.Success(reconstructNonRdf(result, resource.javaClass)))
+                                    cont.resume(
+                                        SolidNetworkResponse.Success(
+                                            reconstructNonRdf(
+                                                result,
+                                                resource.javaClass
+                                            )
+                                        )
+                                    )
                                 } catch (e: Exception) {
                                     cont.resume(SolidNetworkResponse.Exception(e))
                                 }
@@ -288,7 +332,10 @@ class SolidResourceClient {
      * @param ifMatch     Optional ETag for a conditional PUT.
      * @return [SolidNetworkResponse.Success] with the updated resource.
      */
-    suspend fun <T : SolidResource> update(resource: T, ifMatch: String? = null): SolidNetworkResponse<T> {
+    suspend fun <T : SolidResource> update(
+        resource: T,
+        ifMatch: String? = null
+    ): SolidNetworkResponse<T> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<T>
@@ -302,7 +349,14 @@ class SolidResourceClient {
                         object : IASSSolidRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidRDFResource) {
                                 try {
-                                    cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, resource.javaClass)))
+                                    cont.resume(
+                                        SolidNetworkResponse.Success(
+                                            reconstructRdf(
+                                                result,
+                                                resource.javaClass
+                                            )
+                                        )
+                                    )
                                 } catch (e: Exception) {
                                     cont.resume(SolidNetworkResponse.Exception(e))
                                 }
@@ -321,7 +375,14 @@ class SolidResourceClient {
                         object : IASSSolidNonRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidNonRDFResource) {
                                 try {
-                                    cont.resume(SolidNetworkResponse.Success(reconstructNonRdf(result, resource.javaClass)))
+                                    cont.resume(
+                                        SolidNetworkResponse.Success(
+                                            reconstructNonRdf(
+                                                result,
+                                                resource.javaClass
+                                            )
+                                        )
+                                    )
                                 } catch (e: Exception) {
                                     cont.resume(SolidNetworkResponse.Exception(e))
                                 }
@@ -394,7 +455,14 @@ class SolidResourceClient {
                         object : IASSSolidRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidRDFResource) {
                                 try {
-                                    cont.resume(SolidNetworkResponse.Success(reconstructRdf(result, resource.javaClass)))
+                                    cont.resume(
+                                        SolidNetworkResponse.Success(
+                                            reconstructRdf(
+                                                result,
+                                                resource.javaClass
+                                            )
+                                        )
+                                    )
                                 } catch (e: Exception) {
                                     cont.resume(SolidNetworkResponse.Exception(e))
                                 }
@@ -412,7 +480,14 @@ class SolidResourceClient {
                         object : IASSSolidNonRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidNonRDFResource) {
                                 try {
-                                    cont.resume(SolidNetworkResponse.Success(reconstructNonRdf(result, resource.javaClass)))
+                                    cont.resume(
+                                        SolidNetworkResponse.Success(
+                                            reconstructNonRdf(
+                                                result,
+                                                resource.javaClass
+                                            )
+                                        )
+                                    )
                                 } catch (e: Exception) {
                                     cont.resume(SolidNetworkResponse.Exception(e))
                                 }

@@ -11,7 +11,9 @@ open class SolidNonRDFResource : NonRDFResource, SolidResource {
     companion object {
         @JvmField
         val CREATOR = object : Parcelable.Creator<SolidNonRDFResource> {
-            override fun createFromParcel(parcel: Parcel): SolidNonRDFResource = SolidNonRDFResource(parcel)
+            override fun createFromParcel(parcel: Parcel): SolidNonRDFResource =
+                SolidNonRDFResource(parcel)
+
             override fun newArray(size: Int): Array<SolidNonRDFResource?> = arrayOfNulls(size)
         }
     }

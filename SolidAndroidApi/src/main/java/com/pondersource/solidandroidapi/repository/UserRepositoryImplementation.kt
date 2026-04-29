@@ -23,7 +23,7 @@ import java.io.OutputStream
 
 internal class UserRepositoryImplementation private constructor(
     private val context: Context,
-): UserRepository {
+) : UserRepository {
 
     companion object {
 
@@ -34,7 +34,7 @@ internal class UserRepositoryImplementation private constructor(
         @Volatile
         private var INSTANCE: UserRepository? = null
 
-        object ProfileListSerializer: Serializer<ProfileList> {
+        object ProfileListSerializer : Serializer<ProfileList> {
             override val defaultValue: ProfileList
                 get() = ProfileList()
 
@@ -97,7 +97,7 @@ internal class UserRepositoryImplementation private constructor(
 
     override suspend fun removeProfile(webid: String) {
         context.profilesDataStore.updateData {
-            if(it.contains(webid)) {
+            if (it.contains(webid)) {
                 it.copy(profiles = it.profiles.toMutableMap().apply {
                     remove(webid)
                 })

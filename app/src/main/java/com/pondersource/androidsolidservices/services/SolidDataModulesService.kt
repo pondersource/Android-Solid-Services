@@ -23,10 +23,10 @@ import javax.inject.Inject
 class SolidDataModulesService : LifecycleService() {
 
     @Inject
-    lateinit var solidContactsDataModule : SolidContactsDataModule
+    lateinit var solidContactsDataModule: SolidContactsDataModule
 
     @Inject
-    lateinit var auth : Authenticator
+    lateinit var auth: Authenticator
 
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
@@ -36,7 +36,7 @@ class SolidDataModulesService : LifecycleService() {
     //One service for all data modules
     private val binder = object : IASSDataModulesService.Stub() {
         override fun getContactsDataModuleInterface(): IASSContactsModuleInterface {
-           return contactsModuleInterface
+            return contactsModuleInterface
         }
 
     }
@@ -47,7 +47,10 @@ class SolidDataModulesService : LifecycleService() {
 
         override fun getAddressBooks(callback: IASSContactModuleAddressBookListCallback) {
             lifecycleScope.launch(Dispatchers.IO) {
-                callback.valueChanged(solidContactsDataModule.getAddressBooks(getProfile().userInfo!!.webId).getOrNull())
+                callback.valueChanged(
+                    solidContactsDataModule.getAddressBooks(getProfile().userInfo!!.webId)
+                        .getOrNull()
+                )
             }
         }
 

@@ -23,15 +23,15 @@ import java.util.UUID
 abstract class SettingTypeIndex : SolidRDFResource {
 
     // String constants used by subclasses
-    protected val typeKey          = RDF.TYPE
+    protected val typeKey = RDF.TYPE
     protected val typeRegistration = Solid.TYPE_REGISTRATION
-    protected val forClassKey      = Solid.FOR_CLASS
-    protected val instanceKey      = Solid.INSTANCE
+    protected val forClassKey = Solid.FOR_CLASS
+    protected val instanceKey = Solid.INSTANCE
     protected val instanceContainerKey = Solid.INSTANCE_CONTAINER
-    protected val typeIndex        = Solid.TYPE_INDEX
+    protected val typeIndex = Solid.TYPE_INDEX
     protected val unlistedDocument = Solid.UNLISTED_DOCUMENT
-    protected val listedDocument   = Solid.LISTED_DOCUMENT
-    protected val addressBook      = VCARD.ADDRESS_BOOK
+    protected val listedDocument = Solid.LISTED_DOCUMENT
+    protected val addressBook = VCARD.ADDRESS_BOOK
 
     constructor(
         identifier: URI,

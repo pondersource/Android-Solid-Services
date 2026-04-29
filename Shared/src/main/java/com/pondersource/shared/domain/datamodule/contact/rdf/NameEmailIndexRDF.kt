@@ -1,9 +1,8 @@
 package com.pondersource.shared.domain.datamodule.contact.rdf
 
 import com.apicatalog.jsonld.http.media.MediaType
-import com.pondersource.shared.domain.resource.RDFResource
-import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.datamodule.contact.Contact
+import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.shared.vocab.RDF
 import com.pondersource.shared.vocab.VCARD
@@ -39,7 +38,7 @@ class NameEmailIndexRDF : SolidRDFResource {
     fun removeContact(contactUri: String): Boolean {
         val affected = quads.filter {
             (it.predicate == VCARD.IN_ADDRESS_BOOK && it.`object` == contactUri) ||
-            it.subject == contactUri
+                    it.subject == contactUri
         }
         if (affected.isEmpty()) return false
         quads.removeAll { it.subject == contactUri || it.`object` == contactUri }

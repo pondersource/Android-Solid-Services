@@ -22,7 +22,7 @@ class SolidACR : SolidRDFResource {
     constructor(identifier: URI) : this(identifier, null, null)
 
     constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
-        this(identifier, MediaType.JSON_LD, quads, headers)
+            this(identifier, MediaType.JSON_LD, quads, headers)
 
     constructor(
         identifier: URI,

@@ -45,16 +45,17 @@ fun Login(
     navController: NavHostController,
     viewModel: LoginViewModel,
 ) {
-    val doAuthenticationInBrowser = rememberLauncherForActivityResult(object : ActivityResultContract<Intent, Intent?>() {
-        override fun createIntent(context: Context, input: Intent): Intent = input
-        override fun parseResult(resultCode: Int, intent: Intent?): Intent? = intent
-    }) { intent: Intent? ->
-        if (intent != null) {
-            val resp: AuthorizationResponse? = AuthorizationResponse.fromIntent(intent)
-            val ex: AuthorizationException? = AuthorizationException.fromIntent(intent)
-            viewModel.submitAuthorizationResponse(resp, ex)
+    val doAuthenticationInBrowser =
+        rememberLauncherForActivityResult(object : ActivityResultContract<Intent, Intent?>() {
+            override fun createIntent(context: Context, input: Intent): Intent = input
+            override fun parseResult(resultCode: Int, intent: Intent?): Intent? = intent
+        }) { intent: Intent? ->
+            if (intent != null) {
+                val resp: AuthorizationResponse? = AuthorizationResponse.fromIntent(intent)
+                val ex: AuthorizationException? = AuthorizationException.fromIntent(intent)
+                viewModel.submitAuthorizationResponse(resp, ex)
+            }
         }
-    }
 
     LaunchedEffect(Unit) {
         if (!viewModel.isAddingAccount && viewModel.isLoggedIn()) {

@@ -4,9 +4,9 @@ import android.content.SharedPreferences
 import com.pondersource.androidsolidservices.model.GrantedApp
 import kotlinx.serialization.json.Json
 
-class AccessGrantLocalDataSourceImplementation (
+class AccessGrantLocalDataSourceImplementation(
     private val sharedPreferences: SharedPreferences
-): AccessGrantLocalDataSource {
+) : AccessGrantLocalDataSource {
 
     companion object {
         private const val APP_LIST_KEY = "granted_app_list"

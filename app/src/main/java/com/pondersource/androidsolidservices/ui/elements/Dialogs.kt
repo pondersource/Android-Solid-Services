@@ -15,7 +15,7 @@ fun RevokePermissionDialog(
     app: GrantedApp,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
-){
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -42,7 +42,7 @@ fun RequestPermissionDialog(
     appName: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
-){
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {

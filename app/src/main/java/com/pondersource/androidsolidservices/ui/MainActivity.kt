@@ -12,14 +12,14 @@ import com.pondersource.androidsolidservices.ui.theme.ASSAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity: ComponentActivity() {
+class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             val navController = rememberNavController()
-            ASSAppTheme{
+            ASSAppTheme {
                 ASSAppNavHost(
                     modifier = Modifier
                         .fillMaxSize()

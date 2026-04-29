@@ -34,7 +34,9 @@ open class NonRDFResource : Resource {
         this.identifier = URI.create(inParcel.readString())
         this.contentType = inParcel.readString()!!
         val headersMap = Json.decodeFromString<Map<String, List<String>>>(inParcel.readString()!!)
-        this.headers = Headers.Builder().apply { headersMap.forEach { (name, values) -> values.forEach { add(name, it) } } }.build()
+        this.headers = Headers.Builder()
+            .apply { headersMap.forEach { (name, values) -> values.forEach { add(name, it) } } }
+            .build()
         this.entity = inParcel.readString()!!.byteInputStream()
     }
 

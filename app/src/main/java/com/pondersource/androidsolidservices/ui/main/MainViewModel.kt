@@ -21,7 +21,7 @@ class MainViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val authenticator: Authenticator,
     @Named(Constants.ASS_ACCOUNT_NAME) private val aSSAccountName: String,
-): BaseViewModel() {
+) : BaseViewModel() {
 
     val webId: StateFlow<String> = authenticator.activeProfileFlow
         .filterNotNull()

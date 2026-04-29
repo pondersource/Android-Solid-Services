@@ -4,10 +4,10 @@ import com.apicatalog.jsonld.JsonLdOptions
 import com.apicatalog.jsonld.JsonLdVersion
 import com.apicatalog.jsonld.document.JsonDocument
 import com.apicatalog.jsonld.http.media.MediaType
+import com.pondersource.shared.domain.container.SolidContainer
 import com.pondersource.shared.domain.network.HTTPAcceptType
 import com.pondersource.shared.domain.network.HTTPHeaderName
 import com.pondersource.shared.domain.resource.RDFResource
-import com.pondersource.shared.domain.container.SolidContainer
 import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
@@ -32,11 +32,22 @@ import java.net.URI
 internal object SolidResourceParser {
 
     fun <T> parse(response: SolidRawResponse, clazz: Class<T>): T {
-        val contentType = response.headers[HTTPHeaderName.CONTENT_TYPE] ?: HTTPAcceptType.OCTET_STREAM
+        val contentType =
+            response.headers[HTTPHeaderName.CONTENT_TYPE] ?: HTTPAcceptType.OCTET_STREAM
         return when {
-            SolidContainer::class.java.isAssignableFrom(clazz) -> parseContainer(response, clazz, contentType)
-            RDFResource::class.java.isAssignableFrom(clazz)      -> parseRdf(response, clazz, contentType)
-            else                                                -> parseNonRdf(response, clazz, contentType)
+            SolidContainer::class.java.isAssignableFrom(clazz) -> parseContainer(
+                response,
+                clazz,
+                contentType
+            )
+
+            RDFResource::class.java.isAssignableFrom(clazz) -> parseRdf(
+                response,
+                clazz,
+                contentType
+            )
+
+            else -> parseNonRdf(response, clazz, contentType)
         }
     }
 
@@ -46,7 +57,11 @@ internal object SolidResourceParser {
      * The base URI is set to the container's own URL so that any relative IRIs in the
      * `ldp:contains` listing are resolved correctly (e.g. `./child/` → absolute URL).
      */
-    private fun <T> parseContainer(response: SolidRawResponse, clazz: Class<T>, contentType: String): T {
+    private fun <T> parseContainer(
+        response: SolidRawResponse,
+        clazz: Class<T>,
+        contentType: String
+    ): T {
         // JsonLdOptions.base(URI) is a builder method — call on the instance explicitly
         // to avoid Kotlin resolving the zero-arg `base()` getter as a property first.
         val options = JsonLdOptions()
@@ -54,9 +69,15 @@ internal object SolidResourceParser {
         options.processingMode = JsonLdVersion.V1_1
         options.isProduceGeneralizedRdf = true
 
-        val quads = RDFResource.parseJsonLd(JsonDocument.of(response.bodyBytes.inputStream()), options)
+        val quads =
+            RDFResource.parseJsonLd(JsonDocument.of(response.bodyBytes.inputStream()), options)
         return clazz
-            .getConstructor(URI::class.java, MediaType::class.java, List::class.java, Headers::class.java)
+            .getConstructor(
+                URI::class.java,
+                MediaType::class.java,
+                List::class.java,
+                Headers::class.java
+            )
             .newInstance(response.uri, MediaType.of(contentType), quads, response.headers)
     }
 
@@ -74,9 +95,15 @@ internal object SolidResourceParser {
         options.processingMode = JsonLdVersion.V1_1
         options.isProduceGeneralizedRdf = true
 
-        val quads = RDFResource.parseJsonLd(JsonDocument.of(response.bodyBytes.inputStream()), options)
+        val quads =
+            RDFResource.parseJsonLd(JsonDocument.of(response.bodyBytes.inputStream()), options)
         return clazz
-            .getConstructor(URI::class.java, MediaType::class.java, List::class.java, Headers::class.java)
+            .getConstructor(
+                URI::class.java,
+                MediaType::class.java,
+                List::class.java,
+                Headers::class.java
+            )
             .newInstance(response.uri, MediaType.of(contentType), quads, response.headers)
     }
 
@@ -84,7 +111,11 @@ internal object SolidResourceParser {
      * Passes through a non-RDF response (images, PDFs, arbitrary binary files, etc.)
      * as a raw input stream with its content type preserved.
      */
-    private fun <T> parseNonRdf(response: SolidRawResponse, clazz: Class<T>, contentType: String): T {
+    private fun <T> parseNonRdf(
+        response: SolidRawResponse,
+        clazz: Class<T>,
+        contentType: String
+    ): T {
         // Use raw bytes — the body has never been through a String conversion, so binary
         // content (JPEG, MP4, PDF, …) arrives intact.
         return clazz

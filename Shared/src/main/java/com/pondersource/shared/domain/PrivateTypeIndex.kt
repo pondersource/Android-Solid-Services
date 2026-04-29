@@ -20,7 +20,12 @@ class PrivateTypeIndex : SettingTypeIndex {
         }
         if (existing.isEmpty()) {
             addQuad(getIdentifier().toString(), typeKey, typeIndex, maxNumber = Int.MAX_VALUE)
-            addQuad(getIdentifier().toString(), typeKey, unlistedDocument, maxNumber = Int.MAX_VALUE)
+            addQuad(
+                getIdentifier().toString(),
+                typeKey,
+                unlistedDocument,
+                maxNumber = Int.MAX_VALUE
+            )
         }
     }
 }

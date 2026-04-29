@@ -21,6 +21,6 @@ plugins {
     alias(libs.plugins.vanniktech.maven.publish) apply false
 }
 
-tasks.register("clean", Delete::class){
+tasks.register("clean", Delete::class) {
     delete(project.layout.buildDirectory)
 }

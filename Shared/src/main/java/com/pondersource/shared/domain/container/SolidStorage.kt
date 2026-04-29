@@ -24,7 +24,7 @@ class SolidStorage : SolidContainer {
     constructor(identifier: URI) : this(identifier, null, null)
 
     constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
-        this(identifier, MediaType.JSON_LD, quads, headers)
+            this(identifier, MediaType.JSON_LD, quads, headers)
 
     constructor(
         identifier: URI,
@@ -41,8 +41,9 @@ class SolidStorage : SolidContainer {
     }
 
     fun getStorageDescriptionUri(): URI? {
-        val fromDataset = findPropertyForSubject(getIdentifier().toString(), Solid.STORAGE_DESCRIPTION)
-            ?.let { runCatching { URI.create(it) }.getOrNull() }
+        val fromDataset =
+            findPropertyForSubject(getIdentifier().toString(), Solid.STORAGE_DESCRIPTION)
+                ?.let { runCatching { URI.create(it) }.getOrNull() }
         if (fromDataset != null) return fromDataset
         return getHeaders().getStorageDescriptionUri()
     }
@@ -50,7 +51,7 @@ class SolidStorage : SolidContainer {
     fun isStorageType(): Boolean =
         quads.any {
             it.subject == getIdentifier().toString() &&
-            it.predicate == RDF.TYPE &&
-            it.`object` == PIM.STORAGE_TYPE
+                    it.predicate == RDF.TYPE &&
+                    it.`object` == PIM.STORAGE_TYPE
         }
 }

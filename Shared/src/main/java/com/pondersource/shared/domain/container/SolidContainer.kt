@@ -26,13 +26,13 @@ open class SolidContainer : SolidRDFResource {
     constructor(identifier: URI) : this(identifier, null)
 
     constructor(identifier: URI, quads: List<RdfQuad>?) :
-        this(identifier, quads, null)
+            this(identifier, quads, null)
 
     constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>?) :
-        this(identifier, mediaType, quads, null)
+            this(identifier, mediaType, quads, null)
 
     constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
-        this(identifier, MediaType.JSON_LD, quads, headers)
+            this(identifier, MediaType.JSON_LD, quads, headers)
 
     constructor(
         identifier: URI,

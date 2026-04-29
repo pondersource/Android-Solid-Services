@@ -33,7 +33,9 @@ internal class AuthenticatorImplementation private constructor(
 
         fun getInstance(context: Context): Authenticator {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: AuthenticatorImplementation(context.applicationContext).also { INSTANCE = it }
+                INSTANCE ?: AuthenticatorImplementation(context.applicationContext).also {
+                    INSTANCE = it
+                }
             }
         }
     }
@@ -62,17 +64,26 @@ internal class AuthenticatorImplementation private constructor(
                 val webIdProfile = webIdResolver.resolve(
                     webIdUri = webId,
                     tokenProvider = { getInProgressTokenResponse() },
-                    authHeadersProvider = { method, uri -> buildInProgressAuthHeaders(method, uri) },
+                    authHeadersProvider = { method, uri ->
+                        buildInProgressAuthHeaders(
+                            method,
+                            uri
+                        )
+                    },
                     nonceSink = { nonce -> updateInProgressDPoPNonce(nonce) },
                 )
                 webIdProfile.getOidcIssuers()[0].toString()
             }
+
             else -> return Pair(null, "Either webId or oidcIssuer must be provided.")
         }
 
         val (conf, confError) = fetchAuthorizationConfig(issuerUrl)
         if (conf == null) {
-            return Pair(null, "Cannot get access to web-id issuer configurations: ${confError?.message}")
+            return Pair(
+                null,
+                "Cannot get access to web-id issuer configurations: ${confError?.message}"
+            )
         }
 
         val regResponse = registerToOpenId(conf, appName, redirectUri)
@@ -110,7 +121,10 @@ internal class AuthenticatorImplementation private constructor(
 
         if (authException != null || authResponse == null) return null
 
-        val (tokenResponse, tokenException) = requestToken(inProgressAuth.get()!!, isRefresh = false)
+        val (tokenResponse, tokenException) = requestToken(
+            inProgressAuth.get()!!,
+            isRefresh = false
+        )
         if (tokenException != null || tokenResponse == null) return ""
 
         val updatedAfterToken = deepCopyAuthState(inProgressAuth.get()!!.authState)
@@ -153,10 +167,11 @@ internal class AuthenticatorImplementation private constructor(
         }
 
         val token = getLastTokenResponse(webId)
-        val endSessionReq = EndSessionRequest.Builder(profile.authState.authorizationServiceConfiguration!!)
-            .setIdTokenHint(token!!.idToken)
-            .setPostLogoutRedirectUri(logoutRedirectUrl.toUri())
-            .build()
+        val endSessionReq =
+            EndSessionRequest.Builder(profile.authState.authorizationServiceConfiguration!!)
+                .setIdTokenHint(token!!.idToken)
+                .setPostLogoutRedirectUri(logoutRedirectUrl.toUri())
+                .build()
         return Pair(authService.getEndSessionRequestIntent(endSessionReq), null)
     }
 
@@ -179,7 +194,8 @@ internal class AuthenticatorImplementation private constructor(
         val profile = profileManager.getProfile(webId)
         val tokenResponse = getLastTokenResponse(webId)!!
         val headers = mutableMapOf<String, String>()
-        headers[HTTPHeaderName.AUTHORIZATION] = "${tokenResponse.tokenType} ${tokenResponse.accessToken}"
+        headers[HTTPHeaderName.AUTHORIZATION] =
+            "${tokenResponse.tokenType} ${tokenResponse.accessToken}"
         if (tokenResponse.tokenType!!.lowercase() == "dpop") {
             headers[HTTPHeaderName.DPOP] = DPoPGenerator
                 .getInstance(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!)
@@ -266,15 +282,16 @@ internal class AuthenticatorImplementation private constructor(
         }
 
         val tokenRequest = profile.authState.createTokenRequest(isRefresh)
-        val clientAuthentication = if (profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!.supportsDPop()) {
-            DPopClientSecretBasic(
-                clientSecret = profile.authState.lastRegistrationResponse!!.clientSecret!!,
-                configuration = tokenRequest.configuration,
-                refreshToken = profile.authState.refreshToken,
-            )
-        } else {
-            ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
-        }
+        val clientAuthentication =
+            if (profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!.supportsDPop()) {
+                DPopClientSecretBasic(
+                    clientSecret = profile.authState.lastRegistrationResponse!!.clientSecret!!,
+                    configuration = tokenRequest.configuration,
+                    refreshToken = profile.authState.refreshToken,
+                )
+            } else {
+                ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
+            }
 
         return suspendCancellableCoroutine { cont ->
             authService.performTokenRequest(
@@ -300,7 +317,8 @@ internal class AuthenticatorImplementation private constructor(
     }
 
     private fun needsTokenRefresh(profile: Profile): Boolean {
-        val expirationTime = profile.authState.lastTokenResponse?.accessTokenExpirationTime ?: return true
+        val expirationTime =
+            profile.authState.lastTokenResponse?.accessTokenExpirationTime ?: return true
         return (System.currentTimeMillis() + 280_000L) > expirationTime
     }
 
@@ -327,7 +345,8 @@ internal class AuthenticatorImplementation private constructor(
         val profile = inProgressAuth.get() ?: return emptyMap()
         val tokenResponse = profile.authState.lastTokenResponse ?: return emptyMap()
         val headers = mutableMapOf<String, String>()
-        headers[HTTPHeaderName.AUTHORIZATION] = "${tokenResponse.tokenType} ${tokenResponse.accessToken}"
+        headers[HTTPHeaderName.AUTHORIZATION] =
+            "${tokenResponse.tokenType} ${tokenResponse.accessToken}"
         if (tokenResponse.tokenType!!.lowercase() == "dpop") {
             headers[HTTPHeaderName.DPOP] = DPoPGenerator
                 .getInstance(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!)

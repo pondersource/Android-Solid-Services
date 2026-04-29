@@ -22,7 +22,7 @@ class SettingViewModel @Inject constructor(
     private val accountManager: AccountManager,
     private val authenticator: Authenticator,
     @Named(Constants.ASS_ACCOUNT_NAME) private val aSSAccountName: String,
-): BaseViewModel() {
+) : BaseViewModel() {
 
     val accounts: StateFlow<List<Profile>> = authenticator.loggedInProfilesFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())

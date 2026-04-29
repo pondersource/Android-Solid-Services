@@ -8,7 +8,7 @@ import javax.inject.Inject
 @HiltViewModel
 class StartupViewModel @Inject constructor(
     val authenticator: Authenticator,
-) : BaseViewModel(){
+) : BaseViewModel() {
 
     fun isLoggedIn(): Boolean {
         return authenticator.isUserAuthorized()

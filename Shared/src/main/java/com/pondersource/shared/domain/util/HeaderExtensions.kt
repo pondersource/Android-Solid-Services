@@ -1,8 +1,8 @@
 package com.pondersource.shared.domain.util
 
+import com.pondersource.shared.domain.access.WacAllow
 import com.pondersource.shared.domain.network.HTTPHeaderName
 import com.pondersource.shared.domain.network.HTTPLinkRelation
-import com.pondersource.shared.domain.access.WacAllow
 import com.pondersource.shared.vocab.PIM
 import okhttp3.Headers
 import java.net.URI
@@ -53,8 +53,8 @@ fun Headers.isStorage(): Boolean {
     return values(HTTPHeaderName.LINK).any { headerValue ->
         // The type value may appear as the full URI or a shortened form
         headerValue.contains(PIM.STORAGE_TYPE) &&
-        headerValue.contains("""rel="${HTTPLinkRelation.TYPE}"""")
-            .or(headerValue.contains("rel=${HTTPLinkRelation.TYPE}"))
+                headerValue.contains("""rel="${HTTPLinkRelation.TYPE}"""")
+                    .or(headerValue.contains("rel=${HTTPLinkRelation.TYPE}"))
     }
 }
 
@@ -131,8 +131,8 @@ private fun parseLinkRelation(headers: Headers, rel: String): URI? {
     headers.values(HTTPHeaderName.LINK).forEach { headerValue ->
         // Split on commas that are not inside angle brackets or quotes
         headerValue.split(Regex(",(?=\\s*<)")).forEach { segment ->
-            val uriMatch  = Regex("""<([^>]+)>""").find(segment) ?: return@forEach
-            val relMatch  = Regex("""rel="?([^";,\s]+)"?""").find(segment) ?: return@forEach
+            val uriMatch = Regex("""<([^>]+)>""").find(segment) ?: return@forEach
+            val relMatch = Regex("""rel="?([^";,\s]+)"?""").find(segment) ?: return@forEach
             if (relMatch.groupValues[1] == rel) {
                 return runCatching { URI.create(uriMatch.groupValues[1]) }.getOrNull()
             }

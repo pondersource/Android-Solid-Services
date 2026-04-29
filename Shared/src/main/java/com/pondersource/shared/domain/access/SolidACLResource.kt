@@ -24,7 +24,7 @@ class SolidACLResource : SolidRDFResource {
     constructor(identifier: URI) : this(identifier, null, null)
 
     constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
-        this(identifier, MediaType.JSON_LD, quads, headers)
+            this(identifier, MediaType.JSON_LD, quads, headers)
 
     constructor(
         identifier: URI,
@@ -86,12 +86,54 @@ class SolidACLResource : SolidRDFResource {
     fun addAuthorization(authorization: AclAuthorization) {
         val subject = authorization.subject
         addQuad(subject, RDF.TYPE, ACL.AUTHORIZATION, maxNumber = Int.MAX_VALUE)
-        authorization.accessTo.forEach { addQuad(subject, ACL.ACCESS_TO, it.toString(), maxNumber = Int.MAX_VALUE) }
-        authorization.default.forEach { addQuad(subject, ACL.DEFAULT, it.toString(), maxNumber = Int.MAX_VALUE) }
+        authorization.accessTo.forEach {
+            addQuad(
+                subject,
+                ACL.ACCESS_TO,
+                it.toString(),
+                maxNumber = Int.MAX_VALUE
+            )
+        }
+        authorization.default.forEach {
+            addQuad(
+                subject,
+                ACL.DEFAULT,
+                it.toString(),
+                maxNumber = Int.MAX_VALUE
+            )
+        }
         authorization.modes.forEach { addQuad(subject, ACL.MODE, it, maxNumber = Int.MAX_VALUE) }
-        authorization.agents.forEach { addQuad(subject, ACL.AGENT, it.toString(), maxNumber = Int.MAX_VALUE) }
-        authorization.agentClasses.forEach { addQuad(subject, ACL.AGENT_CLASS, it.toString(), maxNumber = Int.MAX_VALUE) }
-        authorization.agentGroups.forEach { addQuad(subject, ACL.AGENT_GROUP, it.toString(), maxNumber = Int.MAX_VALUE) }
-        authorization.origins.forEach { addQuad(subject, ACL.ORIGIN, it.toString(), maxNumber = Int.MAX_VALUE) }
+        authorization.agents.forEach {
+            addQuad(
+                subject,
+                ACL.AGENT,
+                it.toString(),
+                maxNumber = Int.MAX_VALUE
+            )
+        }
+        authorization.agentClasses.forEach {
+            addQuad(
+                subject,
+                ACL.AGENT_CLASS,
+                it.toString(),
+                maxNumber = Int.MAX_VALUE
+            )
+        }
+        authorization.agentGroups.forEach {
+            addQuad(
+                subject,
+                ACL.AGENT_GROUP,
+                it.toString(),
+                maxNumber = Int.MAX_VALUE
+            )
+        }
+        authorization.origins.forEach {
+            addQuad(
+                subject,
+                ACL.ORIGIN,
+                it.toString(),
+                maxNumber = Int.MAX_VALUE
+            )
+        }
     }
 }

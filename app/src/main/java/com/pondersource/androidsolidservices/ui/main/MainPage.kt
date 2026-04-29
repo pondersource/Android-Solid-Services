@@ -3,7 +3,6 @@ package com.pondersource.androidsolidservices.ui.main
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import com.pondersource.androidsolidservices.R
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -24,26 +23,33 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.pondersource.androidsolidservices.R
 import com.pondersource.androidsolidservices.ui.navigation.MainPage
 
 @Composable
 fun MainPage(
     navController: NavController,
-){
+) {
     val nestedNavController = rememberNavController()
 
     val bottomItems = remember {
-        listOf (
-            MainPage.MainNavBottomItem(R.string.access_grant, R.drawable.ic_access_grant,
-                MainPage.AccessGrants),
-            MainPage.MainNavBottomItem(R.string.main, R.drawable.ic_main,
-                MainPage.Main),
-            MainPage.MainNavBottomItem(R.string.setting, R.drawable.ic_setting,
-                MainPage.Setting),
+        listOf(
+            MainPage.MainNavBottomItem(
+                R.string.access_grant, R.drawable.ic_access_grant,
+                MainPage.AccessGrants
+            ),
+            MainPage.MainNavBottomItem(
+                R.string.main, R.drawable.ic_main,
+                MainPage.Main
+            ),
+            MainPage.MainNavBottomItem(
+                R.string.setting, R.drawable.ic_setting,
+                MainPage.Setting
+            ),
         )
     }
 
-    val changeTab : (_: Any) -> Unit = { tabRoute ->
+    val changeTab: (_: Any) -> Unit = { tabRoute ->
         nestedNavController.navigate(tabRoute) {
 
             popUpTo(nestedNavController.graph.findStartDestination().id) {
@@ -54,7 +60,7 @@ fun MainPage(
         }
     }
 
-    Scaffold (
+    Scaffold(
         bottomBar = {
             NavigationBar {
                 val navBackStackEntry by nestedNavController.currentBackStackEntryAsState()
@@ -71,7 +77,7 @@ fun MainPage(
                 }
             }
         }
-    ){ paddingValues ->
+    ) { paddingValues ->
         NavHost(
             navController = nestedNavController,
             startDestination = MainPage.Main,
@@ -87,7 +93,8 @@ fun MainPage(
                 Main(navController, hiltViewModel<MainViewModel>())
             }
             composable<MainPage.Setting> {
-                Setting(navController, hiltViewModel<SettingViewModel>()) }
+                Setting(navController, hiltViewModel<SettingViewModel>())
+            }
         }
     }
 }

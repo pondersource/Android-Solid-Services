@@ -6,7 +6,7 @@ import android.accounts.AccountAuthenticatorResponse
 import android.content.Context
 import android.os.Bundle
 
-class SolidAuthenticator(context: Context): AbstractAccountAuthenticator(context) {
+class SolidAuthenticator(context: Context) : AbstractAccountAuthenticator(context) {
     override fun editProperties(
         response: AccountAuthenticatorResponse?,
         accountType: String?

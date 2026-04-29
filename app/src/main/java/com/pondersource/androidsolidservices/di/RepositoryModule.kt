@@ -5,8 +5,8 @@ import com.pondersource.androidsolidservices.repository.AccessGrantRepository
 import com.pondersource.androidsolidservices.repository.AccessGrantRepositoryImplementation
 import com.pondersource.androidsolidservices.repository.ResourcePermissionRepository
 import com.pondersource.androidsolidservices.repository.ResourcePermissionRepositoryImplementation
-import com.pondersource.solidandroidapi.repository.UserRepository
 import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSource
+import com.pondersource.solidandroidapi.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -8,14 +8,14 @@ import kotlinx.parcelize.Parcelize
 data class Group(
     val uri: String,
     val name: String,
-): Parcelable
+) : Parcelable
 
 @Parcelize
 data class FullGroup(
     val uri: String,
     val name: String,
     val contacts: List<Contact>,
-): Parcelable {
+) : Parcelable {
     companion object {
         fun createFromRdf(groupRdf: GroupRDF): FullGroup {
             return FullGroup(

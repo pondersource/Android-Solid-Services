@@ -11,7 +11,8 @@ import net.openid.appauth.TokenResponse
 interface Authenticator {
 
     companion object {
-        fun getInstance(context: Context): Authenticator = AuthenticatorImplementation.getInstance(context)
+        fun getInstance(context: Context): Authenticator =
+            AuthenticatorImplementation.getInstance(context)
     }
 
     val activeProfileFlow: StateFlow<Profile?>

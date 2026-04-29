@@ -61,7 +61,7 @@ object IriUtils {
      */
     fun parentContainer(iri: String): String? {
         val normalized = stripTrailingSlash(iri)
-        val lastSlash  = normalized.lastIndexOf('/')
+        val lastSlash = normalized.lastIndexOf('/')
         if (lastSlash <= normalized.indexOf("//") + 1) return null
         return normalized.substring(0, lastSlash + 1)
     }

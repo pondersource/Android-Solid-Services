@@ -4,8 +4,8 @@ import android.accounts.AccountManager
 import android.content.Context
 import com.pondersource.androidsolidservices.base.Constants
 import com.pondersource.solidandroidapi.Authenticator
-import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
 import com.pondersource.solidandroidapi.SolidResourceManager
+import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,7 +21,8 @@ class LocalModule {
     @Provides
     @Singleton
     @Named(Constants.ASS_ACCOUNT_NAME)
-    fun provideASSAccountName(): String = "com.pondersource.androidsolidservices.account.DEMOACCOUNT"
+    fun provideASSAccountName(): String =
+        "com.pondersource.androidsolidservices.account.DEMOACCOUNT"
 
     @Provides
     @Singleton

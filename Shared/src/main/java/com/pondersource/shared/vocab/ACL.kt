@@ -13,6 +13,7 @@ object ACL {
     const val READ = "${NAMESPACE}Read"
     const val WRITE = "${NAMESPACE}Write"
     const val APPEND = "${NAMESPACE}Append"
+
     /** Allows reading and modifying the ACL resource itself. */
     const val CONTROL = "${NAMESPACE}Control"
 

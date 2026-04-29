@@ -56,8 +56,8 @@ open class WebId : SolidRDFResource {
             webId ?: return null
             return buildJsonObject {
                 put(KEY_IDENTIFIER, webId.getIdentifier().toString())
-                put(KEY_TYPE,       webId.getContentType())
-                put(KEY_DATASET,    webId.getEntity().toPlainString())
+                put(KEY_TYPE, webId.getContentType())
+                put(KEY_DATASET, webId.getEntity().toPlainString())
             }.toString()
         }
 
@@ -65,8 +65,8 @@ open class WebId : SolidRDFResource {
             val obj = Json.parseToJsonElement(objectString).jsonObject
             return WebId(
                 identifier = URI.create(obj[KEY_IDENTIFIER]!!.jsonPrimitive.content),
-                mediaType  = MediaType.of(obj[KEY_TYPE]!!.jsonPrimitive.content),
-                quads      = parseJsonLd(
+                mediaType = MediaType.of(obj[KEY_TYPE]!!.jsonPrimitive.content),
+                quads = parseJsonLd(
                     JsonDocument.of(obj[KEY_DATASET]!!.jsonPrimitive.content.byteInputStream())
                 ),
             )
@@ -74,13 +74,13 @@ open class WebId : SolidRDFResource {
     }
 
     constructor(identifier: URI, quads: List<RdfQuad>) :
-        super(identifier, quads)
+            super(identifier, quads)
 
     constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>) :
-        super(identifier, mediaType, quads, null)
+            super(identifier, mediaType, quads, null)
 
     constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>, headers: Headers?) :
-        super(identifier, mediaType, quads, headers)
+            super(identifier, mediaType, quads, headers)
 
     fun getTypes(): List<URI> =
         findAllProperties(RDF.TYPE).map { URI.create(it) }

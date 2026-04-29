@@ -6,7 +6,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import com.pondersource.androidsolidservices.R
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,11 +30,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
+import com.pondersource.androidsolidservices.R
 import com.pondersource.androidsolidservices.model.GrantedApp
 import com.pondersource.androidsolidservices.ui.elements.RevokePermissionDialog
-import androidx.core.graphics.createBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +47,7 @@ fun AccessGrants(
     val revokePermissionApp = remember { mutableStateOf<GrantedApp?>(null) }
     val showRevokePermissionDialog = remember { mutableStateOf(false) }
 
-    Scaffold (
+    Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -61,7 +61,7 @@ fun AccessGrants(
         }
     ) { paddingValues ->
 
-        LazyColumn (
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
@@ -118,13 +118,13 @@ private fun GrantedAppItem(
         }
     }
 
-    Card (
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp, 8.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.elevatedCardElevation(),
-    ){
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -133,7 +133,10 @@ private fun GrantedAppItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                bitmap = icon ?: createBitmap(32.dp.value.toInt(), 32.dp.value.toInt()).asImageBitmap(),
+                bitmap = icon ?: createBitmap(
+                    32.dp.value.toInt(),
+                    32.dp.value.toInt()
+                ).asImageBitmap(),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(8.dp)

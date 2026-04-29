@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.Flow
 interface UserRepository {
 
     companion object {
-        fun getInstance(context: Context): UserRepository = UserRepositoryImplementation.getInstance(context)
+        fun getInstance(context: Context): UserRepository =
+            UserRepositoryImplementation.getInstance(context)
     }
 
     fun readAllProfiles(): Flow<ProfileList>

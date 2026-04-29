@@ -1,7 +1,6 @@
 package com.pondersource.androidsolidservices.ui.main
 
 import androidx.compose.foundation.layout.Arrangement
-import com.pondersource.androidsolidservices.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.pondersource.androidsolidservices.R
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +54,7 @@ fun Main(
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleLarge
             )
-            Column (
+            Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -69,9 +69,9 @@ fun Main(
                 )
             }
 
-            Column (
+            Column(
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 Text(
                     text = stringResource(R.string.your_storages),
                     color = MaterialTheme.colorScheme.primary,
@@ -89,7 +89,10 @@ fun Main(
                         onValueChange = {},
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = storagesExpanded.value) },
-                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
+                        modifier = Modifier.menuAnchor(
+                            ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                            true
+                        )
                     )
 
                     ExposedDropdownMenu(

@@ -91,6 +91,13 @@ mavenPublishing {
         variant = "release",
     ))
     coordinates("com.pondersource.solidandroidclient", "solidandroidclient", "0.3.1")
+    configure(
+        AndroidSingleVariantLibrary(
+            javadocJar = JavadocJar.Empty(),
+            sourcesJar = SourcesJar.Sources(),
+            variant = "release",
+        )
+    )
 
     pom {
         name.set("SolidAndroidClient")

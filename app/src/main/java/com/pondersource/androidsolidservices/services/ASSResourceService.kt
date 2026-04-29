@@ -16,9 +16,9 @@ import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidapi.SolidResourceManager
 import com.pondersource.solidandroidclient.IASSResourceService
-import com.pondersource.solidandroidclient.IASSUnitCallback
 import com.pondersource.solidandroidclient.IASSSolidNonRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSSolidRdfResourceCallback
+import com.pondersource.solidandroidclient.IASSUnitCallback
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,10 +52,18 @@ class ASSResourceService : LifecycleService() {
             enterFunction: () -> Unit,
         ) {
             if (authenticator.isUserAuthorized()) {
-                if (resourcePermissionRepository.hasAccess(callerPackage, resourceUrl, permissionType)) {
+                if (resourcePermissionRepository.hasAccess(
+                        callerPackage,
+                        resourceUrl,
+                        permissionType
+                    )
+                ) {
                     enterFunction()
                 } else {
-                    errorCallback(NOT_PERMISSION, "App does not have permission to access the resource.")
+                    errorCallback(
+                        NOT_PERMISSION,
+                        "App does not have permission to access the resource."
+                    )
                 }
             } else {
                 errorCallback(SOLID_NOT_LOGGED_IN, "Solid app has not logged in.")
@@ -80,7 +88,10 @@ class ASSResourceService : LifecycleService() {
             }
         }
 
-        override fun create(resource: SolidNonRDFResource, callback: IASSSolidNonRdfResourceCallback) {
+        override fun create(
+            resource: SolidNonRDFResource,
+            callback: IASSSolidNonRdfResourceCallback
+        ) {
             handleBasicExceptions(
                 resource.getIdentifier().toString(),
                 packageManager.getNameForUid(getCallingUid())!!,
@@ -88,10 +99,18 @@ class ASSResourceService : LifecycleService() {
                 { code, message -> callback.onError(code, message) }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    when (val result = solidResourceManager.create(getProfile().userInfo!!.webId, resource)) {
-                        is SolidNetworkResponse.Success   -> callback.onResult(resource)
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                    when (val result =
+                        solidResourceManager.create(getProfile().userInfo!!.webId, resource)) {
+                        is SolidNetworkResponse.Success -> callback.onResult(resource)
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }
@@ -105,10 +124,18 @@ class ASSResourceService : LifecycleService() {
                 { code, message -> callback.onError(code, message) }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    when (val result = solidResourceManager.create(getProfile().userInfo!!.webId, resource)) {
-                        is SolidNetworkResponse.Success   -> callback.onResult(resource)
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                    when (val result =
+                        solidResourceManager.create(getProfile().userInfo!!.webId, resource)) {
+                        is SolidNetworkResponse.Success -> callback.onResult(resource)
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }
@@ -127,9 +154,16 @@ class ASSResourceService : LifecycleService() {
                         URI.create(resourceUrl),
                         SolidNonRDFResource::class.java,
                     )) {
-                        is SolidNetworkResponse.Success   -> callback.onResult(result.data)
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                        is SolidNetworkResponse.Success -> callback.onResult(result.data)
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }
@@ -148,9 +182,16 @@ class ASSResourceService : LifecycleService() {
                         URI.create(resourceUrl),
                         SolidRDFResource::class.java,
                     )) {
-                        is SolidNetworkResponse.Success   -> callback.onResult(result.data)
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                        is SolidNetworkResponse.Success -> callback.onResult(result.data)
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }
@@ -173,9 +214,16 @@ class ASSResourceService : LifecycleService() {
                         resource,
                         ifMatch,
                     )) {
-                        is SolidNetworkResponse.Success   -> callback.onResult(resource)
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                        is SolidNetworkResponse.Success -> callback.onResult(resource)
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }
@@ -198,9 +246,16 @@ class ASSResourceService : LifecycleService() {
                         resource,
                         ifMatch,
                     )) {
-                        is SolidNetworkResponse.Success   -> callback.onResult(resource)
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                        is SolidNetworkResponse.Success -> callback.onResult(resource)
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }
@@ -219,15 +274,25 @@ class ASSResourceService : LifecycleService() {
                         URI.create(resourceUrl),
                         patchBody,
                     )) {
-                        is SolidNetworkResponse.Success   -> callback.onResult()
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                        is SolidNetworkResponse.Success -> callback.onResult()
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }
         }
 
-        override fun delete(resource: SolidNonRDFResource, callback: IASSSolidNonRdfResourceCallback) {
+        override fun delete(
+            resource: SolidNonRDFResource,
+            callback: IASSSolidNonRdfResourceCallback
+        ) {
             handleBasicExceptions(
                 resource.getIdentifier().toString(),
                 packageManager.getNameForUid(getCallingUid())!!,
@@ -235,10 +300,18 @@ class ASSResourceService : LifecycleService() {
                 { code, message -> callback.onError(code, message) }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    when (val result = solidResourceManager.delete(getProfile().userInfo!!.webId, resource)) {
-                        is SolidNetworkResponse.Success   -> callback.onResult(resource)
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                    when (val result =
+                        solidResourceManager.delete(getProfile().userInfo!!.webId, resource)) {
+                        is SolidNetworkResponse.Success -> callback.onResult(resource)
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }
@@ -252,10 +325,18 @@ class ASSResourceService : LifecycleService() {
                 { code, message -> callback.onError(code, message) }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    when (val result = solidResourceManager.delete(getProfile().userInfo!!.webId, resource)) {
-                        is SolidNetworkResponse.Success   -> callback.onResult(resource)
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                    when (val result =
+                        solidResourceManager.delete(getProfile().userInfo!!.webId, resource)) {
+                        is SolidNetworkResponse.Success -> callback.onResult(resource)
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }
@@ -273,9 +354,16 @@ class ASSResourceService : LifecycleService() {
                         getProfile().userInfo!!.webId,
                         URI.create(containerUrl),
                     )) {
-                        is SolidNetworkResponse.Success   -> callback.onResult()
-                        is SolidNetworkResponse.Error     -> callback.onError(UNKNOWN, result.errorMessage)
-                        is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")
+                        is SolidNetworkResponse.Success -> callback.onResult()
+                        is SolidNetworkResponse.Error -> callback.onError(
+                            UNKNOWN,
+                            result.errorMessage
+                        )
+
+                        is SolidNetworkResponse.Exception -> callback.onError(
+                            UNKNOWN,
+                            result.exception.message ?: ""
+                        )
                     }
                 }
             }

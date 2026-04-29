@@ -4,18 +4,18 @@ import android.content.Context
 import com.apicatalog.jsonld.http.media.MediaType
 import com.pondersource.shared.domain.PrivateTypeIndex
 import com.pondersource.shared.domain.PublicTypeIndex
-import com.pondersource.shared.domain.profile.WebId
+import com.pondersource.shared.domain.datamodule.contact.GROUPS_FILE_NAME
+import com.pondersource.shared.domain.datamodule.contact.GROUP_DIRECTORY_SUFFIX
+import com.pondersource.shared.domain.datamodule.contact.INDEX_FILE_NAME
 import com.pondersource.shared.domain.datamodule.contact.NewContact
+import com.pondersource.shared.domain.datamodule.contact.PEOPLE_DIRECTORY_SUFFIX
+import com.pondersource.shared.domain.datamodule.contact.PEOPLE_FILE_NAME
 import com.pondersource.shared.domain.datamodule.contact.rdf.AddressBookRDF
 import com.pondersource.shared.domain.datamodule.contact.rdf.ContactRDF
 import com.pondersource.shared.domain.datamodule.contact.rdf.GroupRDF
 import com.pondersource.shared.domain.datamodule.contact.rdf.GroupsIndexRDF
 import com.pondersource.shared.domain.datamodule.contact.rdf.NameEmailIndexRDF
-import com.pondersource.shared.domain.datamodule.contact.GROUPS_FILE_NAME
-import com.pondersource.shared.domain.datamodule.contact.GROUP_DIRECTORY_SUFFIX
-import com.pondersource.shared.domain.datamodule.contact.INDEX_FILE_NAME
-import com.pondersource.shared.domain.datamodule.contact.PEOPLE_DIRECTORY_SUFFIX
-import com.pondersource.shared.domain.datamodule.contact.PEOPLE_FILE_NAME
+import com.pondersource.shared.domain.profile.WebId
 import com.pondersource.solidandroidapi.SolidResourceManager
 import com.pondersource.solidandroidapi.SolidResourceManagerImplementation
 import java.net.URI
@@ -49,8 +49,8 @@ internal class SolidContactsDataModuleHelper {
         isPrivate: Boolean = true,
     ): AddressBookRDF {
 
-        val id : String = UUID.randomUUID().toString()
-        val uri  = "${container}${id}/${INDEX_FILE_NAME}"
+        val id: String = UUID.randomUUID().toString()
+        val uri = "${container}${id}/${INDEX_FILE_NAME}"
         val nameEmailIndex = "${container}${id}/${PEOPLE_FILE_NAME}"
         val groupIndex = "${container}${id}/${GROUPS_FILE_NAME}"
 
@@ -107,7 +107,7 @@ internal class SolidContactsDataModuleHelper {
     suspend fun getAddressBook(
         ownerWebId: String,
         uri: URI
-    ) : AddressBookRDF {
+    ): AddressBookRDF {
         return solidResourceManager.read(ownerWebId, uri, AddressBookRDF::class.java).getOrThrow()
     }
 
@@ -134,7 +134,7 @@ internal class SolidContactsDataModuleHelper {
 
         val privateTypeIndex = getPrivateTypeIndex(ownerWebId)
         val publicTypeIndex = getPublicTypeIndex(ownerWebId)
-        if(privateTypeIndex.containsAddressBook(addressBookUri)) {
+        if (privateTypeIndex.containsAddressBook(addressBookUri)) {
             privateTypeIndex.removeAddressBook(addressBookUri)
             solidResourceManager.update(ownerWebId, privateTypeIndex).getOrThrow()
         } else if (publicTypeIndex.containsAddressBook(addressBookUri)) {
@@ -142,7 +142,8 @@ internal class SolidContactsDataModuleHelper {
             solidResourceManager.update(ownerWebId, publicTypeIndex).getOrThrow()
         }
 
-        val addressBookMainContainer = addressBookUri.substring(0, addressBookUri.lastIndexOf("/") + 1)
+        val addressBookMainContainer =
+            addressBookUri.substring(0, addressBookUri.lastIndexOf("/") + 1)
         solidResourceManager.deleteContainer(ownerWebId, URI.create(addressBookMainContainer))
         return addressBookRDF
     }
@@ -151,14 +152,19 @@ internal class SolidContactsDataModuleHelper {
         ownerWebId: String,
         nameEmailIndexUri: URI
     ): NameEmailIndexRDF {
-        return solidResourceManager.read(ownerWebId, nameEmailIndexUri, NameEmailIndexRDF::class.java).getOrThrow()
+        return solidResourceManager.read(
+            ownerWebId,
+            nameEmailIndexUri,
+            NameEmailIndexRDF::class.java
+        ).getOrThrow()
     }
 
     suspend fun getAddressBookGroups(
         ownerWebId: String,
         groupsIndexUri: URI
     ): GroupsIndexRDF {
-        return solidResourceManager.read(ownerWebId, groupsIndexUri, GroupsIndexRDF::class.java).getOrThrow()
+        return solidResourceManager.read(ownerWebId, groupsIndexUri, GroupsIndexRDF::class.java)
+            .getOrThrow()
     }
 
     suspend fun createContact(
@@ -167,9 +173,11 @@ internal class SolidContactsDataModuleHelper {
         newContact: NewContact
     ): ContactRDF {
         val contactId = UUID.randomUUID()
-        val addressBookContainer = addressBookUri.toString().substring(0, addressBookUri.toString().lastIndexOf("/") + 1)
-        val contactUri = "${addressBookContainer}${PEOPLE_DIRECTORY_SUFFIX}${contactId}/${INDEX_FILE_NAME}"
-        val newContactRDF = createSingleContact(ownerWebId,URI.create(contactUri), newContact)
+        val addressBookContainer =
+            addressBookUri.toString().substring(0, addressBookUri.toString().lastIndexOf("/") + 1)
+        val contactUri =
+            "${addressBookContainer}${PEOPLE_DIRECTORY_SUFFIX}${contactId}/${INDEX_FILE_NAME}"
+        val newContactRDF = createSingleContact(ownerWebId, URI.create(contactUri), newContact)
         addContactToAddressBook(ownerWebId, newContactRDF, addressBookUri)
         return newContactRDF
     }
@@ -198,7 +206,8 @@ internal class SolidContactsDataModuleHelper {
         addressBookUri: URI
     ) {
         val addressBookRDF = getAddressBook(ownerWebId, addressBookUri)
-        val nameEmailIndexRDF = getAddressBookContacts(ownerWebId, URI.create(addressBookRDF.getNameEmailIndex()))
+        val nameEmailIndexRDF =
+            getAddressBookContacts(ownerWebId, URI.create(addressBookRDF.getNameEmailIndex()))
         nameEmailIndexRDF.addContact(addressBookRDF.getIdentifier().toString(), contact)
         solidResourceManager.update(ownerWebId, nameEmailIndexRDF)
     }
@@ -241,7 +250,8 @@ internal class SolidContactsDataModuleHelper {
         ownerWebId: String,
         contactUri: URI
     ): ContactRDF {
-        return solidResourceManager.read(ownerWebId, contactUri, ContactRDF::class.java).getOrThrow()
+        return solidResourceManager.read(ownerWebId, contactUri, ContactRDF::class.java)
+            .getOrThrow()
     }
 
 
@@ -251,10 +261,12 @@ internal class SolidContactsDataModuleHelper {
         contactUri: String
     ) {
         val addressBookRDF = getAddressBook(ownerWebId, URI.create(addressBookUri))
-        val nameEmailIndexRDF = getAddressBookContacts(ownerWebId, URI.create(addressBookRDF.getNameEmailIndex()))
-        if(nameEmailIndexRDF.removeContact(contactUri)) {
+        val nameEmailIndexRDF =
+            getAddressBookContacts(ownerWebId, URI.create(addressBookRDF.getNameEmailIndex()))
+        if (nameEmailIndexRDF.removeContact(contactUri)) {
             solidResourceManager.update(ownerWebId, nameEmailIndexRDF)
-            val groupsIndexRDF = getAddressBookGroups(ownerWebId, URI.create(addressBookRDF.getGroupsIndex()))
+            val groupsIndexRDF =
+                getAddressBookGroups(ownerWebId, URI.create(addressBookRDF.getGroupsIndex()))
             groupsIndexRDF.getGroups(addressBookUri).forEach {
                 removeContactFromGroup(ownerWebId, contactUri, it.uri)
             }
@@ -271,8 +283,11 @@ internal class SolidContactsDataModuleHelper {
         addressBookUri: URI,
         groupName: String
     ): GroupRDF {
-        val addressBookContainer = addressBookUri.toString().substring(0, addressBookUri.toString().lastIndexOf("/") + 1)
-        val groupUri = "${addressBookContainer}${GROUP_DIRECTORY_SUFFIX}${groupName.trim().replace(" ", "_")}.ttl"
+        val addressBookContainer =
+            addressBookUri.toString().substring(0, addressBookUri.toString().lastIndexOf("/") + 1)
+        val groupUri = "${addressBookContainer}${GROUP_DIRECTORY_SUFFIX}${
+            groupName.trim().replace(" ", "_")
+        }.ttl"
         val group = createSingleGroup(ownerWebId, addressBookUri, URI.create(groupUri), groupName)
         addGroupToAddressBook(ownerWebId, addressBookUri, group)
         return group
@@ -302,7 +317,8 @@ internal class SolidContactsDataModuleHelper {
         group: GroupRDF
     ) {
         val addressBookRDF = getAddressBook(ownerWebId, addressBookUri)
-        val groupsIndexRDF = getAddressBookGroups(ownerWebId, URI.create(addressBookRDF.getGroupsIndex()))
+        val groupsIndexRDF =
+            getAddressBookGroups(ownerWebId, URI.create(addressBookRDF.getGroupsIndex()))
         groupsIndexRDF.addGroup(addressBookRDF.getIdentifier().toString(), group)
         solidResourceManager.update(ownerWebId, groupsIndexRDF)
     }
@@ -331,7 +347,7 @@ internal class SolidContactsDataModuleHelper {
         ownerWebId: String,
         contactUri: URI,
         newPhoneNumber: String
-    ) : ContactRDF {
+    ): ContactRDF {
         val contact = getContact(ownerWebId, contactUri)
         val addingResult = contact.addPhoneNumber(newPhoneNumber)
         return if (addingResult) {
@@ -361,7 +377,7 @@ internal class SolidContactsDataModuleHelper {
         phoneNumber: String
     ): ContactRDF {
         val contactRdf = getContact(ownerWebId, contactUri)
-        if(contactRdf.removePhoneNumber(phoneNumber)) {
+        if (contactRdf.removePhoneNumber(phoneNumber)) {
             solidResourceManager.update(ownerWebId, contactRdf).getOrThrow()
         }
         return contactRdf
@@ -373,7 +389,7 @@ internal class SolidContactsDataModuleHelper {
         emailAddress: String
     ): ContactRDF {
         val contactRdf = getContact(ownerWebId, contactUri)
-        if(contactRdf.removeEmailAddress(emailAddress)) {
+        if (contactRdf.removeEmailAddress(emailAddress)) {
             solidResourceManager.update(ownerWebId, contactRdf).getOrThrow()
         }
         return contactRdf
@@ -386,7 +402,8 @@ internal class SolidContactsDataModuleHelper {
     ): GroupRDF {
         val addressBookRDF = getAddressBook(ownerWebId, addressBookUri)
         val groupRdf = getGroup(ownerWebId, groupUri)
-        val groupsIndexRDF = getAddressBookGroups(ownerWebId, URI.create(addressBookRDF.getGroupsIndex()))
+        val groupsIndexRDF =
+            getAddressBookGroups(ownerWebId, URI.create(addressBookRDF.getGroupsIndex()))
         if (groupsIndexRDF.removeGroup(groupUri)) {
             solidResourceManager.update(ownerWebId, groupsIndexRDF).getOrThrow()
             solidResourceManager.delete(ownerWebId, groupRdf).getOrThrow()
@@ -408,7 +425,7 @@ internal class SolidContactsDataModuleHelper {
         newName: String
     ): ContactRDF {
         val contactRdf = getContact(ownerWebId, URI.create(contactUri))
-        if(contactRdf.getFullName() != newName) {
+        if (contactRdf.getFullName() != newName) {
             contactRdf.setFullName(newName)
             solidResourceManager.update(ownerWebId, contactRdf)
         }
@@ -417,7 +434,9 @@ internal class SolidContactsDataModuleHelper {
 
 
     private suspend fun getPrivateTypeIndex(webIdString: String): PrivateTypeIndex {
-        val webId = solidResourceManager.read(webIdString, URI.create(webIdString), WebId::class.java).getOrThrow()
+        val webId =
+            solidResourceManager.read(webIdString, URI.create(webIdString), WebId::class.java)
+                .getOrThrow()
         var privateTypeIndexUri = webId.getPrivateTypeIndex()
 
         if (privateTypeIndexUri == null) {
@@ -452,7 +471,9 @@ internal class SolidContactsDataModuleHelper {
     }
 
     private suspend fun getPublicTypeIndex(webIdString: String): PublicTypeIndex {
-        val webId = solidResourceManager.read(webIdString, URI.create(webIdString), WebId::class.java).getOrThrow()
+        val webId =
+            solidResourceManager.read(webIdString, URI.create(webIdString), WebId::class.java)
+                .getOrThrow()
         var publicTypeIndexUri = webId.getPublicTypeIndex()
 
         if (publicTypeIndexUri == null) {

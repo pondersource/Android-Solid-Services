@@ -11,9 +11,9 @@ data class WacAllow(
     val userModes: Set<String>,
     val publicModes: Set<String>
 ) {
-    fun canRead()    = userModes.contains("read")
-    fun canWrite()   = userModes.contains("write")
-    fun canAppend()  = userModes.contains("append") || canWrite()
+    fun canRead() = userModes.contains("read")
+    fun canWrite() = userModes.contains("write")
+    fun canAppend() = userModes.contains("append") || canWrite()
     fun canControl() = userModes.contains("control")
 
     companion object {
@@ -31,7 +31,7 @@ data class WacAllow(
                 groups[group] = modes
             }
             return WacAllow(
-                userModes   = groups["user"]   ?: emptySet(),
+                userModes = groups["user"] ?: emptySet(),
                 publicModes = groups["public"] ?: emptySet()
             )
         }

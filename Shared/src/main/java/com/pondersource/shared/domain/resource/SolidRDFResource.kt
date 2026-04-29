@@ -11,22 +11,24 @@ open class SolidRDFResource : RDFResource, SolidResource {
     companion object {
         @JvmField
         val CREATOR = object : Parcelable.Creator<SolidRDFResource> {
-            override fun createFromParcel(parcel: Parcel): SolidRDFResource = SolidRDFResource(parcel)
+            override fun createFromParcel(parcel: Parcel): SolidRDFResource =
+                SolidRDFResource(parcel)
+
             override fun newArray(size: Int): Array<SolidRDFResource?> = arrayOfNulls(size)
         }
     }
 
     private val metadata: SolidMetadata = SolidMetadata.from(getHeaders())
 
-    protected constructor(inParcel: Parcel): super(inParcel)
+    protected constructor(inParcel: Parcel) : super(inParcel)
 
     constructor(identifier: URI) : this(identifier, null)
 
     constructor(identifier: URI, quads: List<RdfQuad>?) :
-        this(identifier, quads, null)
+            this(identifier, quads, null)
 
     constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
-        this(identifier, MediaType.JSON_LD, quads, headers)
+            this(identifier, MediaType.JSON_LD, quads, headers)
 
     constructor(
         identifier: URI,

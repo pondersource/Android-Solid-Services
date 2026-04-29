@@ -10,7 +10,7 @@ class DPopClientSecretBasic(
     private val clientSecret: String,
     private val configuration: AuthorizationServiceConfiguration,
     private val refreshToken: String? = null,
-): ClientAuthentication {
+) : ClientAuthentication {
 
     companion object Companion {
         const val NAME: String = "client_secret_basic"

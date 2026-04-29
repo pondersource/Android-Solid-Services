@@ -17,13 +17,13 @@ import com.pondersource.shared.vocab.FOAF
 import com.pondersource.shared.vocab.LDP
 import com.pondersource.shared.vocab.Notify
 import com.pondersource.shared.vocab.OWL
-import com.pondersource.shared.vocab.SAI
-import com.pondersource.shared.vocab.ShapeTree
 import com.pondersource.shared.vocab.PIM
 import com.pondersource.shared.vocab.RDF
 import com.pondersource.shared.vocab.RDFS
+import com.pondersource.shared.vocab.SAI
 import com.pondersource.shared.vocab.STAT
 import com.pondersource.shared.vocab.Schema
+import com.pondersource.shared.vocab.ShapeTree
 import com.pondersource.shared.vocab.Solid
 import com.pondersource.shared.vocab.VCARD
 import com.pondersource.shared.vocab.XSD
@@ -112,13 +112,13 @@ open class RDFResource : Resource {
     constructor(identifier: URI) : this(identifier, null as List<RdfQuad>?)
 
     constructor(identifier: URI, quads: List<RdfQuad>?) :
-        this(identifier, quads, null)
+            this(identifier, quads, null)
 
     constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
-        this(identifier, MediaType.JSON_LD, quads, headers)
+            this(identifier, MediaType.JSON_LD, quads, headers)
 
     constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>?) :
-        this(identifier, mediaType, quads, null)
+            this(identifier, mediaType, quads, null)
 
     constructor(
         identifier: URI,
@@ -130,6 +130,9 @@ open class RDFResource : Resource {
         this.headers       = headers ?: Headers.Builder().build()
         this.mediaType     = mediaType
         this.quads         = quads?.toMutableList() ?: mutableListOf()
+        this.headers = headers ?: Headers.Builder().build()
+        this.mediaType = mediaType
+        this.quads = quads?.toMutableList() ?: mutableListOf()
         this.itselfSubject = "$identifier#it"
     }
 
@@ -187,7 +190,15 @@ open class RDFResource : Resource {
     override fun getEntity(): InputStream {
         val converter = QuadsToJsonld()
         quads.forEach { q ->
-            converter.quad(q.subject, q.predicate, q.`object`, q.datatype, q.language, null, q.graph)
+            converter.quad(
+                q.subject,
+                q.predicate,
+                q.`object`,
+                q.datatype,
+                q.language,
+                null,
+                q.graph
+            )
         }
         val jsonLdArray = converter.toJsonLd()
         val compacted = JsonLd.compact(
@@ -213,7 +224,15 @@ open class RDFResource : Resource {
         dest.writeString(mediaType.toString())
         val converter = QuadsToJsonld()
         quads.forEach { q ->
-            converter.quad(q.subject, q.predicate, q.`object`, q.datatype, q.language, null, q.graph)
+            converter.quad(
+                q.subject,
+                q.predicate,
+                q.`object`,
+                q.datatype,
+                q.language,
+                null,
+                q.graph
+            )
         }
         dest.writeString(converter.toJsonLd().toString())
         dest.writeString(itselfSubject)

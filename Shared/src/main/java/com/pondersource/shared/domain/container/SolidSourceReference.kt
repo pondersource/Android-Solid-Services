@@ -24,10 +24,12 @@ data class SolidSourceReference(
     val contentType: String? = null,
 ) {
     fun isContainer(): Boolean =
-        types.any { it == LDP.BASIC_CONTAINER ||
+        types.any {
+            it == LDP.BASIC_CONTAINER ||
                     it == LDP.CONTAINER ||
                     it == LDP.DIRECT_CONTAINER ||
-                    it == LDP.INDIRECT_CONTAINER }
+                    it == LDP.INDIRECT_CONTAINER
+        }
 
     fun isContainerByUri(): Boolean = identifier.endsWith("/")
 }

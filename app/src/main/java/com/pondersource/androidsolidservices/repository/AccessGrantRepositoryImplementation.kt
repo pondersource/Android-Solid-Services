@@ -5,7 +5,7 @@ import com.pondersource.androidsolidservices.repository.datasource.local.accessg
 
 class AccessGrantRepositoryImplementation(
     private val accessGrantLocalDataSource: AccessGrantLocalDataSource,
-): AccessGrantRepository {
+) : AccessGrantRepository {
 
     override fun hasAccessGrant(appPackageName: String): Boolean {
         return accessGrantLocalDataSource.hasAccessGrant(appPackageName)

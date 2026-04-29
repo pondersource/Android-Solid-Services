@@ -77,6 +77,13 @@ mavenPublishing {
         variant = "release",
     ))
     coordinates("com.pondersource.shared", "shared", "0.3.1")
+    configure(
+        AndroidSingleVariantLibrary(
+            javadocJar = JavadocJar.Empty(),
+            sourcesJar = SourcesJar.Sources(),
+            variant = "release",
+        )
+    )
 
     pom {
         name.set("SolidAndroidShared")

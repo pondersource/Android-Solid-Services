@@ -1,6 +1,5 @@
 package com.pondersource.shared.domain.profile
 
-import kotlinx.serialization.json.Json
 import com.pondersource.shared.domain.profile.WebId.Companion.readFromString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -15,6 +14,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
+import kotlinx.serialization.json.Json
 import net.openid.appauth.AuthState
 
 @Serializable
@@ -55,7 +55,7 @@ class ProfileMapSerializer(
     }
 }
 
-class ProfileSerializer: KSerializer<Profile> {
+class ProfileSerializer : KSerializer<Profile> {
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Profile") {
         element<String>("authState")
@@ -66,7 +66,11 @@ class ProfileSerializer: KSerializer<Profile> {
     override fun serialize(encoder: Encoder, value: Profile) {
         encoder.encodeStructure(descriptor) {
             encodeStringElement(descriptor, 0, value.authState.jsonSerializeString())
-            encodeStringElement(descriptor, 1, if (value.userInfo != null) Json.encodeToString(value.userInfo) else "")
+            encodeStringElement(
+                descriptor,
+                1,
+                if (value.userInfo != null) Json.encodeToString(value.userInfo) else ""
+            )
             encodeStringElement(descriptor, 2, WebId.Companion.writeToString(value.webId) ?: "")
         }
     }
@@ -90,7 +94,9 @@ class ProfileSerializer: KSerializer<Profile> {
 
         return Profile(
             authState = if (stateString.isNotEmpty()) AuthState.jsonDeserialize(stateString) else AuthState(),
-            userInfo = if (userInfoString.isNotEmpty()) Json.decodeFromString<UserInfo>(userInfoString) else null,
+            userInfo = if (userInfoString.isNotEmpty()) Json.decodeFromString<UserInfo>(
+                userInfoString
+            ) else null,
             webId = if (webIdString.isNotEmpty()) readFromString(webIdString) else null,
         )
     }

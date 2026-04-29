@@ -1,6 +1,9 @@
 package com.pondersource.solidandroidclient.sdk
 
 import android.content.Context
+import com.pondersource.solidandroidclient.sdk.Solid.Companion.getContactsDataModule
+import com.pondersource.solidandroidclient.sdk.Solid.Companion.getResourceClient
+import com.pondersource.solidandroidclient.sdk.Solid.Companion.getSignInClient
 
 /**
  * Entry point for the Android Solid Services client SDK.

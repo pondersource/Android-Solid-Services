@@ -21,24 +21,25 @@ fun ASSAppTheme(
     val lightColorScheme = lightColorScheme()
     val darkColorScheme = darkColorScheme()
 
-    val colorScheme  = when {
+    val colorScheme = when {
         dynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (isDarkTheme) {
                 dynamicDarkColorScheme(LocalContext.current)
-            }
-            else {
+            } else {
                 dynamicLightColorScheme(LocalContext.current)
             }
         }
+
         isDarkTheme -> {
             darkColorScheme
         }
+
         else -> {
             lightColorScheme
         }
     }
 
-    CompositionLocalProvider{
+    CompositionLocalProvider {
         MaterialTheme(
             colorScheme = colorScheme,
             content = content

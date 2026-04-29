@@ -58,7 +58,7 @@ data class N3Patch(
         val clauses = mutableListOf<String>()
         if (deletes != null) clauses.add("  solid:deletes { $deletes }")
         if (inserts != null) clauses.add("  solid:inserts { $inserts }")
-        if (where   != null) clauses.add("  solid:where   { $where }")
+        if (where != null) clauses.add("  solid:where   { $where }")
 
         append(clauses.joinToString(" ;\n"))
         appendLine(" .")
@@ -71,7 +71,8 @@ data class N3Patch(
 
         fun delete(triples: String): N3Patch = N3Patch(deletes = triples)
 
-        fun replace(inserts: String, where: String): N3Patch = N3Patch(inserts = inserts, where = where)
+        fun replace(inserts: String, where: String): N3Patch =
+            N3Patch(inserts = inserts, where = where)
 
         // ---- DSL builder ----
 
@@ -80,18 +81,20 @@ data class N3Patch(
 
         fun fromDiff(original: RDFResource, updated: RDFResource): N3Patch {
             val originalQuads = original.getAllQuads().filter { it.graph == null }.toSet()
-            val updatedQuads  = updated.getAllQuads().filter  { it.graph == null }.toSet()
+            val updatedQuads = updated.getAllQuads().filter { it.graph == null }.toSet()
 
             val toDelete = originalQuads - updatedQuads
-            val toInsert = updatedQuads  - originalQuads
+            val toInsert = updatedQuads - originalQuads
 
             require(toDelete.isNotEmpty() || toInsert.isNotEmpty()) {
                 "No difference between original and updated resources — patch would be empty."
             }
 
             return N3Patch(
-                deletes = toDelete.takeIf { it.isNotEmpty() }?.joinToString("\n    ") { it.toN3Triple() },
-                inserts = toInsert.takeIf { it.isNotEmpty() }?.joinToString("\n    ") { it.toN3Triple() },
+                deletes = toDelete.takeIf { it.isNotEmpty() }
+                    ?.joinToString("\n    ") { it.toN3Triple() },
+                inserts = toInsert.takeIf { it.isNotEmpty() }
+                    ?.joinToString("\n    ") { it.toN3Triple() },
             )
         }
     }
@@ -110,7 +113,7 @@ class N3PatchBuilder {
 
     private val insertTriples = mutableListOf<String>()
     private val deleteTriples = mutableListOf<String>()
-    private val whereTriples  = mutableListOf<String>()
+    private val whereTriples = mutableListOf<String>()
 
     fun insert(subject: String, predicate: String, iriObject: String): N3PatchBuilder {
         insertTriples += triple(subject, predicate, iriObject.asN3IriTerm())
@@ -162,7 +165,7 @@ class N3PatchBuilder {
     fun build(): N3Patch {
         val insertsStr = insertTriples.takeIf { it.isNotEmpty() }?.joinToString("\n    ")
         val deletesStr = deleteTriples.takeIf { it.isNotEmpty() }?.joinToString("\n    ")
-        val whereStr   = whereTriples.takeIf  { it.isNotEmpty() }?.joinToString("\n    ")
+        val whereStr = whereTriples.takeIf { it.isNotEmpty() }?.joinToString("\n    ")
         return N3Patch(inserts = insertsStr, deletes = deletesStr, where = whereStr)
     }
 
@@ -179,7 +182,7 @@ class N3PatchBuilder {
         return when {
             language != null -> "\"$escaped\"@$language"
             datatype != null -> "\"$escaped\"^^<$datatype>"
-            else             -> "\"$escaped\""
+            else -> "\"$escaped\""
         }
     }
 
@@ -191,7 +194,7 @@ internal fun RdfQuad.toN3Triple(): String {
     val s = if (subject.startsWith("_:")) subject else "<$subject>"
     val p = "<$predicate>"
     val o = when {
-        isBlankObject   -> `object`
+        isBlankObject -> `object`
         isLiteralObject -> {
             val escaped = `object`
                 .replace("\\", "\\\\")
@@ -202,9 +205,10 @@ internal fun RdfQuad.toN3Triple(): String {
             when {
                 language != null -> "\"$escaped\"@$language"
                 datatype != null -> "\"$escaped\"^^<$datatype>"
-                else             -> "\"$escaped\""
+                else -> "\"$escaped\""
             }
         }
+
         else -> "<${`object`}>"
     }
     return "$s $p $o ."

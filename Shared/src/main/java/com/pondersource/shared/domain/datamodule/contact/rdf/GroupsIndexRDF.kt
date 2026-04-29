@@ -1,9 +1,8 @@
 package com.pondersource.shared.domain.datamodule.contact.rdf
 
 import com.apicatalog.jsonld.http.media.MediaType
-import com.pondersource.shared.domain.resource.RDFResource
-import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.datamodule.contact.Group
+import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.shared.vocab.RDF
 import com.pondersource.shared.vocab.VCARD

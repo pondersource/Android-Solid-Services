@@ -1,12 +1,11 @@
 package com.pondersource.shared.domain.datamodule.contact.rdf
 
 import com.apicatalog.jsonld.http.media.MediaType
-import com.pondersource.shared.domain.resource.RDFResource
-import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.datamodule.contact.Email
 import com.pondersource.shared.domain.datamodule.contact.Name
 import com.pondersource.shared.domain.datamodule.contact.PhoneNumber
 import com.pondersource.shared.domain.datamodule.contact.URLType
+import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.shared.vocab.RDF
 import com.pondersource.shared.vocab.VCARD
@@ -50,12 +49,12 @@ class ContactRDF : SolidRDFResource {
                 val type: URLType = when (
                     quads.find { it.subject == urlNode && it.predicate == RDF.TYPE }?.`object`
                 ) {
-                    VCARD.HOME      -> URLType.Home
-                    VCARD.WORK      -> URLType.Work
-                    VCARD.HOMEPAGE  -> URLType.Homepage
-                    VCARD.WEB_ID     -> URLType.WebId
-                    VCARD.PUBLIC_ID  -> URLType.PublicId
-                    else            -> URLType.Home
+                    VCARD.HOME -> URLType.Home
+                    VCARD.WORK -> URLType.Work
+                    VCARD.HOMEPAGE -> URLType.Homepage
+                    VCARD.WEB_ID -> URLType.WebId
+                    VCARD.PUBLIC_ID -> URLType.PublicId
+                    else -> URLType.Home
                 }
                 val url = quads.find { it.subject == urlNode && it.predicate == VCARD.VALUE }
                     ?.`object` ?: return@mapNotNull null
@@ -90,7 +89,12 @@ class ContactRDF : SolidRDFResource {
         val telValue = "tel:$newPhoneNumber"
         if (quads.any { it.predicate == VCARD.VALUE && it.`object` == telValue }) return false
         val blankNode = "_:$newPhoneNumber"
-        addQuad(getIdentifier().toString(), VCARD.HAS_TELEPHONE, blankNode, maxNumber = Int.MAX_VALUE)
+        addQuad(
+            getIdentifier().toString(),
+            VCARD.HAS_TELEPHONE,
+            blankNode,
+            maxNumber = Int.MAX_VALUE
+        )
         addQuadLiteral(blankNode, VCARD.VALUE, telValue, null)
         return true
     }

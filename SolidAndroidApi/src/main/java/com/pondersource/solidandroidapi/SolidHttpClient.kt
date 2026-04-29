@@ -3,8 +3,8 @@ package com.pondersource.solidandroidapi
 import com.pondersource.shared.domain.crud.N3Patch
 import com.pondersource.shared.domain.network.HTTPAcceptType
 import com.pondersource.shared.domain.network.HTTPHeaderName
-import com.pondersource.shared.domain.resource.RDFResource
 import com.pondersource.shared.domain.network.SolidNetworkResponse
+import com.pondersource.shared.domain.resource.RDFResource
 import com.pondersource.shared.domain.resource.Resource
 import com.pondersource.shared.domain.container.SolidContainer
 import com.pondersource.shared.vocab.LDP
@@ -67,16 +67,16 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
     ): SolidRawResponse = withContext(Dispatchers.IO) {
         val mediaType = contentType?.toMediaTypeOrNull()
         val requestBody: RequestBody? = when {
-            body != null                          -> body.toRequestBody(mediaType)
+            body != null -> body.toRequestBody(mediaType)
             method in setOf("POST", "PUT", "PATCH") -> ByteArray(0).toRequestBody(null)
-            else                                  -> null
+            else -> null
         }
         val request = Request.Builder()
             .url(uri.toString())
             .apply {
-                if (accept != null)      header(HTTPHeaderName.ACCEPT, accept)
+                if (accept != null) header(HTTPHeaderName.ACCEPT, accept)
                 if (contentType != null) header(HTTPHeaderName.CONTENT_TYPE, contentType)
-                if (linkHeader != null)  header(HTTPHeaderName.LINK, linkHeader)
+                if (linkHeader != null) header(HTTPHeaderName.LINK, linkHeader)
                 headers.forEach { (k, v) -> addHeader(k, v) }
                 method(method, requestBody)
             }
@@ -84,7 +84,11 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
 
         val response = httpClient.newCall(request).execute()
         val bodyBytes = response.body?.bytes() ?: ByteArray(0)
-        val effectiveUri = try { response.request.url.toUri() } catch (_: Exception) { uri }
+        val effectiveUri = try {
+            response.request.url.toUri()
+        } catch (_: Exception) {
+            uri
+        }
         val statusCode = response.code
         val responseHeaders = response.headers
         response.close()
@@ -101,9 +105,14 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
      *
      * Requires an [Authenticator] at construction.
      */
-    suspend fun <T : Resource> get(webId: String, uri: URI, clazz: Class<T>): SolidNetworkResponse<T> {
+    suspend fun <T : Resource> get(
+        webId: String,
+        uri: URI,
+        clazz: Class<T>
+    ): SolidNetworkResponse<T> {
         return try {
-            val accept = if (RDFResource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.ANY
+            val accept =
+                if (RDFResource::class.java.isAssignableFrom(clazz)) HTTPAcceptType.JSON_LD else HTTPAcceptType.ANY
             val response = executeAuthenticated("GET", webId, uri, accept = accept)
             if (response.isSuccessful()) {
                 SolidNetworkResponse.Success(SolidResourceParser.parse(response, clazz))
@@ -126,12 +135,16 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
      *
      * Requires an [Authenticator] at construction.
      */
-    suspend fun <T : Resource> put(webId: String, resource: T, ifMatch: String? = null): SolidNetworkResponse<T> {
+    suspend fun <T : Resource> put(
+        webId: String,
+        resource: T,
+        ifMatch: String? = null
+    ): SolidNetworkResponse<T> {
         return try {
             val linkType = when {
                 SolidContainer::class.java.isAssignableFrom(resource.javaClass) -> "<${LDP.BASIC_CONTAINER}>; rel=\"type\""
-                RDFResource::class.java.isAssignableFrom(resource.javaClass)      -> "<${LDP.RDF_SOURCE}>; rel=\"type\""
-                else                                                             -> "<${LDP.NON_RDF_SOURCE}>; rel=\"type\""
+                RDFResource::class.java.isAssignableFrom(resource.javaClass) -> "<${LDP.RDF_SOURCE}>; rel=\"type\""
+                else -> "<${LDP.NON_RDF_SOURCE}>; rel=\"type\""
             }
             val bodyBytes = resource.getEntity().readBytes()
             val response = executeAuthenticated(
@@ -279,7 +292,11 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         return response
     }
 
-    private suspend fun buildAuthHeaders(webId: String, method: String, uri: String): Map<String, String> {
+    private suspend fun buildAuthHeaders(
+        webId: String,
+        method: String,
+        uri: String
+    ): Map<String, String> {
         val authenticator = requireAuth()
         authenticator.getLastTokenResponse(webId)
             ?: throw IllegalArgumentException("Not authenticated. Complete login before accessing Solid resources.")
@@ -287,6 +304,8 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
     }
 
     private fun requireAuth(): Authenticator =
-        auth ?: throw IllegalStateException("An Authenticator is required for CRUD operations. " +
-                "Construct SolidHttpClient with an Authenticator instance.")
+        auth ?: throw IllegalStateException(
+            "An Authenticator is required for CRUD operations. " +
+                    "Construct SolidHttpClient with an Authenticator instance."
+        )
 }

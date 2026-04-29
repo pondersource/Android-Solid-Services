@@ -73,7 +73,7 @@ dependencies {
     api(libs.io.jsonwebtoken.api)
     runtimeOnly(libs.io.jsonwebtoken.impl)
     runtimeOnly(libs.io.jsonwebtoken.orgjson) {
-        exclude(group= "org.json:json", module= "json") //provided by Android natively
+        exclude(group = "org.json:json", module = "json") //provided by Android natively
     }
 
     //Local storage for saving profiles
@@ -91,6 +91,13 @@ mavenPublishing {
         variant = "release",
     ))
     coordinates("com.pondersource.solidandroidapi", "solidandroidapi", "0.3.1")
+    configure(
+        AndroidSingleVariantLibrary(
+            javadocJar = JavadocJar.Empty(),
+            sourcesJar = SourcesJar.Sources(),
+            variant = "release",
+        )
+    )
 
     pom {
         name.set("SolidAndroidApi")

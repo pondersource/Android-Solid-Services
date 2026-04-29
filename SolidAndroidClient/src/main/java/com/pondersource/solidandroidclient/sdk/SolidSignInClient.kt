@@ -49,7 +49,11 @@ class SolidSignInClient {
             hasInstalledAndroidSolidServices: () -> Boolean
         ): SolidSignInClient {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: SolidSignInClient(context, applicationInfo, hasInstalledAndroidSolidServices).also { INSTANCE = it }
+                INSTANCE ?: SolidSignInClient(
+                    context,
+                    applicationInfo,
+                    hasInstalledAndroidSolidServices
+                ).also { INSTANCE = it }
             }
         }
     }
@@ -77,7 +81,8 @@ class SolidSignInClient {
         hasInstalledAndroidSolidServices: () -> Boolean
     ) {
         this.applicationInfo = applicationInfo
-        this.applicationName = context.packageManager.getApplicationLabel(this.applicationInfo).toString()
+        this.applicationName =
+            context.packageManager.getApplicationLabel(this.applicationInfo).toString()
         this.hasInstalledAndroidSolidServices = hasInstalledAndroidSolidServices
         val intent = Intent().apply {
             setClassName(
@@ -101,7 +106,7 @@ class SolidSignInClient {
     fun checkConnectionWithASS(onContinue: () -> Unit) {
         return if (hasInstalledAndroidSolidServices()) {
             if (hasConnectedToService()) {
-                if(iASSAuthService!!.hasLoggedIn()) {
+                if (iASSAuthService!!.hasLoggedIn()) {
                     onContinue()
                 } else {
                     throw SolidNotLoggedInException("Please login to your Solid account in Android Solid Services app.")
@@ -123,11 +128,11 @@ class SolidSignInClient {
      * @throws SolidException.SolidNotLoggedInException if no user is logged in.
      */
     @Throws(Exception::class)
-    fun getAccount() : SolidSignInAccount?{
+    fun getAccount(): SolidSignInAccount? {
         if (hasInstalledAndroidSolidServices()) {
             if (hasConnectedToService()) {
-                if(iASSAuthService!!.hasLoggedIn()) {
-                    return if(iASSAuthService!!.isAppAuthorized()) {
+                if (iASSAuthService!!.hasLoggedIn()) {
+                    return if (iASSAuthService!!.isAppAuthorized()) {
                         SolidSignInAccount(
                             applicationInfo.packageName
                         )

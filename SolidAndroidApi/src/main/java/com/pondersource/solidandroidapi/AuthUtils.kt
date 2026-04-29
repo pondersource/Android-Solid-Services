@@ -11,7 +11,7 @@ fun AuthorizationServiceDiscovery.supportsDPop(): Boolean {
 }
 
 fun AuthorizationServiceDiscovery.supportedDPopAlgorithms(): List<String> {
-    return if(this.supportsDPop()) {
+    return if (this.supportsDPop()) {
         this.get(DPOP_SIGNING_ALG_VALUES_SUPPORTED)!!
     } else {
         listOf()

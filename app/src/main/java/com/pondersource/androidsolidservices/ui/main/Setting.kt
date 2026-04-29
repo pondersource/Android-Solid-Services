@@ -187,7 +187,7 @@ private fun AccountRow(
             Text(
                 text = webId.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
                 color = if (isActive) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                else MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.titleMedium,
             )
         }

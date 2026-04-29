@@ -1,6 +1,5 @@
 package com.pondersource.androidsolidservices.services
 
-import com.pondersource.androidsolidservices.R
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.IBinder
@@ -12,13 +11,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
+import com.pondersource.androidsolidservices.R
 import com.pondersource.androidsolidservices.repository.AccessGrantRepository
+import com.pondersource.shared.domain.error.ExceptionsErrorCode.DRAW_OVERLAY_NOT_PERMITTED
+import com.pondersource.shared.domain.error.ExceptionsErrorCode.SOLID_NOT_LOGGED_IN
 import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidclient.IASSAuthenticatorService
 import com.pondersource.solidandroidclient.IASSLoginCallback
 import com.pondersource.solidandroidclient.IASSLogoutCallback
-import com.pondersource.shared.domain.error.ExceptionsErrorCode.DRAW_OVERLAY_NOT_PERMITTED
-import com.pondersource.shared.domain.error.ExceptionsErrorCode.SOLID_NOT_LOGGED_IN
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,7 +31,7 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
     override val savedStateRegistry: SavedStateRegistry = registryController.savedStateRegistry
 
     @Inject
-    lateinit var authenticator : Authenticator
+    lateinit var authenticator: Authenticator
 
     @Inject
     lateinit var accessGrantRepository: AccessGrantRepository
@@ -86,7 +86,10 @@ class ASSAuthenticatorService : LifecycleService(), SavedStateRegistryOwner {
                     callback.onError(SOLID_NOT_LOGGED_IN, "User has not logged in.")
                 }
             } else {
-                callback.onError(DRAW_OVERLAY_NOT_PERMITTED, "Android Solid Services doesn't have permission to draw overlay. Please ask user to enable overlay drawing for Android Solid Services in app settings.")
+                callback.onError(
+                    DRAW_OVERLAY_NOT_PERMITTED,
+                    "Android Solid Services doesn't have permission to draw overlay. Please ask user to enable overlay drawing for Android Solid Services in app settings."
+                )
             }
         }
 

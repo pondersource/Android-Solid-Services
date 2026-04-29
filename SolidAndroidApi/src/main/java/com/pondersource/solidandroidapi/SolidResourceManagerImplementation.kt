@@ -1,10 +1,10 @@
 package com.pondersource.solidandroidapi
 
 import android.content.Context
+import com.pondersource.shared.domain.container.SolidContainer
 import com.pondersource.shared.domain.crud.N3Patch
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.resource.Resource
-import com.pondersource.shared.domain.container.SolidContainer
 import com.pondersource.shared.vocab.LDP
 import java.net.URI
 
@@ -39,9 +39,13 @@ internal class SolidResourceManagerImplementation : SolidResourceManager {
     ): SolidNetworkResponse<T> {
         val existing = solidHttpClient.get(webid, resource.getIdentifier(), resource.javaClass)
         return when {
-            existing is SolidNetworkResponse.Success -> SolidNetworkResponse.Error(409, "Resource already exists")
-            existing is SolidNetworkResponse.Error   -> solidHttpClient.put(webid, resource)
-            else                                      -> SolidNetworkResponse.Error(500, "Unknown error")
+            existing is SolidNetworkResponse.Success -> SolidNetworkResponse.Error(
+                409,
+                "Resource already exists"
+            )
+
+            existing is SolidNetworkResponse.Error -> solidHttpClient.put(webid, resource)
+            else -> SolidNetworkResponse.Error(500, "Unknown error")
         }
     }
 
@@ -71,11 +75,16 @@ internal class SolidResourceManagerImplementation : SolidResourceManager {
         return when (existing) {
             is SolidNetworkResponse.Success -> {
                 when (val del = solidHttpClient.delete(webid, resource.getIdentifier())) {
-                    is SolidNetworkResponse.Success   -> SolidNetworkResponse.Success(resource)
-                    is SolidNetworkResponse.Error     -> SolidNetworkResponse.Error(del.errorCode, del.errorMessage)
+                    is SolidNetworkResponse.Success -> SolidNetworkResponse.Success(resource)
+                    is SolidNetworkResponse.Error -> SolidNetworkResponse.Error(
+                        del.errorCode,
+                        del.errorMessage
+                    )
+
                     is SolidNetworkResponse.Exception -> SolidNetworkResponse.Exception(del.exception)
                 }
             }
+
             else -> existing
         }
     }
@@ -87,7 +96,8 @@ internal class SolidResourceManagerImplementation : SolidResourceManager {
         if (!containerUri.toString().endsWith("/")) {
             return SolidNetworkResponse.Error(400, "Container URL must end with /")
         }
-        val container = solidHttpClient.get(webid, containerUri, SolidContainer::class.java).getOrThrow()
+        val container =
+            solidHttpClient.get(webid, containerUri, SolidContainer::class.java).getOrThrow()
         container.getContained().forEach {
             if (it.types.contains(LDP.BASIC_CONTAINER)) {
                 deleteContainer(webid, URI.create(it.identifier)).getOrThrow()

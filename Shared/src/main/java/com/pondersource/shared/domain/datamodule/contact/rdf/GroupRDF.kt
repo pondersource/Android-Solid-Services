@@ -1,9 +1,8 @@
 package com.pondersource.shared.domain.datamodule.contact.rdf
 
 import com.apicatalog.jsonld.http.media.MediaType
-import com.pondersource.shared.domain.resource.RDFResource
-import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.datamodule.contact.Contact
+import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.shared.vocab.OWL
 import com.pondersource.shared.vocab.RDF
@@ -56,7 +55,12 @@ class GroupRDF : SolidRDFResource {
     }
 
     fun addMember(contact: ContactRDF) {
-        addQuad(getIdentifier().toString(), VCARD.HAS_MEMBER, contact.getIdentifier().toString(), maxNumber = Int.MAX_VALUE)
+        addQuad(
+            getIdentifier().toString(),
+            VCARD.HAS_MEMBER,
+            contact.getIdentifier().toString(),
+            maxNumber = Int.MAX_VALUE
+        )
         addQuadLiteral(contact.getIdentifier().toString(), VCARD.FN, contact.getFullName(), null)
     }
 
@@ -64,8 +68,8 @@ class GroupRDF : SolidRDFResource {
         val contactStr = contactURI.toString()
         val member = quads.find {
             it.subject == getIdentifier().toString() &&
-            it.predicate == VCARD.HAS_MEMBER &&
-            it.`object` == contactStr
+                    it.predicate == VCARD.HAS_MEMBER &&
+                    it.`object` == contactStr
         } ?: return false
 
         val memberNameQuads = quads.filter {

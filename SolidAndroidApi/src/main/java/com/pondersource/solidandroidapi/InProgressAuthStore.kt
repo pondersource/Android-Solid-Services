@@ -10,6 +10,11 @@ internal class InProgressAuthStore {
     val state: StateFlow<Profile?> = _state.asStateFlow()
 
     fun get(): Profile? = _state.value
-    fun set(profile: Profile) { _state.value = profile }
-    fun clear() { _state.value = null }
+    fun set(profile: Profile) {
+        _state.value = profile
+    }
+
+    fun clear() {
+        _state.value = null
+    }
 }

@@ -1,7 +1,5 @@
 package com.pondersource.shared.domain.resource
 
-import com.pondersource.shared.domain.resource.SolidMetadata
-
 /**
  * Marker interface for resources retrieved from a Solid server.
  *

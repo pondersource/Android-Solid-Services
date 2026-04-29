@@ -97,7 +97,7 @@ class SolidContactsDataModule {
         storage: String? = null,
         ownerWebId: String? = null,
         container: String? = null,
-    ) : AddressBook? {
+    ): AddressBook? {
         checkService()
         return suspendCancellableCoroutine { continuation ->
             iASSContactsModuleInterface!!.createAddressBook(
@@ -120,11 +120,13 @@ class SolidContactsDataModule {
     ): AddressBook? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.getAddressBook(uri, object : IASSContactModuleAddressBookCallback.Stub() {
-                override fun valueChanged(addressBook: AddressBook?) {
-                    continuation.resume(addressBook)
-                }
-            })
+            iASSContactsModuleInterface!!.getAddressBook(
+                uri,
+                object : IASSContactModuleAddressBookCallback.Stub() {
+                    override fun valueChanged(addressBook: AddressBook?) {
+                        continuation.resume(addressBook)
+                    }
+                })
         }
     }
 
@@ -133,11 +135,14 @@ class SolidContactsDataModule {
     ): AddressBook? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.deleteAddressBook(addressBookUri, null, object : IASSContactModuleAddressBookCallback.Stub() {
-                override fun valueChanged(addressBook: AddressBook?) {
-                    continuation.resume(addressBook)
-                }
-            })
+            iASSContactsModuleInterface!!.deleteAddressBook(
+                addressBookUri,
+                null,
+                object : IASSContactModuleAddressBookCallback.Stub() {
+                    override fun valueChanged(addressBook: AddressBook?) {
+                        continuation.resume(addressBook)
+                    }
+                })
         }
     }
 
@@ -145,7 +150,7 @@ class SolidContactsDataModule {
         addressBookUri: String,
         newContact: NewContact,
         groupUris: List<String> = emptyList(),
-    ) : FullContact? {
+    ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.createNewContact(
@@ -166,11 +171,13 @@ class SolidContactsDataModule {
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.getContact(contactUri, object : IASSContactModuleFullContactCallback.Stub() {
-                override fun valueChanged(fullContact: FullContact?) {
-                    continuation.resume(fullContact)
-                }
-            })
+            iASSContactsModuleInterface!!.getContact(
+                contactUri,
+                object : IASSContactModuleFullContactCallback.Stub() {
+                    override fun valueChanged(fullContact: FullContact?) {
+                        continuation.resume(fullContact)
+                    }
+                })
         }
 
     }
@@ -181,11 +188,14 @@ class SolidContactsDataModule {
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.renameContact(contactUri, newName, object : IASSContactModuleFullContactCallback.Stub() {
-                override fun valueChanged(fullContact: FullContact?) {
-                    continuation.resume(fullContact)
-                }
-            })
+            iASSContactsModuleInterface!!.renameContact(
+                contactUri,
+                newName,
+                object : IASSContactModuleFullContactCallback.Stub() {
+                    override fun valueChanged(fullContact: FullContact?) {
+                        continuation.resume(fullContact)
+                    }
+                })
         }
     }
 
@@ -195,11 +205,14 @@ class SolidContactsDataModule {
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.addNewPhoneNumber(contactUri, newPhoneNumber, object : IASSContactModuleFullContactCallback.Stub() {
-                override fun valueChanged(fullContact: FullContact?) {
-                    continuation.resume(fullContact)
-                }
-            })
+            iASSContactsModuleInterface!!.addNewPhoneNumber(
+                contactUri,
+                newPhoneNumber,
+                object : IASSContactModuleFullContactCallback.Stub() {
+                    override fun valueChanged(fullContact: FullContact?) {
+                        continuation.resume(fullContact)
+                    }
+                })
         }
     }
 
@@ -209,11 +222,14 @@ class SolidContactsDataModule {
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.addNewEmailAddress(contactUri, newEmailAddress, object : IASSContactModuleFullContactCallback.Stub() {
-                override fun valueChanged(fullContact: FullContact?) {
-                    continuation.resume(fullContact)
-                }
-            })
+            iASSContactsModuleInterface!!.addNewEmailAddress(
+                contactUri,
+                newEmailAddress,
+                object : IASSContactModuleFullContactCallback.Stub() {
+                    override fun valueChanged(fullContact: FullContact?) {
+                        continuation.resume(fullContact)
+                    }
+                })
         }
     }
 
@@ -223,11 +239,14 @@ class SolidContactsDataModule {
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.removePhoneNumber(contactUri, phoneNumber, object : IASSContactModuleFullContactCallback.Stub() {
-                override fun valueChanged(fullContact: FullContact?) {
-                    continuation.resume(fullContact)
-                }
-            })
+            iASSContactsModuleInterface!!.removePhoneNumber(
+                contactUri,
+                phoneNumber,
+                object : IASSContactModuleFullContactCallback.Stub() {
+                    override fun valueChanged(fullContact: FullContact?) {
+                        continuation.resume(fullContact)
+                    }
+                })
         }
     }
 
@@ -237,11 +256,14 @@ class SolidContactsDataModule {
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.removeEmailAddress(contactUri, emailAddress, object : IASSContactModuleFullContactCallback.Stub() {
-                override fun valueChanged(fullContact: FullContact?) {
-                    continuation.resume(fullContact)
-                }
-            })
+            iASSContactsModuleInterface!!.removeEmailAddress(
+                contactUri,
+                emailAddress,
+                object : IASSContactModuleFullContactCallback.Stub() {
+                    override fun valueChanged(fullContact: FullContact?) {
+                        continuation.resume(fullContact)
+                    }
+                })
         }
     }
 
@@ -251,11 +273,14 @@ class SolidContactsDataModule {
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.deleteContact(addressBookUri, contactUri, object : IASSContactModuleFullContactCallback.Stub() {
-                override fun valueChanged(fullContact: FullContact?) {
-                    continuation.resume(fullContact)
-                }
-            })
+            iASSContactsModuleInterface!!.deleteContact(
+                addressBookUri,
+                contactUri,
+                object : IASSContactModuleFullContactCallback.Stub() {
+                    override fun valueChanged(fullContact: FullContact?) {
+                        continuation.resume(fullContact)
+                    }
+                })
         }
     }
 
@@ -271,10 +296,10 @@ class SolidContactsDataModule {
                 title,
                 contactUris,
                 object : IASSContactModuleFullGroupCallback.Stub() {
-                override fun valueChanged(fullGroup: FullGroup?) {
-                    continuation.resume(fullGroup)
-                }
-            })
+                    override fun valueChanged(fullGroup: FullGroup?) {
+                        continuation.resume(fullGroup)
+                    }
+                })
         }
     }
 
@@ -283,11 +308,13 @@ class SolidContactsDataModule {
     ): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.getGroup(groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
-                override fun valueChanged(fullGroup: FullGroup?) {
-                    continuation.resume(fullGroup)
-                }
-            })
+            iASSContactsModuleInterface!!.getGroup(
+                groupUri,
+                object : IASSContactModuleFullGroupCallback.Stub() {
+                    override fun valueChanged(fullGroup: FullGroup?) {
+                        continuation.resume(fullGroup)
+                    }
+                })
         }
     }
 
@@ -297,11 +324,14 @@ class SolidContactsDataModule {
     ): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.deleteGroup(addressBookUri, groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
-                override fun valueChanged(fullGroup: FullGroup?) {
-                    continuation.resume(fullGroup)
-                }
-            })
+            iASSContactsModuleInterface!!.deleteGroup(
+                addressBookUri,
+                groupUri,
+                object : IASSContactModuleFullGroupCallback.Stub() {
+                    override fun valueChanged(fullGroup: FullGroup?) {
+                        continuation.resume(fullGroup)
+                    }
+                })
         }
     }
 
@@ -311,11 +341,14 @@ class SolidContactsDataModule {
     ): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.addContactToGroup(contactUri, groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
-                override fun valueChanged(fullGroup: FullGroup?) {
-                    continuation.resume(fullGroup)
-                }
-            })
+            iASSContactsModuleInterface!!.addContactToGroup(
+                contactUri,
+                groupUri,
+                object : IASSContactModuleFullGroupCallback.Stub() {
+                    override fun valueChanged(fullGroup: FullGroup?) {
+                        continuation.resume(fullGroup)
+                    }
+                })
         }
     }
 
@@ -325,11 +358,14 @@ class SolidContactsDataModule {
     ): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
-            iASSContactsModuleInterface!!.removeContactFromGroup(contactUri, groupUri, object : IASSContactModuleFullGroupCallback.Stub() {
-                override fun valueChanged(fullGroup: FullGroup?) {
-                    continuation.resume(fullGroup)
-                }
-            })
+            iASSContactsModuleInterface!!.removeContactFromGroup(
+                contactUri,
+                groupUri,
+                object : IASSContactModuleFullGroupCallback.Stub() {
+                    override fun valueChanged(fullGroup: FullGroup?) {
+                        continuation.resume(fullGroup)
+                    }
+                })
         }
     }
 }

@@ -8,14 +8,14 @@ import kotlinx.parcelize.Parcelize
 data class Contact(
     val uri: String,
     val name: String,
-): Parcelable
+) : Parcelable
 
 @Parcelize
 data class NewContact(
     var name: String,
     val email: String,
-    val phoneNumber : String,
-): Parcelable
+    val phoneNumber: String,
+) : Parcelable
 
 @Parcelize
 data class FullContact(
@@ -23,7 +23,7 @@ data class FullContact(
     val fullName: String,
     val emailAddresses: List<Email>,
     val phoneNumbers: List<PhoneNumber>,
-): Parcelable {
+) : Parcelable {
     companion object {
         fun createFromRdf(contactRdf: ContactRDF): FullContact {
             return FullContact(
@@ -39,12 +39,12 @@ data class FullContact(
 @Parcelize
 data class Email(
     val value: String,
-): Parcelable
+) : Parcelable
 
 @Parcelize
 data class PhoneNumber(
     val value: String,
-): Parcelable
+) : Parcelable
 
 enum class URLType {
     Home,
@@ -61,4 +61,4 @@ data class Name(
     val additionalName: String? = null,
     val honorificPrefix: String? = null,
     val honorificSuffix: String? = null,
-): Parcelable
+) : Parcelable

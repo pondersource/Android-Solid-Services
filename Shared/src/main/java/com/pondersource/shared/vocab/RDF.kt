@@ -1,4 +1,4 @@
- package com.pondersource.shared.vocab
+package com.pondersource.shared.vocab
 
 /**
  * RDF core vocabulary constants.

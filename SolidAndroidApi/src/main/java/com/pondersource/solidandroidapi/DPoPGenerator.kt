@@ -72,7 +72,8 @@ class DPoPGenerator private constructor(
         nonce?.let { claims["nonce"] = it }
         if (!accessToken.isNullOrEmpty()) {
             claims["ath"] = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(
-                MessageDigest.getInstance("SHA-256").digest(accessToken.toByteArray(Charsets.US_ASCII))
+                MessageDigest.getInstance("SHA-256")
+                    .digest(accessToken.toByteArray(Charsets.US_ASCII))
             )
         }
 
@@ -84,22 +85,22 @@ class DPoPGenerator private constructor(
     }
 
     private fun selectCategory(): DPopSupportedAlgo {
-        if(!authDiscovery.supportsDPop() || authDiscovery.supportedDPopAlgorithms().isEmpty()) {
+        if (!authDiscovery.supportsDPop() || authDiscovery.supportedDPopAlgorithms().isEmpty()) {
             throw IllegalArgumentException("Configuration doesn't support DPoP")
         }
 
         val algos = authDiscovery.supportedDPopAlgorithms()
-        return if(algos.contains(DPopSupportedAlgo.ES256.toString())) {
+        return if (algos.contains(DPopSupportedAlgo.ES256.toString())) {
             DPopSupportedAlgo.ES256
-        } else if(algos.contains(DPopSupportedAlgo.ES384.toString())){
+        } else if (algos.contains(DPopSupportedAlgo.ES384.toString())) {
             DPopSupportedAlgo.ES384
-        } else if(algos.contains(DPopSupportedAlgo.ES512.toString())){
+        } else if (algos.contains(DPopSupportedAlgo.ES512.toString())) {
             DPopSupportedAlgo.ES512
-        } else if(algos.contains(DPopSupportedAlgo.RS256.toString())) {
+        } else if (algos.contains(DPopSupportedAlgo.RS256.toString())) {
             DPopSupportedAlgo.RS256
-        } else if(algos.contains(DPopSupportedAlgo.RS384.toString())){
+        } else if (algos.contains(DPopSupportedAlgo.RS384.toString())) {
             DPopSupportedAlgo.RS384
-        } else if(algos.contains(DPopSupportedAlgo.RS512.toString())){
+        } else if (algos.contains(DPopSupportedAlgo.RS512.toString())) {
             DPopSupportedAlgo.RS512
         } else {
             throw IllegalArgumentException("Configuration doesn't have supported algorithms.")
@@ -108,7 +109,7 @@ class DPoPGenerator private constructor(
 
 }
 
-private enum class DPopSupportedAlgo{
+private enum class DPopSupportedAlgo {
     RS256,
     RS384,
     RS512,
@@ -125,12 +126,15 @@ private abstract class KeyHolder {
     fun getPublicKey(): PublicKey {
         return keyPair.public
     }
+
     fun getPrivateKey(): PrivateKey {
         return keyPair.private
     }
+
     fun getAlgorithmName(): String {
         return getAlgorithm().id
     }
+
     abstract fun getAlgorithm(): SignatureAlgorithm
 }
 
@@ -140,22 +144,27 @@ private object KeyPairHolderFactory {
     }
 
     fun getKeyHolder(provider: String, alias: String, algorithm: DPopSupportedAlgo): KeyHolder {
-        return when(algorithm) {
+        return when (algorithm) {
             DPopSupportedAlgo.RS256 -> {
                 RS256KeyHolder(provider, alias)
             }
+
             DPopSupportedAlgo.RS384 -> {
                 RS384KeyHolder(provider, alias)
             }
+
             DPopSupportedAlgo.RS512 -> {
                 RS512KeyHolder(provider, alias)
             }
+
             DPopSupportedAlgo.ES256 -> {
                 ES256KeyHolder(provider, alias)
             }
+
             DPopSupportedAlgo.ES384 -> {
                 ES384KeyHolder(provider, alias)
             }
+
             DPopSupportedAlgo.ES512 -> {
                 ES512KeyHolder(provider, alias)
             }
@@ -166,7 +175,7 @@ private object KeyPairHolderFactory {
 private abstract class RSKeyHolder(
     override val provider: String,
     override val alias: String,
-): KeyHolder() {
+) : KeyHolder() {
 
     private val localKeyPair: KeyPair
 
@@ -179,7 +188,7 @@ private abstract class RSKeyHolder(
         val keyStore = KeyStore.getInstance(provider)
         keyStore.load(null)
 
-        if(keyStore.containsAlias(alias)) {
+        if (keyStore.containsAlias(alias)) {
             val entry: KeyStore.Entry = keyStore.getEntry(alias, null)
             val privateKeyEntry: KeyStore.PrivateKeyEntry = (entry as KeyStore.PrivateKeyEntry)
             val privateKey: PrivateKey = privateKeyEntry.privateKey
@@ -213,7 +222,7 @@ private abstract class RSKeyHolder(
 private abstract class ESKeyHolder(
     override val provider: String,
     override val alias: String,
-): KeyHolder() {
+) : KeyHolder() {
 
     private val localKeyPair: KeyPair
 
@@ -224,7 +233,7 @@ private abstract class ESKeyHolder(
         val keyStore = KeyStore.getInstance(provider)
         keyStore.load(null)
 
-        if(keyStore.containsAlias(alias)) {
+        if (keyStore.containsAlias(alias)) {
             val entry: KeyStore.Entry = keyStore.getEntry(alias, null)
             val privateKeyEntry: KeyStore.PrivateKeyEntry = (entry as KeyStore.PrivateKeyEntry)
             val privateKey: PrivateKey = privateKeyEntry.privateKey
@@ -252,7 +261,7 @@ private abstract class ESKeyHolder(
 private class RS256KeyHolder(
     provider: String,
     alias: String,
-): RSKeyHolder(provider, alias) {
+) : RSKeyHolder(provider, alias) {
 
     override fun getAlgorithm(): SignatureAlgorithm {
         return Jwts.SIG.RS256
@@ -266,7 +275,7 @@ private class RS256KeyHolder(
 private class RS384KeyHolder(
     provider: String,
     alias: String,
-): RSKeyHolder(provider, alias) {
+) : RSKeyHolder(provider, alias) {
 
     override fun getAlgorithm(): SignatureAlgorithm {
         return Jwts.SIG.RS384
@@ -280,7 +289,7 @@ private class RS384KeyHolder(
 private class RS512KeyHolder(
     provider: String,
     alias: String,
-): RSKeyHolder(provider, alias) {
+) : RSKeyHolder(provider, alias) {
 
     override fun getAlgorithm(): SignatureAlgorithm {
         return Jwts.SIG.RS512
@@ -294,7 +303,7 @@ private class RS512KeyHolder(
 private class ES256KeyHolder(
     provider: String,
     alias: String,
-): ESKeyHolder(provider, alias) {
+) : ESKeyHolder(provider, alias) {
     override fun getAlgorithm(): SignatureAlgorithm {
         return Jwts.SIG.ES256
     }
@@ -303,7 +312,7 @@ private class ES256KeyHolder(
 private class ES384KeyHolder(
     provider: String,
     alias: String,
-): ESKeyHolder(provider, alias) {
+) : ESKeyHolder(provider, alias) {
     override fun getAlgorithm(): SignatureAlgorithm {
         return Jwts.SIG.ES384
     }
@@ -312,7 +321,7 @@ private class ES384KeyHolder(
 private class ES512KeyHolder(
     provider: String,
     alias: String,
-): ESKeyHolder(provider, alias) {
+) : ESKeyHolder(provider, alias) {
     override fun getAlgorithm(): SignatureAlgorithm {
         return Jwts.SIG.ES512
     }

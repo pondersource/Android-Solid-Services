@@ -20,7 +20,8 @@ import com.pondersource.shared.domain.datamodule.contact.NewContact
 interface SolidContactsDataModule {
 
     companion object {
-        fun getInstance(context: Context): SolidContactsDataModule = SolidContactsDataModuleImplementation.getInstance(context)
+        fun getInstance(context: Context): SolidContactsDataModule =
+            SolidContactsDataModuleImplementation.getInstance(context)
     }
 
     //region AddressBooks
@@ -34,7 +35,7 @@ interface SolidContactsDataModule {
         isPrivate: Boolean = true,
         storage: String,
         container: String? = null,
-    ) : DataModuleResult<AddressBook>
+    ): DataModuleResult<AddressBook>
 
     suspend fun getAddressBook(
         ownerWebId: String,
@@ -59,7 +60,7 @@ interface SolidContactsDataModule {
         addressBookString: String,
         newContact: NewContact,
         groupStrings: List<String> = emptyList(),
-    ) : DataModuleResult<FullContact>
+    ): DataModuleResult<FullContact>
 
     suspend fun getContact(
         ownerWebId: String,

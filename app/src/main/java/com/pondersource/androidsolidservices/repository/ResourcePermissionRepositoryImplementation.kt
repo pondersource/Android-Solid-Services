@@ -4,7 +4,7 @@ import com.pondersource.androidsolidservices.model.PermissionType
 
 class ResourcePermissionRepositoryImplementation(
     private val accessGrantRepository: AccessGrantRepository,
-): ResourcePermissionRepository {
+) : ResourcePermissionRepository {
 
 
     override fun hasAccess(

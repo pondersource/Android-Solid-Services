@@ -12,7 +12,7 @@ data class AddressBook(
     var title: String,
     var contacts: List<Contact>,
     var groups: List<Group>,
-): Parcelable {
+) : Parcelable {
     companion object {
         fun createFromRdf(
             addressBookRdf: AddressBookRDF,
@@ -37,4 +37,4 @@ data class AddressBook(
 data class AddressBookList(
     val publicAddressBookUris: List<String>,
     val privateAddressBookUris: List<String>,
-): Parcelable
+) : Parcelable

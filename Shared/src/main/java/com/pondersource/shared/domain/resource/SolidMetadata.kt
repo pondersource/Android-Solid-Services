@@ -71,7 +71,7 @@ data class SolidMetadata(
         val EMPTY = SolidMetadata(
             aclUri = null,
             storageDescriptionUri = null,
-            wacAllow= null,
+            wacAllow = null,
             allowedMethods = emptySet(),
             linkTypes = emptySet(),
             etag = null,

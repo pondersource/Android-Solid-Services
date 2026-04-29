@@ -10,7 +10,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AccessGrantViewModel @Inject constructor(
     private val accessGrantRepository: AccessGrantRepository,
-): BaseViewModel() {
+) : BaseViewModel() {
 
     val grantedApps = mutableStateOf(accessGrantRepository.grantedApplications())
 

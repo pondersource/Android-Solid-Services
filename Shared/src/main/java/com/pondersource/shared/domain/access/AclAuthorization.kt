@@ -52,9 +52,9 @@ data class AclAuthorization(
      */
     val origins: List<URI> = emptyList(),
 ) {
-    fun allowsRead()    = modes.contains(ACL.READ)
-    fun allowsWrite()   = modes.contains(ACL.WRITE)
-    fun allowsAppend()  = modes.contains(ACL.APPEND) || allowsWrite()
+    fun allowsRead() = modes.contains(ACL.READ)
+    fun allowsWrite() = modes.contains(ACL.WRITE)
+    fun allowsAppend() = modes.contains(ACL.APPEND) || allowsWrite()
     fun allowsControl() = modes.contains(ACL.CONTROL)
 
     /** Returns `true` if this authorization applies to the public (`foaf:Agent` agentClass). */

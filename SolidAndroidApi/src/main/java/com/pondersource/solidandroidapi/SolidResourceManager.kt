@@ -22,7 +22,8 @@ interface SolidResourceManager {
          * Returns the application-scoped singleton [SolidResourceManager].
          * @param context Any [Context]; the application context is used internally.
          */
-        fun getInstance(context: Context): SolidResourceManager = SolidResourceManagerImplementation.getInstance(context)
+        fun getInstance(context: Context): SolidResourceManager =
+            SolidResourceManagerImplementation.getInstance(context)
     }
 
     /**
@@ -32,7 +33,7 @@ interface SolidResourceManager {
      * @param clazz The expected resource type (e.g. [com.pondersource.shared.domain.resource.RDFResource]).
      * @return [SolidNetworkResponse.Success] with the resource, or an error/exception variant.
      */
-    suspend fun <T: Resource> read(
+    suspend fun <T : Resource> read(
         webid: String,
         resource: URI,
         clazz: Class<T>,
@@ -44,7 +45,7 @@ interface SolidResourceManager {
      * @param resource The resource to create; its identifier determines the target URI.
      * @return [SolidNetworkResponse.Success] with the created resource.
      */
-    suspend fun <T: Resource> create(
+    suspend fun <T : Resource> create(
         webid: String,
         resource: T
     ): SolidNetworkResponse<T>
@@ -65,7 +66,7 @@ interface SolidResourceManager {
      * @param ifMatch  Optional ETag for a conditional PUT (prevents lost-update races).
      * @return [SolidNetworkResponse.Success] with the updated resource.
      */
-    suspend fun <T: Resource> update(
+    suspend fun <T : Resource> update(
         webid: String,
         newResource: T,
         ifMatch: String? = null,
@@ -116,7 +117,7 @@ interface SolidResourceManager {
      * @param resource The resource to delete.
      * @return [SolidNetworkResponse.Success] with the deleted resource.
      */
-    suspend fun <T: Resource> delete(
+    suspend fun <T : Resource> delete(
         webid: String,
         resource: T,
     ): SolidNetworkResponse<T>

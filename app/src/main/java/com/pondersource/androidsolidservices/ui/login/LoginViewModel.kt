@@ -18,13 +18,14 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     val authenticator: Authenticator,
     savedStateHandle: SavedStateHandle,
-): BaseViewModel() {
+) : BaseViewModel() {
 
     val isAddingAccount: Boolean = savedStateHandle.toRoute<Login>().isAddingAccount
 
     companion object {
         private const val APP_NAME = "Android Solid Service"
-        private const val AUTH_APP_REDIRECT_URL = "com.pondersource.androidsolidservices:/oauth2redirect"
+        private const val AUTH_APP_REDIRECT_URL =
+            "com.pondersource.androidsolidservices:/oauth2redirect"
         private const val OIDC_ISSUER_INRUPT_COM = "https://login.inrupt.com"
         private const val OIDC_ISSUER_SOLID_COMMUNITY = "https://solidcommunity.net"
     }
@@ -53,25 +54,41 @@ class LoginViewModel @Inject constructor(
 
     fun loginWithWebId(webId: String) {
         launchLogin {
-            authenticator.createAuthenticationIntent(webId = webId, appName = APP_NAME, redirectUri = AUTH_APP_REDIRECT_URL)
+            authenticator.createAuthenticationIntent(
+                webId = webId,
+                appName = APP_NAME,
+                redirectUri = AUTH_APP_REDIRECT_URL
+            )
         }
     }
 
     fun loginWithInruptCom() {
         launchLogin {
-            authenticator.createAuthenticationIntent(oidcIssuer = OIDC_ISSUER_INRUPT_COM, appName = APP_NAME, redirectUri = AUTH_APP_REDIRECT_URL)
+            authenticator.createAuthenticationIntent(
+                oidcIssuer = OIDC_ISSUER_INRUPT_COM,
+                appName = APP_NAME,
+                redirectUri = AUTH_APP_REDIRECT_URL
+            )
         }
     }
 
     fun loginWithSolidCommunity() {
         launchLogin {
-            authenticator.createAuthenticationIntent(oidcIssuer = OIDC_ISSUER_SOLID_COMMUNITY, appName = APP_NAME, redirectUri = AUTH_APP_REDIRECT_URL)
+            authenticator.createAuthenticationIntent(
+                oidcIssuer = OIDC_ISSUER_SOLID_COMMUNITY,
+                appName = APP_NAME,
+                redirectUri = AUTH_APP_REDIRECT_URL
+            )
         }
     }
 
     fun loginWithCustomIssuer(issuerUrl: String) {
         launchLogin {
-            authenticator.createAuthenticationIntent(oidcIssuer = issuerUrl, appName = APP_NAME, redirectUri = AUTH_APP_REDIRECT_URL)
+            authenticator.createAuthenticationIntent(
+                oidcIssuer = issuerUrl,
+                appName = APP_NAME,
+                redirectUri = AUTH_APP_REDIRECT_URL
+            )
         }
     }
 

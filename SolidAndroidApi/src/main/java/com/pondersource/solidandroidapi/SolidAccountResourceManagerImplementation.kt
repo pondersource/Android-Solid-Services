@@ -10,12 +10,12 @@ import java.security.InvalidParameterException
 internal class SolidAccountResourceManagerImplementation(
     context: Context,
     private val profile: Profile,
-): SolidAccountResourceManager {
+) : SolidAccountResourceManager {
 
     private val resourceManager = SolidResourceManagerImplementation.getInstance(context)
 
     init {
-        if(profile.userInfo?.webId.isNullOrEmpty()) {
+        if (profile.userInfo?.webId.isNullOrEmpty()) {
             throw InvalidParameterException("WebId is null or empty.")
         }
     }

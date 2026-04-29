@@ -14,5 +14,6 @@ fun <T : Parcelable> DataModuleResult<T>.getOrThrow(): T = when (this) {
     is DataModuleResult.Exception -> throw exception
 }
 
-fun <T : Parcelable> DataModuleResult<T>.getOrNull(): T? = if (this is DataModuleResult.Success) data else null
+fun <T : Parcelable> DataModuleResult<T>.getOrNull(): T? =
+    if (this is DataModuleResult.Success) data else null
 
