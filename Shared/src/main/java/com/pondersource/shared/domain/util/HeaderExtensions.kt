@@ -14,6 +14,10 @@ import java.net.URI
  * Spec: https://solidproject.org/TR/protocol
  */
 
+fun Headers.getContentLength(): Long {
+    return this["content-length"]?.toLongOrNull() ?: -1L
+}
+
 /**
  * Returns the URI of the WAC / ACP access-control resource advertised by
  * `Link: <...>; rel="acl"`, or `null` if absent.
