@@ -8,6 +8,8 @@ import com.pondersource.shared.domain.profile.Profile
 import com.pondersource.shared.domain.profile.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
@@ -20,6 +22,7 @@ import net.openid.appauth.RegistrationRequest
 import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.TokenRequest
 import net.openid.appauth.TokenResponse
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 
 internal class AuthenticatorImplementation private constructor(
@@ -44,6 +47,8 @@ internal class AuthenticatorImplementation private constructor(
     private val authService = AuthorizationService(context)
     private val inProgressAuth = InProgressAuthStore()
     private val webIdResolver = WebIdResolver()
+    private val refreshMutexes = ConcurrentHashMap<String, Mutex>()
+    private fun mutexFor(webId: String) = refreshMutexes.getOrPut(webId) { Mutex() }
 
     override val activeProfileFlow: StateFlow<Profile?> get() = profileManager.activeProfileFlow
     override val loggedInProfilesFlow: StateFlow<List<Profile>> get() = profileManager.loggedInProfilesFlow
@@ -192,7 +197,8 @@ internal class AuthenticatorImplementation private constructor(
     ): Map<String, String> {
         profileManager.awaitInit()
         val profile = profileManager.getProfile(webId)
-        val tokenResponse = getLastTokenResponse(webId)!!
+        val tokenResponse = profile.authState.lastTokenResponse
+            ?: throw IllegalStateException("No token available for $webId. Call getLastTokenResponse first.")
         val headers = mutableMapOf<String, String>()
         headers[HTTPHeaderName.AUTHORIZATION] =
             "${tokenResponse.tokenType} ${tokenResponse.accessToken}"
@@ -308,11 +314,15 @@ internal class AuthenticatorImplementation private constructor(
         profile: Profile,
         forceRefresh: Boolean = false,
     ) {
-        if (forceRefresh || needsTokenRefresh(profile)) {
-            val (tokenResponse, exception) = requestToken(profile, isRefresh = true)
-            val updatedAuthState = deepCopyAuthState(profile.authState)
+        if (!forceRefresh && !needsTokenRefresh(profile)) return
+        mutexFor(webId).withLock {
+            val currentProfile = profileManager.getProfileOrNull(webId) ?: return@withLock
+            if (!needsTokenRefresh(currentProfile)) return@withLock
+
+            val (tokenResponse, exception) = requestToken(currentProfile, isRefresh = true)
+            val updatedAuthState = deepCopyAuthState(currentProfile.authState)
             updatedAuthState.update(tokenResponse, exception)
-            profileManager.writeProfile(webId, profile.copy(authState = updatedAuthState))
+            profileManager.writeProfile(webId, currentProfile.copy(authState = updatedAuthState))
         }
     }
 

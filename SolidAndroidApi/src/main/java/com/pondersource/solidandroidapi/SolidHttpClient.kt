@@ -278,7 +278,15 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         // Retry on 401: could be an expired token, a fresh DPoP-nonce challenge, or both.
         // Force-refresh the access token so the retry carries fresh credentials.
         if (response.statusCode == 401) {
-            requireAuth().getLastTokenResponse(webId, forceRefresh = true)
+            val wwwAuth = response.headers[HTTPHeaderName.WWW_AUTHENTICATE] ?: ""
+            val isPureNonceChallenge = wwwAuth.contains("use_dpop_nonce", ignoreCase = true) &&
+                    !wwwAuth.contains("invalid_token", ignoreCase = true) &&
+                    !wwwAuth.contains("expired_token", ignoreCase = true)
+
+            if (!isPureNonceChallenge) {
+                requireAuth().getLastTokenResponse(webId, forceRefresh = true)
+            }
+
             val retryHeaders = buildAuthHeaders(webId, method, uri.toString()).let { headers ->
                 if (ifMatch != null) headers + mapOf(HTTPHeaderName.IF_MATCH to "\"$ifMatch\"") else headers
             }
