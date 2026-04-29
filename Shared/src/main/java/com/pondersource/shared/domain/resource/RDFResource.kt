@@ -7,7 +7,10 @@ import com.apicatalog.jsonld.JsonLdOptions
 import com.apicatalog.jsonld.document.JsonDocument
 import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.jsonld.serialization.QuadsToJsonld
+import com.apicatalog.jsonld.uri.UriValidationPolicy
 import com.apicatalog.rdf.api.RdfQuadConsumer
+import com.pondersource.shared.domain.util.encodeUri
+import com.pondersource.shared.domain.util.encodeUriString
 import com.pondersource.shared.vocab.ACL
 import com.pondersource.shared.vocab.ACP
 import com.pondersource.shared.vocab.AS
@@ -77,11 +80,13 @@ open class RDFResource : Resource {
 
         fun parseJsonLd(
             document: JsonDocument,
-            options: JsonLdOptions? = null
+            options: JsonLdOptions = JsonLdOptions().apply {
+                uriValidation = UriValidationPolicy.SchemeOnly
+            }
         ): MutableList<RdfQuad> {
             val result = mutableListOf<RdfQuad>()
             val api = JsonLd.toRdf(document)
-            if (options != null) api.options(options)
+            api.options(options)
             api.provide(object : RdfQuadConsumer {
                 override fun quad(
                     subject: String, predicate: String, `object`: String,
@@ -96,7 +101,7 @@ open class RDFResource : Resource {
     }
 
     protected constructor(inParcel: Parcel) {
-        this.identifier = URI.create(inParcel.readString())
+        this.identifier = encodeUriString(inParcel.readString()!!)
         val headersMap = Json.decodeFromString<Map<String, List<String>>>(inParcel.readString()!!)
         this.headers = Headers.Builder().apply {
             headersMap.forEach { (name, values) -> values.forEach { add(name, it) } }
@@ -104,7 +109,6 @@ open class RDFResource : Resource {
         this.mediaType = MediaType.of(inParcel.readString()!!)
         this.quads = parseJsonLd(
             JsonDocument.of(inParcel.readString()!!.byteInputStream()),
-            JsonLdOptions().apply { isRdfStar = true }
         )
         this.itselfSubject = inParcel.readString()!!
     }
@@ -126,10 +130,7 @@ open class RDFResource : Resource {
         quads: List<RdfQuad>?,
         headers: Headers?
     ) {
-        this.identifier    = identifier
-        this.headers       = headers ?: Headers.Builder().build()
-        this.mediaType     = mediaType
-        this.quads         = quads?.toMutableList() ?: mutableListOf()
+        this.identifier = encodeUri(identifier)
         this.headers = headers ?: Headers.Builder().build()
         this.mediaType = mediaType
         this.quads = quads?.toMutableList() ?: mutableListOf()

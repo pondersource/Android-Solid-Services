@@ -1,12 +1,13 @@
 package com.pondersource.solidandroidapi
 
+import com.pondersource.shared.domain.container.SolidContainer
 import com.pondersource.shared.domain.crud.N3Patch
 import com.pondersource.shared.domain.network.HTTPAcceptType
 import com.pondersource.shared.domain.network.HTTPHeaderName
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.resource.RDFResource
 import com.pondersource.shared.domain.resource.Resource
-import com.pondersource.shared.domain.container.SolidContainer
+import com.pondersource.shared.domain.util.encodeUri
 import com.pondersource.shared.vocab.LDP
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -72,7 +73,7 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
             else -> null
         }
         val request = Request.Builder()
-            .url(uri.toString())
+            .url(encodeUri(uri).toString())
             .apply {
                 if (accept != null) header(HTTPHeaderName.ACCEPT, accept)
                 if (contentType != null) header(HTTPHeaderName.CONTENT_TYPE, contentType)
@@ -275,8 +276,6 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
             requireAuth().updateDPoPNonce(webId, nonce)
         }
 
-        // Retry on 401: could be an expired token, a fresh DPoP-nonce challenge, or both.
-        // Force-refresh the access token so the retry carries fresh credentials.
         if (response.statusCode == 401) {
             val wwwAuth = response.headers[HTTPHeaderName.WWW_AUTHENTICATE] ?: ""
             val isPureNonceChallenge = wwwAuth.contains("use_dpop_nonce", ignoreCase = true) &&

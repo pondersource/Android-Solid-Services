@@ -2,6 +2,8 @@ package com.pondersource.shared.domain.resource
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.pondersource.shared.domain.util.encodeUri
+import com.pondersource.shared.domain.util.encodeUriString
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okio.IOException
@@ -31,7 +33,7 @@ open class NonRDFResource : Resource {
 
 
     protected constructor(inParcel: Parcel) {
-        this.identifier = URI.create(inParcel.readString())
+        this.identifier = encodeUriString(inParcel.readString()!!)
         this.contentType = inParcel.readString()!!
         val headersMap = Json.decodeFromString<Map<String, List<String>>>(inParcel.readString()!!)
         this.headers = Headers.Builder()
@@ -46,7 +48,7 @@ open class NonRDFResource : Resource {
         headers: Headers?,
         entity: InputStream
     ) {
-        this.identifier = identifier
+        this.identifier = encodeUri(identifier)
         this.contentType = contentType
         this.headers = headers ?: Headers.Builder().build()
         this.entity = entity

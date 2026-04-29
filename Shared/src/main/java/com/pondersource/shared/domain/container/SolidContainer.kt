@@ -3,7 +3,7 @@ package com.pondersource.shared.domain.container
 import com.apicatalog.jsonld.http.media.MediaType
 import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.resource.SolidRDFResource
-import com.pondersource.shared.domain.container.SolidSourceReference
+import com.pondersource.shared.domain.util.encodeUriString
 import com.pondersource.shared.vocab.DC
 import com.pondersource.shared.vocab.LDP
 import com.pondersource.shared.vocab.RDF
@@ -46,29 +46,29 @@ open class SolidContainer : SolidRDFResource {
     private fun parseContainedResources() {
         val containerUri = getIdentifier().toString()
         quads
-            .filter { it.predicate == LDP.CONTAINS && it.subject == containerUri }
+            .filter { it.predicate == LDP.CONTAINS && iriMatches(it.subject, containerUri) }
             .forEach { containsQuad ->
-                val containedIri = containsQuad.`object`
+                val rawIri = containsQuad.`object`
 
                 val types = quads
-                    .filter { it.subject == containedIri && it.predicate == RDF.TYPE }
+                    .filter { it.subject == rawIri && it.predicate == RDF.TYPE }
                     .map { it.`object` }
 
                 val size = quads
-                    .find { it.subject == containedIri && it.predicate == STAT.SIZE }
+                    .find { it.subject == rawIri && it.predicate == STAT.SIZE }
                     ?.`object`?.toLongOrNull()
 
                 val modified = quads
-                    .find { it.subject == containedIri && it.predicate == DC.MODIFIED }
+                    .find { it.subject == rawIri && it.predicate == DC.MODIFIED }
                     ?.`object`
 
                 val mtime = quads
-                    .find { it.subject == containedIri && it.predicate == STAT.MTIME }
+                    .find { it.subject == rawIri && it.predicate == STAT.MTIME }
                     ?.`object`?.toLongOrNull()
 
                 containerRes.add(
                     SolidSourceReference(
-                        identifier = containedIri,
+                        identifier = encodeIriIfNeeded(rawIri),
                         types = types,
                         size = size,
                         modified = modified,
@@ -76,6 +76,16 @@ open class SolidContainer : SolidRDFResource {
                     )
                 )
             }
+    }
+
+    companion object {
+        private fun iriMatches(a: String, b: String): Boolean {
+            if (a == b) return true
+            return encodeIriIfNeeded(a) == encodeIriIfNeeded(b)
+        }
+
+        private fun encodeIriIfNeeded(iri: String): String =
+            encodeUriString(iri).toString()
     }
 
     fun getContained(): List<SolidSourceReference> = containerRes

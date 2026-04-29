@@ -4,6 +4,7 @@ import com.apicatalog.jsonld.JsonLdOptions
 import com.apicatalog.jsonld.JsonLdVersion
 import com.apicatalog.jsonld.document.JsonDocument
 import com.apicatalog.jsonld.http.media.MediaType
+import com.apicatalog.jsonld.uri.UriValidationPolicy
 import com.pondersource.shared.domain.container.SolidContainer
 import com.pondersource.shared.domain.network.HTTPAcceptType
 import com.pondersource.shared.domain.network.HTTPHeaderName
@@ -68,6 +69,7 @@ internal object SolidResourceParser {
         options.base = response.uri
         options.processingMode = JsonLdVersion.V1_1
         options.isProduceGeneralizedRdf = true
+        options.uriValidation = UriValidationPolicy.SchemeOnly
 
         val quads =
             RDFResource.parseJsonLd(JsonDocument.of(response.bodyBytes.inputStream()), options)
@@ -94,6 +96,7 @@ internal object SolidResourceParser {
         options.rdfDirection = JsonLdOptions.RdfDirection.I18N_DATATYPE
         options.processingMode = JsonLdVersion.V1_1
         options.isProduceGeneralizedRdf = true
+        options.uriValidation = UriValidationPolicy.SchemeOnly
 
         val quads =
             RDFResource.parseJsonLd(JsonDocument.of(response.bodyBytes.inputStream()), options)
