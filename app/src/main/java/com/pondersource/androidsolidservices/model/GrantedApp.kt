@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 data class GrantedApp(
     val packageName: String,
     val name: String,
+    val webId: String,
 )

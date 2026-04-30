@@ -1,52 +1,63 @@
 package com.pondersource.androidsolidservices.repository.datasource.local.accessgrant
 
-import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.pondersource.androidsolidservices.model.GrantedApp
+import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSourceImplementation.PreferencesKeys.APP_LIST_KEY
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 class AccessGrantLocalDataSourceImplementation(
-    private val sharedPreferences: SharedPreferences
+    private val dataStore: DataStore<Preferences>
 ) : AccessGrantLocalDataSource {
 
-    companion object {
-        private const val APP_LIST_KEY = "granted_app_list"
+    private object PreferencesKeys {
+        val APP_LIST_KEY = stringPreferencesKey("granted_app_list")
     }
 
-    override fun hasAccessGrant(appPackageName: String): Boolean {
-        val apps = grantedApplications()
-        val app = apps.find { it.packageName == appPackageName }
-        return app != null
+    override fun hasAccessGrant(appPackageName: String, webId: String): Boolean {
+        return runBlocking {
+            withContext(Dispatchers.IO) {
+                grantedApplications().map { list ->
+                    list.find { it.packageName == appPackageName && it.webId == webId }
+                }.first() != null
+            }
+        }
     }
 
-    override fun addAccessGrant(
+    override suspend fun addAccessGrant(
         appPackageName: String,
-        appName: String
+        appName: String,
+        webId: String
     ) {
-        val apps = grantedApplications()
-        val app = apps.find { it.packageName == appPackageName }
-        if (app == null) {
-            saveGrantedApps(apps + GrantedApp(appPackageName, appName))
+       dataStore.edit {
+           val apps = Json.decodeFromString<List<GrantedApp>>( it[APP_LIST_KEY] ?: "[]")
+           if (apps.none { it.packageName == appPackageName && it.webId == webId }) {
+               it[APP_LIST_KEY] = Json.encodeToString(apps + GrantedApp(appPackageName, appName, webId))
+           }
+       }
+    }
+
+    override suspend fun revokeAccessGrant(appPackageName: String, webId: String) {
+        dataStore.edit {
+            val apps = Json.decodeFromString<List<GrantedApp>>( it[APP_LIST_KEY] ?: "[]")
+            val newList = apps.filter { !(it.packageName == appPackageName && it.webId == webId) }
+            if (newList.size != apps.size) {
+                it[APP_LIST_KEY] = Json.encodeToString(newList)
+            }
         }
     }
 
-    override fun revokeAccessGrant(appPackageName: String) {
-        val apps = grantedApplications()
-        val newList = apps.filter { it.packageName != appPackageName }
-
-        if (newList.size != apps.size) {
-            saveGrantedApps(newList)
-        }
-    }
-
-    override fun grantedApplications(): List<GrantedApp> {
-        val savedString = sharedPreferences.getString(APP_LIST_KEY, "[]")!!
-        return Json.decodeFromString<List<GrantedApp>>(savedString)
-    }
-
-    private fun saveGrantedApps(grantedApps: List<GrantedApp>) {
-        sharedPreferences.edit().apply {
-            putString(APP_LIST_KEY, Json.encodeToString(grantedApps))
-            apply()
+    override fun grantedApplications(): Flow<List<GrantedApp>> {
+        return dataStore.data.map {
+            Json.decodeFromString<List<GrantedApp>>( it[APP_LIST_KEY] ?: "[]")
         }
     }
 }

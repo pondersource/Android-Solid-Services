@@ -2,6 +2,9 @@ package com.pondersource.androidsolidservices.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import com.pondersource.androidsolidservices.base.Constants
 import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSource
 import com.pondersource.androidsolidservices.repository.datasource.local.accessgrant.AccessGrantLocalDataSourceImplementation
@@ -17,6 +20,14 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class DataSourceModule {
 
+    companion object {
+        private const val PREFERENCES_NAME = "com.pondersource.androidsolidservices.preferences"
+    }
+
+    private val Context.preferencesDataStore: DataStore<Preferences> by preferencesDataStore(
+        PREFERENCES_NAME
+    )
+
     @Provides
     @Singleton
     @Named(Constants.ASS_SHARED_PREFERENCES_NAME)
@@ -24,17 +35,14 @@ class DataSourceModule {
 
     @Provides
     @Singleton
-    fun provideSharedPreferences(
-        @ApplicationContext context: Context,
-        @Named(Constants.ASS_SHARED_PREFERENCES_NAME) sharedPreferencesName: String
-    ): SharedPreferences {
-        return context.getSharedPreferences(sharedPreferencesName, Context.MODE_PRIVATE)
-    }
+    fun providePreferencesDatasource(
+        @ApplicationContext context: Context
+    ): DataStore<Preferences> = context.preferencesDataStore
 
     @Provides
     fun provideAccessGrantLocalDataSource(
-        sharedPreferences: SharedPreferences,
+        dataStore: DataStore<Preferences>,
     ): AccessGrantLocalDataSource {
-        return AccessGrantLocalDataSourceImplementation(sharedPreferences)
+        return AccessGrantLocalDataSourceImplementation(dataStore)
     }
 }

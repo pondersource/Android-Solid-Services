@@ -1,14 +1,15 @@
 package com.pondersource.androidsolidservices.repository
 
 import com.pondersource.androidsolidservices.model.GrantedApp
+import kotlinx.coroutines.flow.Flow
 
 interface AccessGrantRepository {
 
-    fun hasAccessGrant(appPackageName: String): Boolean
+    fun hasAccessGrant(appPackageName: String, webId: String): Boolean
 
-    fun addAccessGrant(appPackageName: String, appName: String)
+    suspend fun addAccessGrant(appPackageName: String, appName: String, webId: String)
 
-    fun revokeAccessGrant(appPackageName: String)
+    suspend fun revokeAccessGrant(appPackageName: String, webId: String)
 
-    fun grantedApplications(): List<GrantedApp>
+    fun grantedApplications(): Flow<List<GrantedApp>>
 }
