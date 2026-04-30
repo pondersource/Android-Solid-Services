@@ -123,6 +123,17 @@ interface SolidResourceManager {
     ): SolidNetworkResponse<T>
 
     /**
+     * Deletes a resource from the pod.
+     * @param webid The WebID of the authenticated user making the request.
+     * @param resourceUri The uri of the resource to delete.
+     * @return [SolidNetworkResponse.Success]
+     */
+    suspend fun delete(
+        webid: String,
+        resourceUri: URI,
+    ): SolidNetworkResponse<Boolean>
+
+    /**
      * Recursively deletes a container and all of its contents.
      * @param webid The WebID of the authenticated user making the request.
      * @param containerUri The URI of the LDP container to delete.

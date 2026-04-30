@@ -30,6 +30,10 @@ interface SolidAccountResourceManager {
         resource: T,
     ): SolidNetworkResponse<T>
 
+    suspend fun delete(
+        resourceUri: URI,
+    ): SolidNetworkResponse<Boolean>
+
     suspend fun deleteContainer(
         containerUri: URI
     ): SolidNetworkResponse<Boolean>

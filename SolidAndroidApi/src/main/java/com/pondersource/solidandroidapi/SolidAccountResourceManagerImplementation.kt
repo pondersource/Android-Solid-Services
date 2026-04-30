@@ -39,6 +39,10 @@ internal class SolidAccountResourceManagerImplementation(
         return resourceManager.delete(profile.userInfo!!.webId, resource)
     }
 
+    override suspend fun delete(resourceUri: URI): SolidNetworkResponse<Boolean> {
+        return resourceManager.delete(profile.userInfo!!.webId, resourceUri)
+    }
+
     override suspend fun deleteContainer(containerUri: URI): SolidNetworkResponse<Boolean> {
         return resourceManager.deleteContainer(profile.userInfo!!.webId, containerUri)
     }

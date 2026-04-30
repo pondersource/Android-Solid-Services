@@ -89,6 +89,21 @@ internal class SolidResourceManagerImplementation : SolidResourceManager {
         }
     }
 
+    override suspend fun delete(
+        webid: String,
+        resourceUri: URI,
+    ): SolidNetworkResponse<Boolean> {
+        return when (val del = solidHttpClient.delete(webid, resourceUri)) {
+            is SolidNetworkResponse.Success -> SolidNetworkResponse.Success(true)
+            is SolidNetworkResponse.Error -> SolidNetworkResponse.Error(
+                del.errorCode,
+                del.errorMessage
+            )
+
+            is SolidNetworkResponse.Exception -> SolidNetworkResponse.Exception(del.exception)
+        }
+    }
+
     override suspend fun deleteContainer(
         webid: String,
         containerUri: URI,
