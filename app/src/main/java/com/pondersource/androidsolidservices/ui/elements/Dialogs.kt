@@ -32,7 +32,7 @@ fun RevokePermissionDialog(
             Text("Revoke Permission")
         },
         text = {
-            Text("Do you want to revoke Solid access from ${app.name}?")
+            Text("Do you want to revoke Solid access from ${app.name} for account ${app.webId}?")
         }
     )
 }

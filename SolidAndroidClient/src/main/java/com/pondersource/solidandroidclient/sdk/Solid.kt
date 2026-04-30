@@ -22,7 +22,7 @@ import com.pondersource.solidandroidclient.sdk.Solid.Companion.getSignInClient
  * ### Typical setup (in `Application.onCreate` or a Hilt module):
  * ```kotlin
  * val signIn = Solid.getSignInClient(context)
- * signIn.requestLogin { granted, error -> ... }
+ * signIn.requestLogin { selectedWebId, error -> ... }
  * ```
  */
 class Solid {

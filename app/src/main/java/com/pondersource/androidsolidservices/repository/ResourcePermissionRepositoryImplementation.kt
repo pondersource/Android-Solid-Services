@@ -8,10 +8,11 @@ class ResourcePermissionRepositoryImplementation(
 
 
     override fun hasAccess(
+        webId: String,
         resourceClaimantPackageName: String,
         resourceUrl: String,
         permissionType: PermissionType
     ): Boolean {
-        return accessGrantRepository.hasAccessGrant(resourceClaimantPackageName)
+        return accessGrantRepository.hasAccessGrant(resourceClaimantPackageName, webId)
     }
 }

@@ -139,16 +139,16 @@ class SolidResourceClient {
     // ── Public API ────────────────────────────────────────────────────────────
 
     /**
-     * Fetches and parses the authenticated user's WebID document from their pod.
+     * Fetches and parses the WebID document for [webId] from their pod.
      * @return [SolidNetworkResponse.Success] with the [WebId], or an error/exception variant.
      */
-    suspend fun getWebId(): SolidNetworkResponse<WebId> {
+    suspend fun getWebId(webId: String): SolidNetworkResponse<WebId> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<WebId>
         }
         return suspendCancellableCoroutine { cont ->
-            iASSResourceService!!.getWebId(object : IASSSolidRdfResourceCallback.Stub() {
+            iASSResourceService!!.getWebId(webId, object : IASSSolidRdfResourceCallback.Stub() {
                 override fun onResult(result: SolidRDFResource) {
                     try {
                         cont.resume(
@@ -172,12 +172,14 @@ class SolidResourceClient {
     }
 
     /**
-     * Reads a resource from the pod.
+     * Reads a resource from the pod for [webId].
+     * @param webId The WebID of the account to read from.
      * @param resourceUrl The full URL of the resource.
      * @param clazz The expected resource type; must extend [RDFResource] or [NonRDFResource].
      * @return [SolidNetworkResponse.Success] with the resource, or an error/exception variant.
      */
     suspend fun <T : SolidResource> read(
+        webId: String,
         resourceUrl: String,
         clazz: Class<T>
     ): SolidNetworkResponse<T> {
@@ -189,6 +191,7 @@ class SolidResourceClient {
             when {
                 RDFResource::class.java.isAssignableFrom(clazz) -> {
                     iASSResourceService!!.readRdf(
+                        webId,
                         resourceUrl,
                         object : IASSSolidRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidRDFResource) {
@@ -214,6 +217,7 @@ class SolidResourceClient {
 
                 NonRDFResource::class.java.isAssignableFrom(clazz) -> {
                     iASSResourceService!!.read(
+                        webId,
                         resourceUrl,
                         object : IASSSolidNonRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidNonRDFResource) {
@@ -249,10 +253,10 @@ class SolidResourceClient {
     }
 
     /**
-     * Creates a new resource on the pod at the URI specified by [resource].
+     * Creates a new resource on the pod at the URI specified by [resource] for [webId].
      * @return [SolidNetworkResponse.Success] with the created resource.
      */
-    suspend fun <T : SolidResource> create(resource: T): SolidNetworkResponse<T> {
+    suspend fun <T : SolidResource> create(webId: String, resource: T): SolidNetworkResponse<T> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<T>
@@ -261,6 +265,7 @@ class SolidResourceClient {
             when (resource) {
                 is SolidRDFResource -> {
                     iASSResourceService!!.createRdf(
+                        webId,
                         resource,
                         object : IASSSolidRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidRDFResource) {
@@ -286,6 +291,7 @@ class SolidResourceClient {
 
                 is SolidNonRDFResource -> {
                     iASSResourceService!!.create(
+                        webId,
                         resource,
                         object : IASSSolidNonRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidNonRDFResource) {
@@ -333,6 +339,7 @@ class SolidResourceClient {
      * @return [SolidNetworkResponse.Success] with the updated resource.
      */
     suspend fun <T : SolidResource> update(
+        webId: String,
         resource: T,
         ifMatch: String? = null
     ): SolidNetworkResponse<T> {
@@ -344,6 +351,7 @@ class SolidResourceClient {
             when (resource) {
                 is SolidRDFResource -> {
                     iASSResourceService!!.updateRdf(
+                        webId,
                         resource,
                         ifMatch,
                         object : IASSSolidRdfResourceCallback.Stub() {
@@ -370,6 +378,7 @@ class SolidResourceClient {
 
                 is SolidNonRDFResource -> {
                     iASSResourceService!!.update(
+                        webId,
                         resource,
                         ifMatch,
                         object : IASSSolidNonRdfResourceCallback.Stub() {
@@ -416,13 +425,14 @@ class SolidResourceClient {
      * @param patch The patch to apply.
      * @return [SolidNetworkResponse.Success] with [Unit] on success.
      */
-    suspend fun patch(uri: URI, patch: N3Patch): SolidNetworkResponse<Unit> {
+    suspend fun patch(webId: String, uri: URI, patch: N3Patch): SolidNetworkResponse<Unit> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<Unit>
         }
         return suspendCancellableCoroutine { cont ->
             iASSResourceService!!.patch(
+                webId,
                 uri.toString(),
                 patch.toN3String(),
                 object : IASSUnitCallback.Stub() {
@@ -439,10 +449,10 @@ class SolidResourceClient {
     }
 
     /**
-     * Deletes a resource from the pod.
+     * Deletes a resource from the pod for [webId].
      * @return [SolidNetworkResponse.Success] with the deleted resource.
      */
-    suspend fun <T : SolidResource> delete(resource: T): SolidNetworkResponse<T> {
+    suspend fun <T : SolidResource> delete(webId: String, resource: T): SolidNetworkResponse<T> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<T>
@@ -451,6 +461,7 @@ class SolidResourceClient {
             when (resource) {
                 is SolidRDFResource -> {
                     iASSResourceService!!.deleteRdf(
+                        webId,
                         resource,
                         object : IASSSolidRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidRDFResource) {
@@ -476,6 +487,7 @@ class SolidResourceClient {
 
                 is SolidNonRDFResource -> {
                     iASSResourceService!!.delete(
+                        webId,
                         resource,
                         object : IASSSolidNonRdfResourceCallback.Stub() {
                             override fun onResult(result: SolidNonRDFResource) {
@@ -513,13 +525,14 @@ class SolidResourceClient {
      * @param containerUri The URI of the LDP container to delete (must end with `/`).
      * @return [SolidNetworkResponse.Success] with `true` on success.
      */
-    suspend fun deleteContainer(containerUri: URI): SolidNetworkResponse<Boolean> {
+    suspend fun deleteContainer(webId: String, containerUri: URI): SolidNetworkResponse<Boolean> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<Boolean>
         }
         return suspendCancellableCoroutine { cont ->
             iASSResourceService!!.deleteContainer(
+                webId,
                 containerUri.toString(),
                 object : IASSUnitCallback.Stub() {
                     override fun onResult() {

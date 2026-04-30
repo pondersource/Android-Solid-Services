@@ -43,6 +43,13 @@
             android:exported="true" />
 
         <activity
+            android:name=".ui.ProfileSelectionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AndroidSolidServices.Dialog"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" />
+
+        <activity
             android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter android:label="launch">

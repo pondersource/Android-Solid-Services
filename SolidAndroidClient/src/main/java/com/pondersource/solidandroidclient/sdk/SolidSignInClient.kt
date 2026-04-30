@@ -121,21 +121,19 @@ class SolidSignInClient {
 
 
     /**
-     * Returns a [SolidSignInAccount] if this app is authorized, or `null` if it has not yet
-     * been granted access by the user.
+     * Returns a [SolidSignInAccount] if this app is authorized for [webId], or `null` if not yet
+     * granted access.
      * @throws SolidException.SolidAppNotFoundException if the ASS app is not installed.
      * @throws SolidException.SolidServiceConnectionException if the IPC service is not connected.
      * @throws SolidException.SolidNotLoggedInException if no user is logged in.
      */
     @Throws(Exception::class)
-    fun getAccount(): SolidSignInAccount? {
+    fun getAccount(webId: String): SolidSignInAccount? {
         if (hasInstalledAndroidSolidServices()) {
             if (hasConnectedToService()) {
                 if (iASSAuthService!!.hasLoggedIn()) {
-                    return if (iASSAuthService!!.isAppAuthorized()) {
-                        SolidSignInAccount(
-                            applicationInfo.packageName
-                        )
+                    return if (iASSAuthService!!.isAppAuthorized(webId)) {
+                        SolidSignInAccount(applicationInfo.packageName, webId)
                     } else {
                         null
                     }
@@ -151,19 +149,22 @@ class SolidSignInClient {
     }
 
     /**
-     * Requests the user to grant this app access to Solid via the ASS app.
+     * Prompts the user to choose a Solid account and grant access.
      *
-     * A system dialog is shown to the user inside the ASS app.  The result is delivered
+     * A profile-picker dialog is shown inside the ASS app. The result is delivered
      * asynchronously to [callBack]:
-     * - `(true, null)` — access granted
-     * - `(false, null)` — access denied by the user
-     * - `(null, error)` — an error occurred
+     * - `(selectedWebId, null)` — user granted access; [selectedWebId] is the chosen account
+     * - `(null, null)` — user dismissed without granting
+     * - `(null, error)` — an error occurred (e.g. overlay permission missing)
+     *
+     * Use the returned [selectedWebId] for all subsequent [SolidResourceClient] and
+     * [SolidContactsDataModule] calls.
      */
-    fun requestLogin(callBack: (Boolean?, SolidException?) -> Unit) {
+    fun requestLogin(callBack: (String?, SolidException?) -> Unit) {
         checkConnectionWithASS {
             iASSAuthService!!.requestLogin(object : IASSLoginCallback.Stub() {
-                override fun onResult(granted: Boolean) {
-                    callBack(granted, null)
+                override fun onResult(granted: Boolean, selectedWebId: String) {
+                    callBack(if (granted) selectedWebId else null, null)
                 }
 
                 override fun onError(errorCode: Int, errorMessage: String) {
@@ -174,11 +175,11 @@ class SolidSignInClient {
     }
 
     /**
-     * Revokes this app's access to Solid.  [callBack] receives `true` on success.
+     * Revokes this app's access to [webId]'s Solid pod.  [callBack] receives `true` on success.
      */
-    fun disconnectFromSolid(callBack: (Boolean) -> Unit) {
+    fun disconnectFromSolid(webId: String, callBack: (Boolean) -> Unit) {
         checkConnectionWithASS {
-            iASSAuthService!!.disconnectFromSolid(object : IASSLogoutCallback.Stub() {
+            iASSAuthService!!.disconnectFromSolid(webId, object : IASSLogoutCallback.Stub() {
                 override fun onResult(granted: Boolean) {
                     callBack(granted)
                 }

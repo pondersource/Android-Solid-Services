@@ -18,9 +18,10 @@ import com.pondersource.solidandroidclient.contacts.IASSContactModuleFullGroupCa
 
 interface IASSContactsModuleInterface {
 
-    void getAddressBooks(IASSContactModuleAddressBookListCallback callback);
+    void getAddressBooks(String webId, IASSContactModuleAddressBookListCallback callback);
 
     void createAddressBook(
+            String webId,
             String title,
             boolean isPrivate,
             IASSContactModuleAddressBookCallback callback,
@@ -29,15 +30,17 @@ interface IASSContactsModuleInterface {
             @nullable String container
     );
 
-    void getAddressBook(String uri, IASSContactModuleAddressBookCallback callback);
+    void getAddressBook(String webId, String uri, IASSContactModuleAddressBookCallback callback);
 
     void deleteAddressBook(
+        String webId,
         String uri,
         @nullable String ownerWebId,
         IASSContactModuleAddressBookCallback callback
     );
 
     void createNewContact(
+        String webId,
         String addressBookUri,
         in NewContact newContact,
         in List<String> groupUris,
@@ -45,47 +48,55 @@ interface IASSContactsModuleInterface {
     );
 
     void getContact(
+        String webId,
         String contactUri,
         IASSContactModuleFullContactCallback callback
     );
 
     void renameContact(
+         String webId,
          String contactUri,
          String newName,
          IASSContactModuleFullContactCallback callback
     );
 
     void addNewPhoneNumber(
+        String webId,
         String contactUri,
         String newPhoneNumber,
         IASSContactModuleFullContactCallback callback
     );
 
     void addNewEmailAddress(
+        String webId,
         String contactUri,
         String newEmailAddress,
         IASSContactModuleFullContactCallback callback
     );
 
     void removePhoneNumber(
+        String webId,
         String contactUri,
         String phoneNumber,
         IASSContactModuleFullContactCallback callback
     );
 
     void removeEmailAddress(
+        String webId,
         String contactUri,
         String emailAddress,
         IASSContactModuleFullContactCallback callback
     );
 
     void deleteContact(
+        String webId,
         String addressBookUri,
         String contactUri,
         IASSContactModuleFullContactCallback callback
     );
 
     void createNewGroup(
+         String webId,
          String addressBookUri,
          String title,
          in List<String> contactUris,
@@ -93,23 +104,27 @@ interface IASSContactsModuleInterface {
     );
 
     void getGroup(
+        String webId,
         String groupUri,
         IASSContactModuleFullGroupCallback callback
     );
 
     void deleteGroup(
+        String webId,
         String addressBookUri,
         String groupUri,
         IASSContactModuleFullGroupCallback callback
     );
 
     void addContactToGroup(
+        String webId,
         String contactUri,
         String groupUri,
         IASSContactModuleFullGroupCallback callback
     );
 
     void removeContactFromGroup(
+        String webId,
         String contactUri,
         String groupUri,
         IASSContactModuleFullGroupCallback callback

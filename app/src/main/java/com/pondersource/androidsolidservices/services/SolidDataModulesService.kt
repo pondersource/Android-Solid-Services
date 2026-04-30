@@ -43,18 +43,16 @@ class SolidDataModulesService : LifecycleService() {
 
     private val contactsModuleInterface = object : IASSContactsModuleInterface.Stub() {
 
-        private fun getProfile() = auth.getActiveProfile()
-
-        override fun getAddressBooks(callback: IASSContactModuleAddressBookListCallback) {
+        override fun getAddressBooks(webId: String, callback: IASSContactModuleAddressBookListCallback) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.getAddressBooks(getProfile().userInfo!!.webId)
-                        .getOrNull()
+                    solidContactsDataModule.getAddressBooks(webId).getOrNull()
                 )
             }
         }
 
         override fun createAddressBook(
+            webId: String,
             title: String,
             isPrivate: Boolean,
             callback: IASSContactModuleAddressBookCallback,
@@ -63,13 +61,13 @@ class SolidDataModulesService : LifecycleService() {
             container: String?
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
+                val profile = auth.getProfile(webId)
                 callback.valueChanged(
                     solidContactsDataModule.createAddressBook(
-                        ownerWebId ?: getProfile().userInfo!!.webId, //TODO
+                        ownerWebId ?: webId,
                         title,
                         isPrivate,
-                        storage ?: getProfile().webId!!.getStorages()[0].toString(), //TODO
-
+                        storage ?: profile.webId!!.getStorages()[0].toString(),
                         container
                     ).getOrNull()
                 )
@@ -77,35 +75,32 @@ class SolidDataModulesService : LifecycleService() {
         }
 
         override fun getAddressBook(
+            webId: String,
             uri: String,
             callback: IASSContactModuleAddressBookCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.getAddressBook(
-                        getProfile().userInfo!!.webId,
-                        uri
-                    ).getOrNull()
+                    solidContactsDataModule.getAddressBook(webId, uri).getOrNull()
                 )
             }
         }
 
         override fun deleteAddressBook(
+            webId: String,
             uri: String,
             ownerWebId: String?,
             callback: IASSContactModuleAddressBookCallback
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.deleteAddressBook(
-                        uri,
-                        ownerWebId ?: getProfile().userInfo!!.webId,
-                    ).getOrNull()
+                    solidContactsDataModule.deleteAddressBook(uri, ownerWebId ?: webId).getOrNull()
                 )
             }
         }
 
         override fun createNewContact(
+            webId: String,
             addressBookUri: String,
             newContact: NewContact,
             groupUris: List<String>,
@@ -113,127 +108,103 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.createNewContact(
-                        getProfile().userInfo!!.webId,
-                        addressBookUri,
-                        newContact,
-                        groupUris
-                    ).getOrNull()
+                    solidContactsDataModule.createNewContact(webId, addressBookUri, newContact, groupUris).getOrNull()
                 )
             }
         }
 
         override fun getContact(
+            webId: String,
             contactUri: String,
             callback: IASSContactModuleFullContactCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.getContact(
-                        getProfile().userInfo!!.webId,
-                        contactUri
-                    ).getOrNull()
+                    solidContactsDataModule.getContact(webId, contactUri).getOrNull()
                 )
             }
         }
 
         override fun renameContact(
+            webId: String,
             contactUri: String,
             newName: String,
             callback: IASSContactModuleFullContactCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.renameContact(
-                        getProfile().userInfo!!.webId,
-                        contactUri,
-                        newName
-                    ).getOrNull()
+                    solidContactsDataModule.renameContact(webId, contactUri, newName).getOrNull()
                 )
             }
         }
 
         override fun addNewPhoneNumber(
+            webId: String,
             contactUri: String,
             newPhoneNumber: String,
             callback: IASSContactModuleFullContactCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.addNewPhoneNumber(
-                        getProfile().userInfo!!.webId,
-                        contactUri,
-                        newPhoneNumber
-                    ).getOrNull()
+                    solidContactsDataModule.addNewPhoneNumber(webId, contactUri, newPhoneNumber).getOrNull()
                 )
             }
         }
 
         override fun addNewEmailAddress(
+            webId: String,
             contactUri: String,
             newEmailAddress: String,
             callback: IASSContactModuleFullContactCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.addNewEmailAddress(
-                        getProfile().userInfo!!.webId,
-                        contactUri,
-                        newEmailAddress
-                    ).getOrNull()
+                    solidContactsDataModule.addNewEmailAddress(webId, contactUri, newEmailAddress).getOrNull()
                 )
             }
         }
 
         override fun removePhoneNumber(
+            webId: String,
             contactUri: String,
             phoneNumber: String,
             callback: IASSContactModuleFullContactCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.removePhoneNumber(
-                        getProfile().userInfo!!.webId,
-                        contactUri,
-                        phoneNumber
-                    ).getOrNull()
+                    solidContactsDataModule.removePhoneNumber(webId, contactUri, phoneNumber).getOrNull()
                 )
             }
         }
 
         override fun removeEmailAddress(
+            webId: String,
             contactUri: String,
             emailAddress: String,
             callback: IASSContactModuleFullContactCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.removeEmailAddress(
-                        getProfile().userInfo!!.webId,
-                        contactUri,
-                        emailAddress
-                    ).getOrNull()
+                    solidContactsDataModule.removeEmailAddress(webId, contactUri, emailAddress).getOrNull()
                 )
             }
         }
 
         override fun deleteContact(
+            webId: String,
             addressBookUri: String,
             contactUri: String,
             callback: IASSContactModuleFullContactCallback
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.deleteContact(
-                        getProfile().userInfo!!.webId,
-                        addressBookUri,
-                        contactUri,
-                    ).getOrNull()
+                    solidContactsDataModule.deleteContact(webId, addressBookUri, contactUri).getOrNull()
                 )
             }
         }
 
         override fun createNewGroup(
+            webId: String,
             addressBookUri: String,
             title: String,
             contactUris: List<String>,
@@ -241,74 +212,58 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.createNewGroup(
-                        getProfile().userInfo!!.webId,
-                        addressBookUri,
-                        title,
-                        contactUris
-                    ).getOrNull()
+                    solidContactsDataModule.createNewGroup(webId, addressBookUri, title, contactUris).getOrNull()
                 )
             }
         }
 
         override fun getGroup(
+            webId: String,
             groupUri: String,
             callback: IASSContactModuleFullGroupCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.getGroup(
-                        getProfile().userInfo!!.webId,
-                        groupUri
-                    ).getOrNull()
+                    solidContactsDataModule.getGroup(webId, groupUri).getOrNull()
                 )
             }
         }
 
         override fun deleteGroup(
+            webId: String,
             addressBookUri: String,
             groupUri: String,
             callback: IASSContactModuleFullGroupCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.deleteGroup(
-                        getProfile().userInfo!!.webId,
-                        addressBookUri,
-                        groupUri
-                    ).getOrNull()
+                    solidContactsDataModule.deleteGroup(webId, addressBookUri, groupUri).getOrNull()
                 )
             }
         }
 
         override fun addContactToGroup(
+            webId: String,
             contactUri: String,
             groupUri: String,
             callback: IASSContactModuleFullGroupCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.addContactToGroup(
-                        getProfile().userInfo!!.webId,
-                        contactUri,
-                        groupUri
-                    ).getOrNull()
+                    solidContactsDataModule.addContactToGroup(webId, contactUri, groupUri).getOrNull()
                 )
             }
         }
 
         override fun removeContactFromGroup(
+            webId: String,
             contactUri: String,
             groupUri: String,
             callback: IASSContactModuleFullGroupCallback,
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.removeContactFromGroup(
-                        getProfile().userInfo!!.webId,
-                        contactUri,
-                        groupUri
-                    ).getOrNull()
+                    solidContactsDataModule.removeContactFromGroup(webId, contactUri, groupUri).getOrNull()
                 )
             }
         }

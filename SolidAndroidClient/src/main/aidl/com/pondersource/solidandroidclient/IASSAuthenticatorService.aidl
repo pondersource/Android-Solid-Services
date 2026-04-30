@@ -8,9 +8,9 @@ interface IASSAuthenticatorService {
 
     boolean hasLoggedIn();
 
-    boolean isAppAuthorized();
+    boolean isAppAuthorized(String webId);
 
     void requestLogin(IASSLoginCallback callback);
 
-    void disconnectFromSolid(IASSLogoutCallback callback);
+    void disconnectFromSolid(String webId, IASSLogoutCallback callback);
 }

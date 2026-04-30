@@ -79,10 +79,10 @@ class SolidContactsDataModule {
         return contactsConnectionFlow
     }
 
-    suspend fun getAddressBooks(): AddressBookList? {
+    suspend fun getAddressBooks(webId: String): AddressBookList? {
         checkService()
         return suspendCancellableCoroutine { continuation ->
-            iASSContactsModuleInterface!!.getAddressBooks(object :
+            iASSContactsModuleInterface!!.getAddressBooks(webId, object :
                 IASSContactModuleAddressBookListCallback.Stub() {
                 override fun valueChanged(addressBookList: AddressBookList?) {
                     continuation.resume(addressBookList)
@@ -92,6 +92,7 @@ class SolidContactsDataModule {
     }
 
     suspend fun createAddressBook(
+        webId: String,
         title: String,
         isPrivate: Boolean = true,
         storage: String? = null,
@@ -101,6 +102,7 @@ class SolidContactsDataModule {
         checkService()
         return suspendCancellableCoroutine { continuation ->
             iASSContactsModuleInterface!!.createAddressBook(
+                webId,
                 title,
                 isPrivate,
                 object : IASSContactModuleAddressBookCallback.Stub() {
@@ -115,12 +117,11 @@ class SolidContactsDataModule {
         }
     }
 
-    suspend fun getAddressBook(
-        uri: String,
-    ): AddressBook? {
+    suspend fun getAddressBook(webId: String, uri: String): AddressBook? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.getAddressBook(
+                webId,
                 uri,
                 object : IASSContactModuleAddressBookCallback.Stub() {
                     override fun valueChanged(addressBook: AddressBook?) {
@@ -130,12 +131,11 @@ class SolidContactsDataModule {
         }
     }
 
-    suspend fun deleteAddressBook(
-        addressBookUri: String,
-    ): AddressBook? {
+    suspend fun deleteAddressBook(webId: String, addressBookUri: String): AddressBook? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.deleteAddressBook(
+                webId,
                 addressBookUri,
                 null,
                 object : IASSContactModuleAddressBookCallback.Stub() {
@@ -147,6 +147,7 @@ class SolidContactsDataModule {
     }
 
     suspend fun createNewContact(
+        webId: String,
         addressBookUri: String,
         newContact: NewContact,
         groupUris: List<String> = emptyList(),
@@ -154,6 +155,7 @@ class SolidContactsDataModule {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.createNewContact(
+                webId,
                 addressBookUri,
                 newContact,
                 groupUris,
@@ -166,12 +168,11 @@ class SolidContactsDataModule {
         }
     }
 
-    suspend fun getContact(
-        contactUri: String
-    ): FullContact? {
+    suspend fun getContact(webId: String, contactUri: String): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.getContact(
+                webId,
                 contactUri,
                 object : IASSContactModuleFullContactCallback.Stub() {
                     override fun valueChanged(fullContact: FullContact?) {
@@ -179,16 +180,13 @@ class SolidContactsDataModule {
                     }
                 })
         }
-
     }
 
-    suspend fun renameContact(
-        contactUri: String,
-        newName: String,
-    ): FullContact? {
+    suspend fun renameContact(webId: String, contactUri: String, newName: String): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.renameContact(
+                webId,
                 contactUri,
                 newName,
                 object : IASSContactModuleFullContactCallback.Stub() {
@@ -200,12 +198,14 @@ class SolidContactsDataModule {
     }
 
     suspend fun addNewPhoneNumber(
+        webId: String,
         contactUri: String,
-        newPhoneNumber: String,
+        newPhoneNumber: String
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.addNewPhoneNumber(
+                webId,
                 contactUri,
                 newPhoneNumber,
                 object : IASSContactModuleFullContactCallback.Stub() {
@@ -217,12 +217,14 @@ class SolidContactsDataModule {
     }
 
     suspend fun addNewEmailAddress(
+        webId: String,
         contactUri: String,
-        newEmailAddress: String,
+        newEmailAddress: String
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.addNewEmailAddress(
+                webId,
                 contactUri,
                 newEmailAddress,
                 object : IASSContactModuleFullContactCallback.Stub() {
@@ -234,12 +236,14 @@ class SolidContactsDataModule {
     }
 
     suspend fun removePhoneNumber(
+        webId: String,
         contactUri: String,
-        phoneNumber: String,
+        phoneNumber: String
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.removePhoneNumber(
+                webId,
                 contactUri,
                 phoneNumber,
                 object : IASSContactModuleFullContactCallback.Stub() {
@@ -251,12 +255,14 @@ class SolidContactsDataModule {
     }
 
     suspend fun removeEmailAddress(
+        webId: String,
         contactUri: String,
-        emailAddress: String,
+        emailAddress: String
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.removeEmailAddress(
+                webId,
                 contactUri,
                 emailAddress,
                 object : IASSContactModuleFullContactCallback.Stub() {
@@ -268,12 +274,14 @@ class SolidContactsDataModule {
     }
 
     suspend fun deleteContact(
+        webId: String,
         addressBookUri: String,
         contactUri: String
     ): FullContact? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.deleteContact(
+                webId,
                 addressBookUri,
                 contactUri,
                 object : IASSContactModuleFullContactCallback.Stub() {
@@ -285,6 +293,7 @@ class SolidContactsDataModule {
     }
 
     suspend fun createNewGroup(
+        webId: String,
         addressBookUri: String,
         title: String,
         contactUris: List<String> = emptyList(),
@@ -292,6 +301,7 @@ class SolidContactsDataModule {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.createNewGroup(
+                webId,
                 addressBookUri,
                 title,
                 contactUris,
@@ -303,12 +313,11 @@ class SolidContactsDataModule {
         }
     }
 
-    suspend fun getGroup(
-        groupUri: String,
-    ): FullGroup? {
+    suspend fun getGroup(webId: String, groupUri: String): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.getGroup(
+                webId,
                 groupUri,
                 object : IASSContactModuleFullGroupCallback.Stub() {
                     override fun valueChanged(fullGroup: FullGroup?) {
@@ -318,13 +327,11 @@ class SolidContactsDataModule {
         }
     }
 
-    suspend fun deleteGroup(
-        addressBookUri: String,
-        groupUri: String
-    ): FullGroup? {
+    suspend fun deleteGroup(webId: String, addressBookUri: String, groupUri: String): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.deleteGroup(
+                webId,
                 addressBookUri,
                 groupUri,
                 object : IASSContactModuleFullGroupCallback.Stub() {
@@ -335,13 +342,11 @@ class SolidContactsDataModule {
         }
     }
 
-    suspend fun addContactToGroup(
-        contactUri: String,
-        groupUri: String,
-    ): FullGroup? {
+    suspend fun addContactToGroup(webId: String, contactUri: String, groupUri: String): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.addContactToGroup(
+                webId,
                 contactUri,
                 groupUri,
                 object : IASSContactModuleFullGroupCallback.Stub() {
@@ -353,12 +358,14 @@ class SolidContactsDataModule {
     }
 
     suspend fun removeContactFromGroup(
+        webId: String,
         contactUri: String,
-        groupUri: String,
+        groupUri: String
     ): FullGroup? {
         checkService()
         return suspendCoroutine { continuation ->
             iASSContactsModuleInterface!!.removeContactFromGroup(
+                webId,
                 contactUri,
                 groupUri,
                 object : IASSContactModuleFullGroupCallback.Stub() {

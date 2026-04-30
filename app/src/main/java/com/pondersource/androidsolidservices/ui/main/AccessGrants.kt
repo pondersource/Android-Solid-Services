@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.pondersource.androidsolidservices.R
 import com.pondersource.androidsolidservices.model.GrantedApp
@@ -43,6 +45,8 @@ fun AccessGrants(
     navController: NavController,
     viewModel: AccessGrantViewModel,
 ) {
+
+    val grantedApps by viewModel.grantedApps.collectAsStateWithLifecycle()
 
     val revokePermissionApp = remember { mutableStateOf<GrantedApp?>(null) }
     val showRevokePermissionDialog = remember { mutableStateOf(false) }
@@ -67,13 +71,13 @@ fun AccessGrants(
                 .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            items(viewModel.grantedApps.value) { app ->
+            items(grantedApps) { app ->
                 GrantedAppItem(app) {
                     revokePermissionApp.value = app
                     showRevokePermissionDialog.value = true
                 }
             }
-            if (viewModel.grantedApps.value.isEmpty()) {
+            if (grantedApps.isEmpty()) {
                 item {
                     Text(
                         text = "No app granted",
@@ -146,6 +150,7 @@ private fun GrantedAppItem(
             Column {
                 Text(text = app.name)
                 Text(text = app.packageName)
+                Text(text = app.webId, style = MaterialTheme.typography.bodySmall)
                 Button(onRevokeClicked) {
                     Text(text = "Revoke Permission")
                 }
