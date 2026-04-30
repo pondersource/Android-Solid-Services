@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.jetbrains.kotlin.compose.compiler)
     alias(libs.plugins.vanniktech.maven.publish)
     `maven-publish`
 }
@@ -43,7 +44,7 @@ android {
 
     buildFeatures {
         aidl = true
-        viewBinding = true
+        compose = true
     }
 
     packaging {
@@ -80,6 +81,12 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.google.android.material)
     implementation(libs.jetbrains.kotlinx.coroutins.android)
+
+    // Compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
     api(project(":Shared"))
 }
