@@ -12,6 +12,7 @@ object DC {
 
     // Descriptive
     const val TITLE = "${NAMESPACE}title"
+    const val TITLE_LEGACY = "https://purl.org/dc/terms/title"
     const val DESCRIPTION = "${NAMESPACE}description"
     const val SUBJECT = "${NAMESPACE}subject"
     const val LANGUAGE = "${NAMESPACE}language"

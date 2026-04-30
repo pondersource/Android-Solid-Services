@@ -21,10 +21,10 @@ class GroupsIndexRDF : SolidRDFResource {
     fun getGroups(addressBookUri: String): List<Group> =
         quads
             .filter { it.predicate == VCARD.INCLUDES_GROUP && it.subject == addressBookUri }
-            .map { triple ->
+            .mapNotNull { triple ->
                 val groupName = quads.find {
                     it.subject == triple.`object` && it.predicate == VCARD.FN
-                }!!.`object`
+                }?.`object` ?: return@mapNotNull null
                 Group(triple.`object`, groupName)
             }
 

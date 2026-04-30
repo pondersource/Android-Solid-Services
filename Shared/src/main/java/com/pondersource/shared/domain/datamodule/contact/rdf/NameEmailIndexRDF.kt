@@ -21,10 +21,10 @@ class NameEmailIndexRDF : SolidRDFResource {
     fun getContacts(addressBookUri: String): List<Contact> =
         quads
             .filter { it.predicate == VCARD.IN_ADDRESS_BOOK && it.subject == addressBookUri }
-            .map { triple ->
+            .mapNotNull { triple ->
                 val contactName = quads.find {
                     it.subject == triple.`object` && it.predicate == VCARD.FN
-                }!!.`object`
+                }?.`object` ?: return@mapNotNull null
                 Contact(triple.`object`, contactName)
             }
 

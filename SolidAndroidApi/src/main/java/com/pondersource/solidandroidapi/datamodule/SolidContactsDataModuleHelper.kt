@@ -465,7 +465,7 @@ internal class SolidContactsDataModuleHelper {
 
         return solidResourceManager.read(
             webIdString,
-            privateTypeIndexUri!!,
+            privateTypeIndexUri,
             PrivateTypeIndex::class.java
         ).getOrThrow()
     }
@@ -502,7 +502,7 @@ internal class SolidContactsDataModuleHelper {
 
         return solidResourceManager.read(
             webIdString,
-            publicTypeIndexUri!!,
+            publicTypeIndexUri,
             PublicTypeIndex::class.java
         ).getOrThrow()
     }

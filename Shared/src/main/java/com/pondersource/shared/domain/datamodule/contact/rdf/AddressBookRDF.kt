@@ -25,14 +25,14 @@ class AddressBookRDF : SolidRDFResource {
     }
 
     fun getOwner(): String =
-        quads.find { it.predicate == DC.TITLE }!!.`object`
+        quads.find { it.predicate == ACL.OWNER }!!.`object`
 
     fun setOwner(owner: String) {
         addQuad(getIdentifier().toString(), ACL.OWNER, owner)
     }
 
     fun getTitle(): String =
-        quads.find { it.predicate == DC.TITLE }!!.`object`
+        quads.find { it.predicate == DC.TITLE || it.predicate == DC.TITLE_LEGACY }!!.`object`
 
     fun setTitle(title: String) {
         addQuadLiteral(getIdentifier().toString(), DC.TITLE, title, XSD.STRING)
