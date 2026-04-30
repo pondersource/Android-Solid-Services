@@ -1,13 +1,11 @@
 package com.pondersource.androidsolidservices.ui.elements
 
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.res.stringResource
+import com.pondersource.androidsolidservices.R
 import com.pondersource.androidsolidservices.model.GrantedApp
 
 @Composable
@@ -20,48 +18,27 @@ fun RevokePermissionDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(onConfirm) {
-                Text("Revoke")
+                Text(
+                    text = stringResource(R.string.revoke)
+                )
             }
         },
         dismissButton = {
             Button(onDismiss) {
-                Text("Cancel")
+                Text(
+                    text = stringResource(R.string.cancel)
+                )
             }
         },
         title = {
-            Text("Revoke Permission")
+            Text(
+                text = stringResource(R.string.revoke_permission)
+            )
         },
         text = {
-            Text("Do you want to revoke Solid access from ${app.name} for account ${app.webId}?")
+            Text(
+                text = stringResource(R.string.revoke_permission_description, app.name, app.webId)
+            )
         }
-    )
-}
-
-@Composable
-fun RequestPermissionDialog(
-    appName: String,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            Button(onConfirm) {
-                Text("Allow")
-            }
-        },
-        modifier = Modifier.size(100.dp),
-        dismissButton = {
-            Button(onDismiss) {
-                Text("Deny")
-            }
-        },
-        title = {
-            Text("Permission Request")
-        },
-        text = {
-            Text("$appName wants to access your Solid pod. Do you allow?")
-        },
-        properties = DialogProperties(false, false)
     )
 }

@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -175,7 +176,7 @@ private fun ProfileSelectionScreen(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "wants to access your Solid Pod",
+                    text = stringResource(R.string.wants_to_access_your_solid_pod),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -185,7 +186,7 @@ private fun ProfileSelectionScreen(
                 Spacer(Modifier.height(12.dp))
 
                 Text(
-                    text = "Choose an account",
+                    text = stringResource(R.string.choose_an_account),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.Start),
@@ -195,7 +196,7 @@ private fun ProfileSelectionScreen(
 
                 if (profiles.isEmpty()) {
                     Text(
-                        text = "No accounts logged in.",
+                        text = stringResource(R.string.no_accounts_logged_in),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(vertical = 16.dp),
@@ -220,7 +221,9 @@ private fun ProfileSelectionScreen(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Cancel")
+                    Text(
+                        text = stringResource(R.string.cancel)
+                    )
                 }
             }
         }

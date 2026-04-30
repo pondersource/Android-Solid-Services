@@ -1,7 +1,6 @@
 package com.pondersource.androidsolidservices.ui.main
 
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -63,17 +63,27 @@ fun MainPage(
                 dismissOnBackPress = false,
                 dismissOnClickOutside = false
             ),
-            title = { Text("Overlay Permission Required") },
-            text = { Text("Android Solid Services needs permission to draw over other apps in order to show access grant dialogs. Please enable it in Settings.") },
+            title = {
+                Text(
+                    text = stringResource(R.string.overlay_permission_required)
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.overlay_permission_required_description)
+                )
+            },
             confirmButton = {
                 Button(onClick = {
                     val intent = Intent(
                         Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:${context.packageName}")
+                        "package:${context.packageName}".toUri()
                     )
                     context.startActivity(intent)
                 }) {
-                    Text("Open Settings")
+                    Text(
+                        text = stringResource(R.string.open_settings)
+                    )
                 }
             }
         )

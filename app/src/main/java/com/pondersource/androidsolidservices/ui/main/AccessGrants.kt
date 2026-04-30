@@ -80,7 +80,7 @@ fun AccessGrants(
             if (grantedApps.isEmpty()) {
                 item {
                     Text(
-                        text = "No app granted",
+                        text = stringResource(R.string.no_app_granted),
                         modifier = Modifier.padding(16.dp)
                     )
                 }
@@ -152,7 +152,7 @@ private fun GrantedAppItem(
                 Text(text = app.packageName)
                 Text(text = app.webId, style = MaterialTheme.typography.bodySmall)
                 Button(onRevokeClicked) {
-                    Text(text = "Revoke Permission")
+                    Text(text = stringResource(R.string.revoke_permission))
                 }
             }
         }
