@@ -18,6 +18,31 @@ fun Headers.getContentLength(): Long {
     return this["content-length"]?.toLongOrNull() ?: -1L
 }
 
+fun Headers.getContentType(): String? = get(HTTPHeaderName.CONTENT_TYPE)
+
+fun Headers.getAcceptPatch(): List<String> =
+    get(HTTPHeaderName.ACCEPT_PATCH)
+        ?.split(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
+        ?: emptyList()
+
+fun Headers.getAcceptPost(): List<String> =
+    get(HTTPHeaderName.ACCEPT_POST)
+        ?.split(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
+        ?: emptyList()
+
+fun Headers.getAcceptPut(): List<String> =
+    get(HTTPHeaderName.ACCEPT_PUT)
+        ?.split(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
+        ?: emptyList()
+
+fun Headers.getWwwAuthenticate(): String? = get(HTTPHeaderName.WWW_AUTHENTICATE)
+
 /**
  * Returns the URI of the WAC / ACP access-control resource advertised by
  * `Link: <...>; rel="acl"`, or `null` if absent.
@@ -47,6 +72,16 @@ fun Headers.getStorageDescriptionUri(): URI? =
  */
 fun Headers.getOwnerUri(): URI? =
     parseLinkRelation(this, HTTPLinkRelation.OWNER)
+
+/**
+ * Returns the OIDC issuer URI advertised by
+ * `Link: <...>; rel="http://www.w3.org/ns/solid/terms#oidcIssuer"`,
+ * or `null` if absent.
+ *
+ * Spec: https://solidproject.org/TR/oidc — Solid-OIDC issuer discovery
+ */
+fun Headers.getOidcIssuerUri(): URI? =
+    parseLinkRelation(this, HTTPLinkRelation.OIDC_ISSUER)
 
 /**
  * Returns `true` when the `Link` header contains

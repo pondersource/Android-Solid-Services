@@ -4,6 +4,7 @@ import android.content.Context
 import com.pondersource.shared.domain.crud.N3Patch
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.resource.Resource
+import com.pondersource.shared.domain.resource.SolidMetadata
 import java.net.URI
 
 /**
@@ -25,6 +26,25 @@ interface SolidResourceManager {
         fun getInstance(context: Context): SolidResourceManager =
             SolidResourceManagerImplementation.getInstance(context)
     }
+
+    /**
+     * Fetches only the HTTP headers for the resource at [uri] via HTTP HEAD.
+     *
+     * Returns [SolidMetadata] with all Solid-relevant response headers: ETag, Content-Type,
+     * Content-Length, WAC-Allow, Allow, all Link relations (acl, describedby, type,
+     * storageDescription), Accept-Patch/Post/Put, Last-Modified, and WWW-Authenticate.
+     *
+     * No response body is transferred. Ideal for caching checks, permission discovery,
+     * and auxiliary resource IRI resolution before committing to a full GET.
+     *
+     * @param webid The WebID of the authenticated user making the request.
+     * @param uri   The URI of the resource to HEAD.
+     * @return [SolidNetworkResponse.Success] with [SolidMetadata], or an error/exception variant.
+     */
+    suspend fun head(
+        webid: String,
+        uri: URI,
+    ): SolidNetworkResponse<SolidMetadata>
 
     /**
      * Reads a resource from the pod.

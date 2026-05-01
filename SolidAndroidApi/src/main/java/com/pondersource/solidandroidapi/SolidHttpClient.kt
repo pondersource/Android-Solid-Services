@@ -7,6 +7,7 @@ import com.pondersource.shared.domain.network.HTTPHeaderName
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.resource.RDFResource
 import com.pondersource.shared.domain.resource.Resource
+import com.pondersource.shared.domain.resource.SolidMetadata
 import com.pondersource.shared.domain.util.encodeUri
 import com.pondersource.shared.vocab.LDP
 import kotlinx.coroutines.Dispatchers
@@ -177,7 +178,12 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
      *
      * Requires an [Authenticator] at construction.
      */
-    suspend fun patch(webId: String, uri: URI, patch: N3Patch): SolidNetworkResponse<Unit> {
+    suspend fun patch(
+        webId: String,
+        uri: URI,
+        patch: N3Patch,
+        ifMatch: String? = null
+    ): SolidNetworkResponse<Unit> {
         return try {
             val response = executeAuthenticated(
                 method = "PATCH",
@@ -185,6 +191,7 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
                 uri = uri,
                 contentType = patch.contentType,
                 body = patch.toInputStream().readBytes(),
+                ifMatch = ifMatch,
             )
             if (response.isSuccessful()) {
                 SolidNetworkResponse.Success(Unit)
@@ -204,7 +211,12 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
      *
      * Requires an [Authenticator] at construction.
      */
-    suspend fun patchRaw(webId: String, uri: URI, n3Body: String): SolidNetworkResponse<Unit> {
+    suspend fun patchRaw(
+        webId: String,
+        uri: URI,
+        n3Body: String,
+        ifMatch: String? = null
+    ): SolidNetworkResponse<Unit> {
         return try {
             val response = executeAuthenticated(
                 method = "PATCH",
@@ -212,6 +224,7 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
                 uri = uri,
                 contentType = com.pondersource.shared.domain.network.HTTPAcceptType.N3,
                 body = n3Body.toByteArray(Charsets.UTF_8),
+                ifMatch = ifMatch,
             )
             if (response.isSuccessful()) {
                 SolidNetworkResponse.Success(Unit)
@@ -224,14 +237,40 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
     }
 
     /**
+     * Fetches only the HTTP headers for the Solid resource at [uri] via HTTP HEAD.
+     *
+     * Returns [SolidMetadata] populated from all response headers: ETag, Content-Type,
+     * Content-Length, WAC-Allow, Allow, Link relations (acl, describedby, type,
+     * storageDescription), Accept-Patch/Post/Put, Last-Modified, and WWW-Authenticate.
+     *
+     * Requires an [Authenticator] at construction.
+     */
+    suspend fun head(webId: String, uri: URI): SolidNetworkResponse<SolidMetadata> {
+        return try {
+            val response = executeAuthenticated("HEAD", webId, uri)
+            if (response.isSuccessful()) {
+                SolidNetworkResponse.Success(SolidMetadata.from(response.headers))
+            } else {
+                SolidNetworkResponse.Error(response.statusCode, response.statusCode.toString())
+            }
+        } catch (e: Exception) {
+            SolidNetworkResponse.Exception(e)
+        }
+    }
+
+    /**
      * Deletes the Solid resource at [uri].
      *
      * Auth headers are injected automatically.
      * Requires an [Authenticator] at construction.
      */
-    suspend fun delete(webId: String, uri: URI): SolidNetworkResponse<Boolean> {
+    suspend fun delete(
+        webId: String,
+        uri: URI,
+        ifMatch: String? = null
+    ): SolidNetworkResponse<Boolean> {
         return try {
-            val response = executeAuthenticated("DELETE", webId, uri)
+            val response = executeAuthenticated("DELETE", webId, uri, ifMatch = ifMatch)
             if (response.isSuccessful()) {
                 SolidNetworkResponse.Success(true)
             } else {

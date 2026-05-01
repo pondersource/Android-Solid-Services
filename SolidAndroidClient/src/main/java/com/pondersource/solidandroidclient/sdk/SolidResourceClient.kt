@@ -6,17 +6,21 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import com.apicatalog.jsonld.http.media.MediaType
+import com.pondersource.shared.domain.container.SolidContainer
 import com.pondersource.shared.domain.crud.N3Patch
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.profile.WebId
 import com.pondersource.shared.domain.resource.NonRDFResource
 import com.pondersource.shared.domain.resource.RDFResource
+import com.pondersource.shared.domain.resource.SolidMetadata
 import com.pondersource.shared.domain.resource.SolidNonRDFResource
 import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.shared.domain.resource.SolidResource
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_CRUD_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
+import com.pondersource.solidandroidclient.IASSContainerCallback
 import com.pondersource.solidandroidclient.IASSResourceService
+import com.pondersource.solidandroidclient.IASSSolidMetadataCallback
 import com.pondersource.solidandroidclient.IASSSolidNonRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSSolidRdfResourceCallback
 import com.pondersource.solidandroidclient.IASSUnitCallback
@@ -168,6 +172,45 @@ class SolidResourceClient {
                     cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
                 }
             })
+        }
+    }
+
+    /**
+     * Fetches only the HTTP headers for the resource at [resourceUrl] via HTTP HEAD.
+     *
+     * Returns [SolidMetadata] with ETag, Content-Type, Content-Length, WAC-Allow, Allow,
+     * Link relations (acl, describedby, type, storageDescription), Accept-Patch/Post/Put,
+     * Last-Modified, and WWW-Authenticate — with no body transfer.
+     *
+     * Use this to:
+     * - Check resource existence cheaply (200 vs 404/401)
+     * - Discover ACL and description resource IRIs (`aclUri`, `describeByUri`)
+     * - Read effective permissions before write attempts (`wacAllow`)
+     * - Retrieve ETag for conditional PUT/PATCH (`etag`)
+     * - Know supported methods before calling them (`allowedMethods`)
+     *
+     * @param webId       The WebID of the account making the request.
+     * @param resourceUrl The full URL of the resource.
+     * @return [SolidNetworkResponse.Success] with [SolidMetadata], or an error/exception variant.
+     */
+    suspend fun head(webId: String, resourceUrl: String): SolidNetworkResponse<SolidMetadata> {
+        checkBasicConditions()?.let {
+            @Suppress("UNCHECKED_CAST")
+            return it as SolidNetworkResponse<SolidMetadata>
+        }
+        return suspendCancellableCoroutine { cont ->
+            iASSResourceService!!.head(
+                webId,
+                resourceUrl,
+                object : IASSSolidMetadataCallback.Stub() {
+                    override fun onResult(result: SolidMetadata) {
+                        cont.resume(SolidNetworkResponse.Success(result))
+                    }
+
+                    override fun onError(errorCode: Int, errorMessage: String) {
+                        cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
+                    }
+                })
         }
     }
 
@@ -517,6 +560,44 @@ class SolidResourceClient {
                     )
                 )
             }
+        }
+    }
+
+    /**
+     * Reads an LDP container from the pod, with each contained resource enriched by
+     * its own HTTP HEAD metadata.
+     *
+     * Each [com.pondersource.shared.domain.container.SolidSourceReference] in the returned
+     * [SolidContainer] includes a populated [com.pondersource.shared.domain.container.SolidSourceReference.headMetadata]
+     * field carrying the full [SolidMetadata] for that item — ETag, Content-Type,
+     * Content-Length, WAC-Allow, Allow, Link relations, Accept-Patch/Post/Put,
+     * Last-Modified, and WWW-Authenticate.
+     *
+     * @param webId        The WebID of the account making the request.
+     * @param containerUrl The full URL of the LDP container (should end with `/`).
+     * @return [SolidNetworkResponse.Success] with the enriched [SolidContainer], or an error/exception variant.
+     */
+    suspend fun readContainer(
+        webId: String,
+        containerUrl: String
+    ): SolidNetworkResponse<SolidContainer> {
+        checkBasicConditions()?.let {
+            @Suppress("UNCHECKED_CAST")
+            return it as SolidNetworkResponse<SolidContainer>
+        }
+        return suspendCancellableCoroutine { cont ->
+            iASSResourceService!!.readContainer(
+                webId,
+                containerUrl,
+                object : IASSContainerCallback.Stub() {
+                    override fun onResult(result: SolidContainer) {
+                        cont.resume(SolidNetworkResponse.Success(result))
+                    }
+
+                    override fun onError(errorCode: Int, errorMessage: String) {
+                        cont.resume(SolidNetworkResponse.Error(errorCode, errorMessage))
+                    }
+                })
         }
     }
 

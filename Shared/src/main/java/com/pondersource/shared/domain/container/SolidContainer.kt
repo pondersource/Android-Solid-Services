@@ -1,5 +1,7 @@
 package com.pondersource.shared.domain.container
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.apicatalog.jsonld.http.media.MediaType
 import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.resource.SolidRDFResource
@@ -43,6 +45,15 @@ open class SolidContainer : SolidRDFResource {
         parseContainedResources()
     }
 
+    protected constructor(inParcel: Parcel) : super(inParcel) {
+        parseContainedResources()
+        val enriched = inParcel.createTypedArrayList(SolidSourceReference.CREATOR)
+        if (enriched != null) {
+            containerRes.clear()
+            containerRes.addAll(enriched)
+        }
+    }
+
     private fun parseContainedResources() {
         val containerUri = getIdentifier().toString()
         quads
@@ -78,7 +89,18 @@ open class SolidContainer : SolidRDFResource {
             }
     }
 
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        super.writeToParcel(dest, flags)
+        dest.writeTypedList(containerRes)
+    }
+
     companion object {
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<SolidContainer> {
+            override fun createFromParcel(parcel: Parcel): SolidContainer = SolidContainer(parcel)
+            override fun newArray(size: Int): Array<SolidContainer?> = arrayOfNulls(size)
+        }
+
         private fun iriMatches(a: String, b: String): Boolean {
             if (a == b) return true
             return encodeIriIfNeeded(a) == encodeIriIfNeeded(b)
@@ -89,6 +111,11 @@ open class SolidContainer : SolidRDFResource {
     }
 
     fun getContained(): List<SolidSourceReference> = containerRes
+
+    fun enrichContained(refs: List<SolidSourceReference>) {
+        containerRes.clear()
+        containerRes.addAll(refs)
+    }
 
     fun hasLabel(): Boolean = getLabel() != null
 

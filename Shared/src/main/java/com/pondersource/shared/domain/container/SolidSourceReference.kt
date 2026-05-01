@@ -1,5 +1,9 @@
 package com.pondersource.shared.domain.container
 
+import android.os.Build
+import android.os.Parcel
+import android.os.Parcelable
+import com.pondersource.shared.domain.resource.SolidMetadata
 import com.pondersource.shared.vocab.LDP
 
 /**
@@ -14,6 +18,7 @@ import com.pondersource.shared.vocab.LDP
  * @property modified    Last-modified datetime string (`dcterms:modified`), if provided.
  * @property mtime       Unix timestamp of last modification (`stat:mtime`), if provided.
  * @property contentType Content-type hint derived from `rdf:type` media-type URI, if present.
+ * @property headMetadata Full HTTP HEAD metadata for this resource, populated after a HEAD request.
  */
 data class SolidSourceReference(
     val identifier: String,
@@ -22,7 +27,9 @@ data class SolidSourceReference(
     val modified: String? = null,
     val mtime: Long? = null,
     val contentType: String? = null,
-) {
+    val headMetadata: SolidMetadata? = null,
+) : Parcelable {
+
     fun isContainer(): Boolean =
         types.any {
             it == LDP.BASIC_CONTAINER ||
@@ -32,4 +39,39 @@ data class SolidSourceReference(
         }
 
     fun isContainerByUri(): Boolean = identifier.endsWith("/")
+
+    override fun describeContents(): Int = 0
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(identifier)
+        dest.writeStringList(types)
+        dest.writeValue(size)
+        dest.writeString(modified)
+        dest.writeValue(mtime)
+        dest.writeString(contentType)
+        dest.writeParcelable(headMetadata, flags)
+    }
+
+    companion object {
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<SolidSourceReference> {
+            override fun createFromParcel(parcel: Parcel): SolidSourceReference =
+                SolidSourceReference(
+                    identifier = parcel.readString()!!,
+                    types = parcel.createStringArrayList()!!,
+                    size = parcel.readValue(Long::class.java.classLoader) as Long?,
+                    modified = parcel.readString(),
+                    mtime = parcel.readValue(Long::class.java.classLoader) as Long?,
+                    contentType = parcel.readString(),
+                    headMetadata = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        parcel.readParcelable(SolidMetadata::class.java.classLoader, SolidMetadata::class.java)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        parcel.readParcelable(SolidMetadata::class.java.classLoader)
+                    },
+                )
+
+            override fun newArray(size: Int): Array<SolidSourceReference?> = arrayOfNulls(size)
+        }
+    }
 }
