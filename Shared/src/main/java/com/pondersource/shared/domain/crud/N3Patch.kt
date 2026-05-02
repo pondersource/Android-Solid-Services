@@ -3,6 +3,8 @@ package com.pondersource.shared.domain.crud
 import com.pondersource.shared.domain.network.HTTPAcceptType
 import com.pondersource.shared.domain.resource.RDFResource
 import com.pondersource.shared.domain.resource.RdfQuad
+import com.pondersource.shared.vocab.RDF
+import com.pondersource.shared.vocab.Solid
 import java.io.InputStream
 
 /**
@@ -36,7 +38,7 @@ import java.io.InputStream
  * Content-Type: text/n3
  * Spec: https://solidproject.org/TR/protocol#n3-patch
  */
-data class N3Patch(
+public data class N3Patch(
     val deletes: String? = null,
     val inserts: String? = null,
     val where: String? = null,
@@ -49,9 +51,9 @@ data class N3Patch(
 
     val contentType: String = HTTPAcceptType.N3
 
-    fun toN3String(): String = buildString {
-        appendLine("@prefix solid: <http://www.w3.org/ns/solid/terms#> .")
-        appendLine("@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .")
+    public fun toN3String(): String = buildString {
+        appendLine("@prefix solid: <${Solid.NAMESPACE}> .")
+        appendLine("@prefix rdf: <${RDF.NAMESPACE}> .")
         appendLine()
         appendLine("<> a solid:InsertDeletePatch ;")
 
@@ -64,22 +66,20 @@ data class N3Patch(
         appendLine(" .")
     }
 
-    fun toInputStream(): InputStream = toN3String().byteInputStream()
+    public fun toInputStream(): InputStream = toN3String().byteInputStream()
 
-    companion object {
-        fun insert(triples: String): N3Patch = N3Patch(inserts = triples)
+    public companion object {
+        public fun insert(triples: String): N3Patch = N3Patch(inserts = triples)
 
-        fun delete(triples: String): N3Patch = N3Patch(deletes = triples)
+        public fun delete(triples: String): N3Patch = N3Patch(deletes = triples)
 
-        fun replace(inserts: String, where: String): N3Patch =
+        public fun replace(inserts: String, where: String): N3Patch =
             N3Patch(inserts = inserts, where = where)
 
-        // ---- DSL builder ----
-
-        fun build(block: N3PatchBuilder.() -> Unit): N3Patch =
+        public fun build(block: N3PatchBuilder.() -> Unit): N3Patch =
             N3PatchBuilder().apply(block).build()
 
-        fun fromDiff(original: RDFResource, updated: RDFResource): N3Patch {
+        public fun fromDiff(original: RDFResource, updated: RDFResource): N3Patch {
             val originalQuads = original.getAllQuads().filter { it.graph == null }.toSet()
             val updatedQuads = updated.getAllQuads().filter { it.graph == null }.toSet()
 
@@ -109,18 +109,18 @@ data class N3Patch(
  * Variable names passed to [where], [deleteVar], and [insertVar] must not include
  * the leading `?` — the builder adds it automatically.
  */
-class N3PatchBuilder {
+public class N3PatchBuilder {
 
     private val insertTriples = mutableListOf<String>()
     private val deleteTriples = mutableListOf<String>()
     private val whereTriples = mutableListOf<String>()
 
-    fun insert(subject: String, predicate: String, iriObject: String): N3PatchBuilder {
+    public fun insert(subject: String, predicate: String, iriObject: String): N3PatchBuilder {
         insertTriples += triple(subject, predicate, iriObject.asN3IriTerm())
         return this
     }
 
-    fun insertLiteral(
+    public fun insertLiteral(
         subject: String,
         predicate: String,
         value: String,
@@ -131,17 +131,17 @@ class N3PatchBuilder {
         return this
     }
 
-    fun insertVar(subject: String, predicate: String, variable: String): N3PatchBuilder {
+    public fun insertVar(subject: String, predicate: String, variable: String): N3PatchBuilder {
         insertTriples += triple(subject, predicate, "?$variable")
         return this
     }
 
-    fun delete(subject: String, predicate: String, iriObject: String): N3PatchBuilder {
+    public fun delete(subject: String, predicate: String, iriObject: String): N3PatchBuilder {
         deleteTriples += triple(subject, predicate, iriObject.asN3IriTerm())
         return this
     }
 
-    fun deleteLiteral(
+    public fun deleteLiteral(
         subject: String,
         predicate: String,
         value: String,
@@ -152,17 +152,17 @@ class N3PatchBuilder {
         return this
     }
 
-    fun deleteVar(subject: String, predicate: String, variable: String): N3PatchBuilder {
+    public fun deleteVar(subject: String, predicate: String, variable: String): N3PatchBuilder {
         deleteTriples += triple(subject, predicate, "?$variable")
         return this
     }
 
-    fun where(subject: String, predicate: String, variable: String): N3PatchBuilder {
+    public fun where(subject: String, predicate: String, variable: String): N3PatchBuilder {
         whereTriples += triple(subject, predicate, "?$variable")
         return this
     }
 
-    fun build(): N3Patch {
+    public fun build(): N3Patch {
         val insertsStr = insertTriples.takeIf { it.isNotEmpty() }?.joinToString("\n    ")
         val deletesStr = deleteTriples.takeIf { it.isNotEmpty() }?.joinToString("\n    ")
         val whereStr = whereTriples.takeIf { it.isNotEmpty() }?.joinToString("\n    ")

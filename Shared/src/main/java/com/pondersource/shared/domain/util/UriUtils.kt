@@ -3,7 +3,7 @@ package com.pondersource.shared.domain.util
 import java.net.URI
 import java.net.URL
 
-fun encodeUri(uri: URI): URI {
+public fun encodeUri(uri: URI): URI {
     return try {
         URI(
             uri.scheme,
@@ -19,7 +19,7 @@ fun encodeUri(uri: URI): URI {
     }
 }
 
-fun encodeUriString(raw: String): URI {
+public fun encodeUriString(raw: String): URI {
     return try {
         encodeUri(URI(raw))
     } catch (_: Exception) {

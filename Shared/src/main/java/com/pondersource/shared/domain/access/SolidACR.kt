@@ -17,14 +17,14 @@ import java.net.URI
  *
  * Spec: https://solidproject.org/TR/acp
  */
-class SolidACR : SolidRDFResource {
+public class SolidACR : SolidRDFResource {
 
-    constructor(identifier: URI) : this(identifier, null, null)
+    public constructor(identifier: URI) : this(identifier, null, null)
 
-    constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
+    public constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
             this(identifier, MediaType.JSON_LD, quads, headers)
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType,
         quads: List<RdfQuad>?,
@@ -32,14 +32,14 @@ class SolidACR : SolidRDFResource {
     ) : super(identifier, mediaType, quads, headers)
 
     /** Returns `true` if the quad store declares `rdf:type acp:AccessControlResource`. */
-    fun isACR(): Boolean =
+    public fun isACR(): Boolean =
         quads.any { it.predicate == RDF.TYPE && it.`object` == ACP.ACCESS_CONTROL_RESOURCE }
 
     /**
      * Returns all `acp:AccessControl` IRIs referenced directly via
      * `acp:accessControl` on this ACR.
      */
-    fun getAccessControls(): List<URI> =
+    public fun getAccessControls(): List<URI> =
         quads
             .filter { it.predicate == ACP.ACCESS_CONTROL }
             .mapNotNull { runCatching { URI.create(it.`object`) }.getOrNull() }
@@ -48,7 +48,7 @@ class SolidACR : SolidRDFResource {
      * Returns all `acp:AccessControl` IRIs that apply transitively to
      * member resources via `acp:memberAccessControl`.
      */
-    fun getMemberAccessControls(): List<URI> =
+    public fun getMemberAccessControls(): List<URI> =
         quads
             .filter { it.predicate == ACP.MEMBER_ACCESS_CONTROL }
             .mapNotNull { runCatching { URI.create(it.`object`) }.getOrNull() }
@@ -57,7 +57,7 @@ class SolidACR : SolidRDFResource {
      * Returns all `acp:Policy` IRIs referenced by any access control in
      * this ACR via `acp:apply`.
      */
-    fun getPolicies(): List<URI> =
+    public fun getPolicies(): List<URI> =
         quads
             .filter { it.predicate == ACP.APPLY }
             .mapNotNull { runCatching { URI.create(it.`object`) }.getOrNull() }
@@ -65,7 +65,7 @@ class SolidACR : SolidRDFResource {
     /**
      * Returns the access modes granted by a policy identified by [policyIri].
      */
-    fun getAllowedModes(policyIri: String): Set<String> =
+    public fun getAllowedModes(policyIri: String): Set<String> =
         quads
             .filter { it.subject == policyIri && it.predicate == ACP.ALLOW }
             .map { it.`object` }
@@ -74,7 +74,7 @@ class SolidACR : SolidRDFResource {
     /**
      * Returns the access modes denied by a policy identified by [policyIri].
      */
-    fun getDeniedModes(policyIri: String): Set<String> =
+    public fun getDeniedModes(policyIri: String): Set<String> =
         quads
             .filter { it.subject == policyIri && it.predicate == ACP.DENY }
             .map { it.`object` }

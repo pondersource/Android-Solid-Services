@@ -19,14 +19,14 @@ import java.net.URI
  *
  * Spec: https://solidproject.org/TR/wac
  */
-class SolidACLResource : SolidRDFResource {
+public class SolidACLResource : SolidRDFResource {
 
-    constructor(identifier: URI) : this(identifier, null, null)
+    public constructor(identifier: URI) : this(identifier, null, null)
 
-    constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
+    public constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
             this(identifier, MediaType.JSON_LD, quads, headers)
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType,
         quads: List<RdfQuad>?,
@@ -36,7 +36,7 @@ class SolidACLResource : SolidRDFResource {
     /**
      * Returns all `acl:Authorization` instances in this ACL document.
      */
-    fun getAuthorizations(): List<AclAuthorization> {
+    public fun getAuthorizations(): List<AclAuthorization> {
         val authSubjects = quads
             .filter { it.predicate == RDF.TYPE && it.`object` == ACL.AUTHORIZATION }
             .map { it.subject }
@@ -83,7 +83,7 @@ class SolidACLResource : SolidRDFResource {
     /**
      * Adds a new authorization to this ACL document.
      */
-    fun addAuthorization(authorization: AclAuthorization) {
+    public fun addAuthorization(authorization: AclAuthorization) {
         val subject = authorization.subject
         addQuad(subject, RDF.TYPE, ACL.AUTHORIZATION, maxNumber = Int.MAX_VALUE)
         authorization.accessTo.forEach {

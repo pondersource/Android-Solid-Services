@@ -5,9 +5,9 @@ import com.pondersource.shared.domain.resource.RdfQuad
 import okhttp3.Headers
 import java.net.URI
 
-class PrivateTypeIndex : SettingTypeIndex {
+public class PrivateTypeIndex : SettingTypeIndex {
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType,
         quads: List<RdfQuad>?,

@@ -10,14 +10,14 @@ import android.os.Parcelable
  *
  * Spec: https://solidproject.org/TR/wac — WAC-Allow header
  */
-data class WacAllow(
+public data class WacAllow(
     val userModes: Set<String>,
     val publicModes: Set<String>
 ) : Parcelable {
-    fun canRead() = userModes.contains("read")
-    fun canWrite() = userModes.contains("write")
-    fun canAppend() = userModes.contains("append") || canWrite()
-    fun canControl() = userModes.contains("control")
+    public fun canRead(): Boolean = userModes.contains("read")
+    public fun canWrite(): Boolean = userModes.contains("write")
+    public fun canAppend(): Boolean = userModes.contains("append") || canWrite()
+    public fun canControl(): Boolean = userModes.contains("control")
 
     override fun describeContents(): Int = 0
 
@@ -26,9 +26,9 @@ data class WacAllow(
         dest.writeStringList(publicModes.toList())
     }
 
-    companion object {
+    public companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<WacAllow> {
+        public val CREATOR: Parcelable.Creator<WacAllow> = object : Parcelable.Creator<WacAllow> {
             override fun createFromParcel(parcel: Parcel): WacAllow = WacAllow(
                 userModes = parcel.createStringArrayList()!!.toSet(),
                 publicModes = parcel.createStringArrayList()!!.toSet(),
@@ -37,7 +37,7 @@ data class WacAllow(
             override fun newArray(size: Int): Array<WacAllow?> = arrayOfNulls(size)
         }
 
-        fun parse(headerValue: String?): WacAllow? {
+        public fun parse(headerValue: String?): WacAllow? {
             headerValue ?: return null
             val groups = mutableMapOf<String, Set<String>>()
             val regex = Regex("""(\w+)\s*=\s*"([^"]*)"""")

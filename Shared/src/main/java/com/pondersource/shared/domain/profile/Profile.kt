@@ -18,21 +18,21 @@ import kotlinx.serialization.json.Json
 import net.openid.appauth.AuthState
 
 @Serializable
-data class ProfileList(
+public data class ProfileList(
     @Serializable(with = ProfileMapSerializer::class)
     val profiles: Map<String, Profile> = mapOf()
 )
 
-fun ProfileList.contains(webId: String): Boolean {
+public fun ProfileList.contains(webId: String): Boolean {
     return profiles.containsKey(webId)
 }
 
-fun ProfileList.getProfileOrNull(webId: String): Profile? {
+public fun ProfileList.getProfileOrNull(webId: String): Profile? {
     return profiles[webId]
 }
 
 @Serializable(with = ProfileSerializer::class)
-data class Profile(
+public data class Profile(
     val authState: AuthState = AuthState(),
     val userInfo: UserInfo? = null,
     val webId: WebId? = null
@@ -40,7 +40,7 @@ data class Profile(
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = Map::class)
-class ProfileMapSerializer(
+public class ProfileMapSerializer(
     private val keySerializer: KSerializer<String>,
     private val valueSerializer: KSerializer<Profile>
 ) : KSerializer<Map<String, Profile>> {
@@ -55,7 +55,7 @@ class ProfileMapSerializer(
     }
 }
 
-class ProfileSerializer : KSerializer<Profile> {
+public class ProfileSerializer : KSerializer<Profile> {
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Profile") {
         element<String>("authState")

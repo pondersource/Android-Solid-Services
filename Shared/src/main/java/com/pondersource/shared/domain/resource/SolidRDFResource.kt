@@ -6,11 +6,11 @@ import com.apicatalog.jsonld.http.media.MediaType
 import okhttp3.Headers
 import java.net.URI
 
-open class SolidRDFResource : RDFResource, SolidResource {
+public open class SolidRDFResource : RDFResource, SolidResource {
 
-    companion object {
+    public companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<SolidRDFResource> {
+        public val CREATOR: Parcelable.Creator<SolidRDFResource> = object : Parcelable.Creator<SolidRDFResource> {
             override fun createFromParcel(parcel: Parcel): SolidRDFResource =
                 SolidRDFResource(parcel)
 
@@ -22,15 +22,15 @@ open class SolidRDFResource : RDFResource, SolidResource {
 
     protected constructor(inParcel: Parcel) : super(inParcel)
 
-    constructor(identifier: URI) : this(identifier, null)
+    public constructor(identifier: URI) : this(identifier, null)
 
-    constructor(identifier: URI, quads: List<RdfQuad>?) :
+    public constructor(identifier: URI, quads: List<RdfQuad>?) :
             this(identifier, quads, null)
 
-    constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
+    public constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
             this(identifier, MediaType.JSON_LD, quads, headers)
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType,
         quads: List<RdfQuad>?,

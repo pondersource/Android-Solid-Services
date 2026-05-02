@@ -7,14 +7,14 @@ import com.pondersource.shared.domain.datamodule.contact.rdf.NameEmailIndexRDF
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class AddressBook(
+public data class AddressBook(
     val uri: String,
     var title: String,
     var contacts: List<Contact>,
     var groups: List<Group>,
 ) : Parcelable {
-    companion object {
-        fun createFromRdf(
+    public companion object {
+        public fun createFromRdf(
             addressBookRdf: AddressBookRDF,
             nameEmailIndexRdf: NameEmailIndexRDF,
             groupsIndexRdf: GroupsIndexRDF
@@ -34,7 +34,7 @@ data class AddressBook(
 }
 
 @Parcelize
-data class AddressBookList(
+public data class AddressBookList(
     val publicAddressBookUris: List<String>,
     val privateAddressBookUris: List<String>,
 ) : Parcelable

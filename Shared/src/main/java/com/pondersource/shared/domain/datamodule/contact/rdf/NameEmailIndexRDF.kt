@@ -10,16 +10,16 @@ import com.pondersource.shared.vocab.XSD
 import okhttp3.Headers
 import java.net.URI
 
-class NameEmailIndexRDF : SolidRDFResource {
+public class NameEmailIndexRDF : SolidRDFResource {
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType? = null,
         quads: List<RdfQuad>? = null,
         headers: Headers? = null
     ) : super(identifier, mediaType ?: MediaType.JSON_LD, quads, headers)
 
-    fun getContacts(addressBookUri: String): List<Contact> =
+    public fun getContacts(addressBookUri: String): List<Contact> =
         quads
             .filter { it.predicate == VCARD.IN_ADDRESS_BOOK && it.subject == addressBookUri }
             .mapNotNull { triple ->
@@ -29,14 +29,14 @@ class NameEmailIndexRDF : SolidRDFResource {
                 Contact(triple.`object`, contactName)
             }
 
-    fun addContact(addressBookUri: String, contact: ContactRDF) {
+    public fun addContact(addressBookUri: String, contact: ContactRDF) {
         val contactUri = contact.getIdentifier().toString()
         addQuad(addressBookUri, VCARD.IN_ADDRESS_BOOK, contactUri, maxNumber = Int.MAX_VALUE)
         addQuad(contactUri, RDF.TYPE, VCARD.INDIVIDUAL)
         addQuadLiteral(contactUri, VCARD.FN, contact.getFullName(), XSD.STRING)
     }
 
-    fun removeContact(contactUri: String): Boolean {
+    public fun removeContact(contactUri: String): Boolean {
         val affected = quads.filter {
             (it.predicate == VCARD.IN_ADDRESS_BOOK && it.`object` == contactUri) ||
                     it.subject == contactUri

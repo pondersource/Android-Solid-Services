@@ -5,19 +5,19 @@ import com.pondersource.shared.domain.datamodule.contact.rdf.GroupRDF
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Group(
+public data class Group(
     val uri: String,
     val name: String,
 ) : Parcelable
 
 @Parcelize
-data class FullGroup(
+public data class FullGroup(
     val uri: String,
     val name: String,
     val contacts: List<Contact>,
 ) : Parcelable {
-    companion object {
-        fun createFromRdf(groupRdf: GroupRDF): FullGroup {
+    public companion object {
+        public fun createFromRdf(groupRdf: GroupRDF): FullGroup {
             return FullGroup(
                 uri = groupRdf.getIdentifier().toString(),
                 name = groupRdf.getTitle(),

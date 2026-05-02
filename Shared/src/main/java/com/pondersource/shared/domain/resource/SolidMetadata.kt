@@ -44,7 +44,7 @@ import java.net.URI
  * convenience (not defined by any Solid spec), following the same pattern
  * used by the Inrupt Java Client SDK.
  */
-data class SolidMetadata(
+public data class SolidMetadata(
     /** URI of the WAC/ACP access-control resource. From `Link: rel="acl"`. */
     val aclUri: URI?,
 
@@ -133,9 +133,9 @@ data class SolidMetadata(
         dest.writeByte(if (isStorage) 1 else 0)
     }
 
-    companion object {
+    public companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<SolidMetadata> {
+        public val CREATOR: Parcelable.Creator<SolidMetadata> = object : Parcelable.Creator<SolidMetadata> {
             override fun createFromParcel(parcel: Parcel): SolidMetadata = SolidMetadata(
                 aclUri = parcel.readString()?.let { runCatching { URI.create(it) }.getOrNull() },
                 storageDescriptionUri = parcel.readString()
@@ -170,7 +170,7 @@ data class SolidMetadata(
             override fun newArray(size: Int): Array<SolidMetadata?> = arrayOfNulls(size)
         }
 
-        fun from(headers: Headers): SolidMetadata = SolidMetadata(
+        public fun from(headers: Headers): SolidMetadata = SolidMetadata(
             aclUri = headers.getAclUri(),
             storageDescriptionUri = headers.getStorageDescriptionUri(),
             ownerUri = headers.getOwnerUri(),
@@ -191,7 +191,7 @@ data class SolidMetadata(
             isStorage = headers.isStorage(),
         )
 
-        val EMPTY = SolidMetadata(
+        public val EMPTY: SolidMetadata = SolidMetadata(
             aclUri = null,
             storageDescriptionUri = null,
             ownerUri = null,

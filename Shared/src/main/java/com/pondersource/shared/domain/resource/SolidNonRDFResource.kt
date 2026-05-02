@@ -6,11 +6,11 @@ import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
 
-open class SolidNonRDFResource : NonRDFResource, SolidResource {
+public open class SolidNonRDFResource : NonRDFResource, SolidResource {
 
-    companion object {
+    public companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<SolidNonRDFResource> {
+        public val CREATOR: Parcelable.Creator<SolidNonRDFResource> = object : Parcelable.Creator<SolidNonRDFResource> {
             override fun createFromParcel(parcel: Parcel): SolidNonRDFResource =
                 SolidNonRDFResource(parcel)
 
@@ -22,13 +22,13 @@ open class SolidNonRDFResource : NonRDFResource, SolidResource {
 
     protected constructor(inParcel: Parcel) : super(inParcel)
 
-    constructor(
+    public constructor(
         identifier: URI,
         contentType: String,
         entity: InputStream,
     ) : this(identifier, contentType, entity, null)
 
-    constructor(
+    public constructor(
         identifier: URI,
         contentType: String,
         entity: InputStream,

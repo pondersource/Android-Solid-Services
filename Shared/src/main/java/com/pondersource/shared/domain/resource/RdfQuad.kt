@@ -10,7 +10,7 @@ package com.pondersource.shared.domain.resource
  *
  * Blank nodes use the `"_:"` prefix per the N-Quads / RdfQuadConsumer convention.
  */
-data class RdfQuad(
+public data class RdfQuad(
     val subject: String,
     val predicate: String,
     val `object`: String,

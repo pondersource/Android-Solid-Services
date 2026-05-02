@@ -13,7 +13,7 @@ import java.net.URI
  *
  * Spec: https://solidproject.org/TR/wac
  */
-data class AclAuthorization(
+public data class AclAuthorization(
     /** Identifier of this authorization node (blank node or IRI). */
     val subject: String,
 
@@ -52,11 +52,11 @@ data class AclAuthorization(
      */
     val origins: List<URI> = emptyList(),
 ) {
-    fun allowsRead() = modes.contains(ACL.READ)
-    fun allowsWrite() = modes.contains(ACL.WRITE)
-    fun allowsAppend() = modes.contains(ACL.APPEND) || allowsWrite()
-    fun allowsControl() = modes.contains(ACL.CONTROL)
+    public fun allowsRead(): Boolean = modes.contains(ACL.READ)
+    public fun allowsWrite(): Boolean = modes.contains(ACL.WRITE)
+    public fun allowsAppend(): Boolean = modes.contains(ACL.APPEND) || allowsWrite()
+    public fun allowsControl(): Boolean = modes.contains(ACL.CONTROL)
 
     /** Returns `true` if this authorization applies to the public (`foaf:Agent` agentClass). */
-    fun isPublic() = agentClasses.any { it.toString() == Solid.PUBLIC_AGENT }
+    public fun isPublic(): Boolean = agentClasses.any { it.toString() == Solid.PUBLIC_AGENT }
 }

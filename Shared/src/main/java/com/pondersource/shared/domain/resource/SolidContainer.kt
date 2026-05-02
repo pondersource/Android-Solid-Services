@@ -19,22 +19,22 @@ import java.net.URI
  *
  * Spec: https://solidproject.org/TR/protocol — Container resources
  */
-open class SolidContainer : SolidRDFResource {
+public open class SolidContainer : SolidRDFResource {
 
     private val containerRes = arrayListOf<SolidSourceReference>()
 
-    constructor(identifier: URI) : this(identifier, null)
+    public constructor(identifier: URI) : this(identifier, null)
 
-    constructor(identifier: URI, quads: List<RdfQuad>?) :
+    public constructor(identifier: URI, quads: List<RdfQuad>?) :
             this(identifier, quads, null)
 
-    constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>?) :
+    public constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>?) :
             this(identifier, mediaType, quads, null)
 
-    constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
+    public constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
             this(identifier, MediaType.JSON_LD, quads, headers)
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType,
         quads: List<RdfQuad>?,
@@ -92,9 +92,9 @@ open class SolidContainer : SolidRDFResource {
         dest.writeTypedList(containerRes)
     }
 
-    companion object {
+    public companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<SolidContainer> {
+        public val CREATOR: Parcelable.Creator<SolidContainer> = object : Parcelable.Creator<SolidContainer> {
             override fun createFromParcel(parcel: Parcel): SolidContainer = SolidContainer(parcel)
             override fun newArray(size: Int): Array<SolidContainer?> = arrayOfNulls(size)
         }
@@ -108,16 +108,16 @@ open class SolidContainer : SolidRDFResource {
             encodeUriString(iri).toString()
     }
 
-    fun getContained(): List<SolidSourceReference> = containerRes
+    public fun getContained(): List<SolidSourceReference> = containerRes
 
-    fun enrichContained(refs: List<SolidSourceReference>) {
+    public fun enrichContained(refs: List<SolidSourceReference>) {
         containerRes.clear()
         containerRes.addAll(refs)
     }
 
-    fun hasLabel(): Boolean = getLabel() != null
+    public fun hasLabel(): Boolean = getLabel() != null
 
-    fun getLabel(): String? =
+    public fun getLabel(): String? =
         quads.find {
             it.subject == getIdentifier().toString() && it.predicate == RDFS.LABEL
         }?.`object`

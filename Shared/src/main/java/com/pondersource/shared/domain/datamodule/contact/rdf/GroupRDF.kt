@@ -11,9 +11,9 @@ import com.pondersource.shared.vocab.XSD
 import okhttp3.Headers
 import java.net.URI
 
-class GroupRDF : SolidRDFResource {
+public class GroupRDF : SolidRDFResource {
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType? = null,
         quads: List<RdfQuad>? = null,
@@ -24,20 +24,20 @@ class GroupRDF : SolidRDFResource {
         addQuad(getIdentifier().toString(), RDF.TYPE, VCARD.GROUP)
     }
 
-    fun getTitle(): String =
+    public fun getTitle(): String =
         quads.find {
             it.subject == getIdentifier().toString() && it.predicate == VCARD.FN
         }!!.`object`
 
-    fun setTitle(title: String) {
+    public fun setTitle(title: String) {
         addQuadLiteral(getIdentifier().toString(), VCARD.FN, title, XSD.STRING)
     }
 
-    fun setIncludesInAddressBook(addressBookUri: String) {
+    public fun setIncludesInAddressBook(addressBookUri: String) {
         addQuad(addressBookUri, VCARD.INCLUDES_GROUP, getIdentifier().toString())
     }
 
-    fun getContacts(): List<Contact> {
+    public fun getContacts(): List<Contact> {
         val members = quads
             .filter { it.predicate == VCARD.HAS_MEMBER }
             .map { triple ->
@@ -55,7 +55,7 @@ class GroupRDF : SolidRDFResource {
         }
     }
 
-    fun addMember(contact: ContactRDF) {
+    public fun addMember(contact: ContactRDF) {
         addQuad(
             getIdentifier().toString(),
             VCARD.HAS_MEMBER,
@@ -65,7 +65,7 @@ class GroupRDF : SolidRDFResource {
         addQuadLiteral(contact.getIdentifier().toString(), VCARD.FN, contact.getFullName(), XSD.STRING)
     }
 
-    fun removeMember(contactURI: URI): Boolean {
+    public fun removeMember(contactURI: URI): Boolean {
         val contactStr = contactURI.toString()
         val member = quads.find {
             it.subject == getIdentifier().toString() &&

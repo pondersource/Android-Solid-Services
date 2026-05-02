@@ -4,71 +4,71 @@ package com.pondersource.shared.domain.network
  * HTTP header name constants.
  * See https://solidproject.org/TR/protocol for Solid-specific headers.
  */
-object HTTPHeaderName {
+public object HTTPHeaderName {
     //Standard request headers
-    const val AUTHORIZATION = "Authorization"
-    const val ACCEPT = "Accept"
-    const val CONTENT_TYPE = "Content-Type"
-    const val CONTENT_LENGTH = "Content-Length"
-    const val LINK = "Link"
-    const val IF_NONE_MATCH = "If-None-Match"
-    const val IF_MATCH = "If-Match"
-    const val IF_UNMODIFIED_SINCE = "If-Unmodified-Since"
-    const val IF_MODIFIED_SINCE = "If-Modified-Since"
-    const val ORIGIN = "Origin"
-    const val HOST = "Host"
+    public const val AUTHORIZATION: String = "Authorization"
+    public const val ACCEPT: String = "Accept"
+    public const val CONTENT_TYPE: String = "Content-Type"
+    public const val CONTENT_LENGTH: String = "Content-Length"
+    public const val LINK: String = "Link"
+    public const val IF_NONE_MATCH: String = "If-None-Match"
+    public const val IF_MATCH: String = "If-Match"
+    public const val IF_UNMODIFIED_SINCE: String = "If-Unmodified-Since"
+    public const val IF_MODIFIED_SINCE: String = "If-Modified-Since"
+    public const val ORIGIN: String = "Origin"
+    public const val HOST: String = "Host"
 
     //Standard response headers
-    const val ETAG = "ETag"
-    const val LAST_MODIFIED = "Last-Modified"
-    const val LOCATION = "Location"
-    const val ALLOW = "Allow"
-    const val VARY = "Vary"
-    const val WWW_AUTHENTICATE = "WWW-Authenticate"
+    public const val ETAG: String = "ETag"
+    public const val LAST_MODIFIED: String = "Last-Modified"
+    public const val LOCATION: String = "Location"
+    public const val ALLOW: String = "Allow"
+    public const val VARY: String = "Vary"
+    public const val WWW_AUTHENTICATE: String = "WWW-Authenticate"
 
     //CORS headers
-    const val ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin"
-    const val ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods"
-    const val ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers"
-    const val ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers"
-    const val ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age"
+    public const val ACCESS_CONTROL_ALLOW_ORIGIN: String = "Access-Control-Allow-Origin"
+    public const val ACCESS_CONTROL_ALLOW_METHODS: String = "Access-Control-Allow-Methods"
+    public const val ACCESS_CONTROL_ALLOW_HEADERS: String = "Access-Control-Allow-Headers"
+    public const val ACCESS_CONTROL_EXPOSE_HEADERS: String = "Access-Control-Expose-Headers"
+    public const val ACCESS_CONTROL_MAX_AGE: String = "Access-Control-Max-Age"
 
     //Content negotiation
-    const val ACCEPT_PATCH = "Accept-Patch"
-    const val ACCEPT_POST = "Accept-Post"
-    const val ACCEPT_PUT = "Accept-Put"
+    public const val ACCEPT_PATCH: String = "Accept-Patch"
+    public const val ACCEPT_POST: String = "Accept-Post"
+    public const val ACCEPT_PUT: String = "Accept-Put"
 
     //DPoP (Solid-OIDC)
-    public const val DPOP : String = "DPoP"
-    const val DPOP_NONCE = "DPoP-Nonce"
+    public const val DPOP: String = "DPoP"
+    public const val DPOP_NONCE: String = "DPoP-Nonce"
 
     //WAC (Web Access Control)
     /** WAC-Allow: user="read write", public="read" */
-    const val WAC_ALLOW = "WAC-Allow"
+    public const val WAC_ALLOW: String = "WAC-Allow"
 }
 
 /**
  * HTTP media type / content type constants.
  */
-object HTTPAcceptType {
+public object HTTPAcceptType {
     //RDF formats
-    const val JSON_LD = "application/ld+json"
-    const val TURTLE = "text/turtle"
-    const val N3 = "text/n3"
-    const val N_TRIPLES = "application/n-triples"
-    const val N_QUADS = "application/n-quads"
-    const val TRIG = "application/trig"
-    const val RDF_XML = "application/rdf+xml"
-    const val JSON_RDF = "application/rdf+json"
+    public const val JSON_LD: String = "application/ld+json"
+    public const val TURTLE: String = "text/turtle"
+    public const val N3: String = "text/n3"
+    public const val N_TRIPLES: String = "application/n-triples"
+    public const val N_QUADS: String = "application/n-quads"
+    public const val TRIG: String = "application/trig"
+    public const val RDF_XML: String = "application/rdf+xml"
+    public const val JSON_RDF: String = "application/rdf+json"
 
     //General
-    const val JSON = "application/json"
-    const val OCTET_STREAM = "application/octet-stream"
-    const val FORM_URL_ENCODED = "application/x-www-form-urlencoded"
-    const val MULTIPART_FORM_DATA = "multipart/form-data"
-    const val TEXT_PLAIN = "text/plain"
-    const val TEXT_HTML = "text/html"
-    const val ANY = "*/*"
+    public const val JSON: String = "application/json"
+    public const val OCTET_STREAM: String = "application/octet-stream"
+    public const val FORM_URL_ENCODED: String = "application/x-www-form-urlencoded"
+    public const val MULTIPART_FORM_DATA: String = "multipart/form-data"
+    public const val TEXT_PLAIN: String = "text/plain"
+    public const val TEXT_HTML: String = "text/html"
+    public const val ANY: String = "*/*"
 }
 
 /**
@@ -76,69 +76,69 @@ object HTTPAcceptType {
  * Used in Solid `Link:` headers.
  * See https://solidproject.org/TR/protocol
  */
-object HTTPLinkRelation {
+public object HTTPLinkRelation {
     /** The ACL resource associated with this resource (WAC and ACP). */
-    const val ACL = "acl"
+    public const val ACL: String = "acl"
 
     /** A resource that describes this resource. */
-    const val DESCRIBED_BY = "describedby"
+    public const val DESCRIBED_BY: String = "describedby"
 
     /** This resource describes the context resource (inverse of describedby). */
-    const val DESCRIBES = "describes"
+    public const val DESCRIBES: String = "describes"
 
     /** The rdf:type(s) of this resource. */
-    const val TYPE = "type"
+    public const val TYPE: String = "type"
 
     /**
      * The storage description resource.
      * Full IRI: http://www.w3.org/ns/solid/terms#storageDescription
      */
-    const val STORAGE_DESCRIPTION = "http://www.w3.org/ns/solid/terms#storageDescription"
+    public const val STORAGE_DESCRIPTION: String = "http://www.w3.org/ns/solid/terms#storageDescription"
 
     /**
      * The owner of a storage.
      * Full IRI: http://www.w3.org/ns/solid/terms#owner
      */
-    const val OWNER = "http://www.w3.org/ns/solid/terms#owner"
+    public const val OWNER: String = "http://www.w3.org/ns/solid/terms#owner"
 
     /**
      * The OIDC issuer for this resource / WebID.
      * Full IRI: http://www.w3.org/ns/solid/terms#oidcIssuer
      */
-    const val OIDC_ISSUER = "http://www.w3.org/ns/solid/terms#oidcIssuer"
+    public const val OIDC_ISSUER: String = "http://www.w3.org/ns/solid/terms#oidcIssuer"
 
     /** Canonical URL of a resource. */
-    const val CANONICAL = "canonical"
+    public const val CANONICAL: String = "canonical"
 
     /** Predecessor version in a version chain. */
-    const val PREDECESSOR_VERSION = "predecessor-version"
+    public const val PREDECESSOR_VERSION: String = "predecessor-version"
 
     /** Alternate representation. */
-    const val ALTERNATE = "alternate"
+    public const val ALTERNATE: String = "alternate"
 }
 
 /**
  * HTTP status code constants used in the Solid protocol.
  * See https://solidproject.org/TR/protocol
  */
-object HTTPStatusCode {
-    const val OK = 200
-    const val CREATED = 201
-    const val NO_CONTENT = 204
+public object HTTPStatusCode {
+    public const val OK: Int = 200
+    public const val CREATED: Int = 201
+    public const val NO_CONTENT: Int = 204
 
-    const val MOVED_PERMANENTLY = 301
-    const val TEMPORARY_REDIRECT = 307
-    const val PERMANENT_REDIRECT = 308
+    public const val MOVED_PERMANENTLY: Int = 301
+    public const val TEMPORARY_REDIRECT: Int = 307
+    public const val PERMANENT_REDIRECT: Int = 308
 
-    const val BAD_REQUEST = 400
-    const val UNAUTHORIZED = 401
-    const val FORBIDDEN = 403
-    const val NOT_FOUND = 404
-    const val METHOD_NOT_ALLOWED = 405
-    const val CONFLICT = 409
-    const val GONE = 410
-    const val PRECONDITION_FAILED = 412
-    const val UNPROCESSABLE_ENTITY = 422
+    public const val BAD_REQUEST: Int = 400
+    public const val UNAUTHORIZED: Int = 401
+    public const val FORBIDDEN: Int = 403
+    public const val NOT_FOUND: Int = 404
+    public const val METHOD_NOT_ALLOWED: Int = 405
+    public const val CONFLICT: Int = 409
+    public const val GONE: Int = 410
+    public const val PRECONDITION_FAILED: Int = 412
+    public const val UNPROCESSABLE_ENTITY: Int = 422
 
-    const val INTERNAL_SERVER_ERROR = 500
+    public const val INTERNAL_SERVER_ERROR: Int = 500
 }

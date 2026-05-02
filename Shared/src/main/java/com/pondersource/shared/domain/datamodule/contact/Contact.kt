@@ -5,27 +5,27 @@ import com.pondersource.shared.domain.datamodule.contact.rdf.ContactRDF
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Contact(
+public data class Contact(
     val uri: String,
     val name: String,
 ) : Parcelable
 
 @Parcelize
-data class NewContact(
+public data class NewContact(
     var name: String,
     val email: String,
     val phoneNumber: String,
 ) : Parcelable
 
 @Parcelize
-data class FullContact(
+public data class FullContact(
     val uri: String,
     val fullName: String,
     val emailAddresses: List<Email>,
     val phoneNumbers: List<PhoneNumber>,
 ) : Parcelable {
-    companion object {
-        fun createFromRdf(contactRdf: ContactRDF): FullContact {
+    public companion object {
+        public fun createFromRdf(contactRdf: ContactRDF): FullContact {
             return FullContact(
                 uri = contactRdf.getIdentifier().toString(),
                 fullName = contactRdf.getFullName(),
@@ -37,16 +37,16 @@ data class FullContact(
 }
 
 @Parcelize
-data class Email(
+public data class Email(
     val value: String,
 ) : Parcelable
 
 @Parcelize
-data class PhoneNumber(
+public data class PhoneNumber(
     val value: String,
 ) : Parcelable
 
-enum class URLType {
+public enum class URLType {
     Home,
     Work,
     Homepage,
@@ -55,7 +55,7 @@ enum class URLType {
 }
 
 @Parcelize
-data class Name(
+public data class Name(
     val familyName: String? = null,
     val givenName: String? = null,
     val additionalName: String? = null,

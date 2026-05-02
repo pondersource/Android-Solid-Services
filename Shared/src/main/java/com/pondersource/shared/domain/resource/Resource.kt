@@ -6,15 +6,15 @@ import okio.IOException
 import java.io.InputStream
 import java.net.URI
 
-interface Resource : AutoCloseable, Parcelable {
+public interface Resource : AutoCloseable, Parcelable {
 
-    fun getIdentifier(): URI
+    public fun getIdentifier(): URI
 
-    fun getContentType(): String
+    public fun getContentType(): String
 
-    fun getHeaders(): Headers
+    public fun getHeaders(): Headers
 
     @Throws(IOException::class)
-    fun getEntity(): InputStream
+    public fun getEntity(): InputStream
 
 }

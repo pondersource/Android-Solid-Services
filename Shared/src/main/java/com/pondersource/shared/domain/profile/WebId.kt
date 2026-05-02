@@ -45,14 +45,14 @@ import java.net.URI
  *
  * Spec: https://solid.github.io/webid-profile/
  */
-open class WebId : SolidRDFResource {
+public open class WebId : SolidRDFResource {
 
-    companion object {
+    public companion object {
         private const val KEY_IDENTIFIER = "identifier"
         private const val KEY_TYPE = "type"
         private const val KEY_DATASET = "dataset"
 
-        fun writeToString(webId: WebId?): String? {
+        public fun writeToString(webId: WebId?): String? {
             webId ?: return null
             return buildJsonObject {
                 put(KEY_IDENTIFIER, webId.getIdentifier().toString())
@@ -61,7 +61,7 @@ open class WebId : SolidRDFResource {
             }.toString()
         }
 
-        fun readFromString(objectString: String): WebId {
+        public fun readFromString(objectString: String): WebId {
             val obj = Json.parseToJsonElement(objectString).jsonObject
             return WebId(
                 identifier = URI.create(obj[KEY_IDENTIFIER]!!.jsonPrimitive.content),
@@ -73,63 +73,63 @@ open class WebId : SolidRDFResource {
         }
     }
 
-    constructor(identifier: URI, quads: List<RdfQuad>) :
+    public constructor(identifier: URI, quads: List<RdfQuad>) :
             super(identifier, quads)
 
-    constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>) :
+    public constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>) :
             super(identifier, mediaType, quads, null)
 
-    constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>, headers: Headers?) :
+    public constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>, headers: Headers?) :
             super(identifier, mediaType, quads, headers)
 
-    fun getTypes(): List<URI> =
+    public fun getTypes(): List<URI> =
         findAllProperties(RDF.TYPE).map { URI.create(it) }
 
-    fun getPreferencesFile(): URI? =
+    public fun getPreferencesFile(): URI? =
         findProperty(PIM.PREFERENCES_FILE)?.let { runCatching { URI.create(it) }.getOrNull() }
 
-    fun getStorages(): List<URI> =
+    public fun getStorages(): List<URI> =
         findAllProperties(PIM.STORAGE).map { URI.create(it) }
 
-    fun getInbox(): URI? =
+    public fun getInbox(): URI? =
         findProperty(LDP.INBOX)?.let { runCatching { URI.create(it) }.getOrNull() }
 
-    fun getRelatedResources(): List<URI> =
+    public fun getRelatedResources(): List<URI> =
         findAllProperties(RDFS.SEE_ALSO).map { URI.create(it) }
 
-    fun getPrimaryTopicDocuments(): List<URI> =
+    public fun getPrimaryTopicDocuments(): List<URI> =
         findAllProperties(FOAF.IS_PRIMARY_TOPIC_OF).map { URI.create(it) }
 
-    fun getOidcIssuers(): List<URI> =
+    public fun getOidcIssuers(): List<URI> =
         findAllProperties(Solid.OIDC_ISSUER).map { URI.create(it) }
 
-    fun getPrivateTypeIndex(): URI? =
+    public fun getPrivateTypeIndex(): URI? =
         findProperty(Solid.PRIVATE_TYPE_INDEX)?.let { runCatching { URI.create(it) }.getOrNull() }
 
-    fun getPublicTypeIndex(): URI? =
+    public fun getPublicTypeIndex(): URI? =
         findProperty(Solid.PUBLIC_TYPE_INDEX)?.let { runCatching { URI.create(it) }.getOrNull() }
 
-    fun getName(): String? = findProperty(FOAF.NAME)
+    public fun getName(): String? = findProperty(FOAF.NAME)
 
-    fun getGivenName(): String? = findProperty(FOAF.GIVEN_NAME)
+    public fun getGivenName(): String? = findProperty(FOAF.GIVEN_NAME)
 
-    fun getFamilyName(): String? = findProperty(FOAF.FAMILY_NAME)
+    public fun getFamilyName(): String? = findProperty(FOAF.FAMILY_NAME)
 
-    fun getPhoto(): URI? =
+    public fun getPhoto(): URI? =
         findProperty(FOAF.IMG)?.let { runCatching { URI.create(it) }.getOrNull() }
 
-    fun getKnows(): List<URI> =
+    public fun getKnows(): List<URI> =
         findAllProperties(FOAF.KNOWS).map { URI.create(it) }
 
-    fun getTrustedApps(): List<URI> =
+    public fun getTrustedApps(): List<URI> =
         findAllProperties(ACL.TRUSTED_APP)
             .mapNotNull { runCatching { URI.create(it) }.getOrNull() }
 
-    fun getCertKeys(): List<URI> =
+    public fun getCertKeys(): List<URI> =
         findAllProperties(Cert.KEY)
             .mapNotNull { runCatching { URI.create(it) }.getOrNull() }
 
-    fun setPrivateTypeIndex(
+    public fun setPrivateTypeIndex(
         webId: String,
         storage: String,
         uri: String = "$storage/settings/privateTypeIndex",
@@ -137,7 +137,7 @@ open class WebId : SolidRDFResource {
         addQuad(webId, Solid.PRIVATE_TYPE_INDEX, uri)
     }
 
-    fun setPublicTypeIndex(
+    public fun setPublicTypeIndex(
         webId: String,
         storage: String,
         uri: String = "$storage/settings/publicTypeIndex",
@@ -145,7 +145,7 @@ open class WebId : SolidRDFResource {
         addQuad(webId, Solid.PUBLIC_TYPE_INDEX, uri)
     }
 
-    fun setPreferencesFile(
+    public fun setPreferencesFile(
         webId: String,
         storage: String,
         uri: String = "$storage/settings/prefs.ttl",
@@ -153,11 +153,11 @@ open class WebId : SolidRDFResource {
         addQuad(webId, PIM.PREFERENCES_FILE, uri)
     }
 
-    fun setStorage(webId: String, storageUri: String) {
+    public fun setStorage(webId: String, storageUri: String) {
         addQuad(webId, PIM.STORAGE, storageUri, maxNumber = Int.MAX_VALUE)
     }
 
-    fun setInbox(
+    public fun setInbox(
         webId: String,
         storage: String,
         uri: String = "$storage/inbox/",
@@ -165,7 +165,7 @@ open class WebId : SolidRDFResource {
         addQuad(webId, LDP.INBOX, uri)
     }
 
-    fun setOidcIssuer(webId: String, issuerUri: String) {
+    public fun setOidcIssuer(webId: String, issuerUri: String) {
         addQuad(webId, Solid.OIDC_ISSUER, issuerUri, maxNumber = Int.MAX_VALUE)
     }
 }

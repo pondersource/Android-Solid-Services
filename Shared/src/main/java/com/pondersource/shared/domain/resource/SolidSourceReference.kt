@@ -19,7 +19,7 @@ import com.pondersource.shared.vocab.LDP
  * @property contentType Content-type hint derived from `rdf:type` media-type URI, if present.
  * @property headMetadata Full HTTP HEAD metadata for this resource, populated after a HEAD request.
  */
-data class SolidSourceReference(
+public data class SolidSourceReference(
     val identifier: String,
     val types: List<String>,
     val size: Long? = null,
@@ -29,7 +29,7 @@ data class SolidSourceReference(
     val headMetadata: SolidMetadata? = null,
 ) : Parcelable {
 
-    fun isContainer(): Boolean =
+    public fun isContainer(): Boolean =
         types.any {
             it == LDP.BASIC_CONTAINER ||
                     it == LDP.CONTAINER ||
@@ -37,7 +37,7 @@ data class SolidSourceReference(
                     it == LDP.INDIRECT_CONTAINER
         }
 
-    fun isContainerByUri(): Boolean = identifier.endsWith("/")
+    public fun isContainerByUri(): Boolean = identifier.endsWith("/")
 
     override fun describeContents(): Int = 0
 
@@ -51,9 +51,9 @@ data class SolidSourceReference(
         dest.writeParcelable(headMetadata, flags)
     }
 
-    companion object {
+    public companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<SolidSourceReference> {
+        public val CREATOR: Parcelable.Creator<SolidSourceReference> = object : Parcelable.Creator<SolidSourceReference> {
             override fun createFromParcel(parcel: Parcel): SolidSourceReference =
                 SolidSourceReference(
                     identifier = parcel.readString()!!,

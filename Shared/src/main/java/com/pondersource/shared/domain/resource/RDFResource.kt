@@ -38,7 +38,7 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 import java.net.URI
 
-open class RDFResource : Resource {
+public open class RDFResource : Resource {
 
     private val identifier: URI
     private val headers: Headers
@@ -71,14 +71,14 @@ open class RDFResource : Resource {
         }.build()
     )
 
-    companion object {
+    public companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<RDFResource> {
+        public val CREATOR: Parcelable.Creator<RDFResource> = object : Parcelable.Creator<RDFResource> {
             override fun createFromParcel(parcel: Parcel): RDFResource = RDFResource(parcel)
             override fun newArray(size: Int): Array<RDFResource?> = Array(size) { null }
         }
 
-        fun parseJsonLd(
+        public fun parseJsonLd(
             document: JsonDocument,
             options: JsonLdOptions = JsonLdOptions().apply {
                 uriValidation = UriValidationPolicy.SchemeOnly
@@ -113,18 +113,18 @@ open class RDFResource : Resource {
         this.itselfSubject = inParcel.readString()!!
     }
 
-    constructor(identifier: URI) : this(identifier, null as List<RdfQuad>?)
+    public constructor(identifier: URI) : this(identifier, null as List<RdfQuad>?)
 
-    constructor(identifier: URI, quads: List<RdfQuad>?) :
+    public constructor(identifier: URI, quads: List<RdfQuad>?) :
             this(identifier, quads, null)
 
-    constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
+    public constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
             this(identifier, MediaType.JSON_LD, quads, headers)
 
-    constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>?) :
+    public constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>?) :
             this(identifier, mediaType, quads, null)
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType,
         quads: List<RdfQuad>?,
@@ -137,7 +137,7 @@ open class RDFResource : Resource {
         this.itselfSubject = "$identifier#it"
     }
 
-    fun addQuad(
+    public fun addQuad(
         subject: String,
         predicate: String,
         obj: String,
@@ -146,7 +146,7 @@ open class RDFResource : Resource {
         addQuadLiteral(subject, predicate, obj, null, null, maxNumber)
     }
 
-    fun addQuadLiteral(
+    public fun addQuadLiteral(
         subject: String,
         predicate: String,
         value: String,
@@ -164,23 +164,23 @@ open class RDFResource : Resource {
         quads.add(quad)
     }
 
-    fun clearProperties(predicate: String, subject: String = itselfSubject) {
+    public fun clearProperties(predicate: String, subject: String = itselfSubject) {
         quads.removeAll { it.subject == subject && it.predicate == predicate }
     }
 
-    fun findAllProperties(predicate: String): List<String> =
+    public fun findAllProperties(predicate: String): List<String> =
         quads.filter { it.predicate == predicate }.map { it.`object` }
 
-    fun findProperty(predicate: String): String? =
+    public fun findProperty(predicate: String): String? =
         quads.find { it.predicate == predicate }?.`object`
 
-    fun findAllPropertiesForSubject(subject: String, predicate: String): List<String> =
+    public fun findAllPropertiesForSubject(subject: String, predicate: String): List<String> =
         quads.filter { it.subject == subject && it.predicate == predicate }.map { it.`object` }
 
-    fun findPropertyForSubject(subject: String, predicate: String): String? =
+    public fun findPropertyForSubject(subject: String, predicate: String): String? =
         quads.find { it.subject == subject && it.predicate == predicate }?.`object`
 
-    fun getAllQuads(): List<RdfQuad> = quads.toList()
+    public fun getAllQuads(): List<RdfQuad> = quads.toList()
 
     override fun getIdentifier(): URI = identifier
 

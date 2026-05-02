@@ -13,9 +13,9 @@ import com.pondersource.shared.vocab.XSD
 import okhttp3.Headers
 import java.net.URI
 
-class ContactRDF : SolidRDFResource {
+public class ContactRDF : SolidRDFResource {
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType? = null,
         quads: List<RdfQuad>? = null,
@@ -26,21 +26,21 @@ class ContactRDF : SolidRDFResource {
         addQuad(getIdentifier().toString(), RDF.TYPE, VCARD.INDIVIDUAL)
     }
 
-    fun getFullName(): String =
+    public fun getFullName(): String =
         quads.find {
             it.subject == getIdentifier().toString() && it.predicate == VCARD.FN
         }!!.`object`
 
-    fun setFullName(name: String) {
+    public fun setFullName(name: String) {
         addQuadLiteral(getIdentifier().toString(), VCARD.FN, name, XSD.STRING)
     }
 
-    fun getPhotoUrl(): String? =
+    public fun getPhotoUrl(): String? =
         quads.find {
             it.subject == getIdentifier().toString() && it.predicate == VCARD.HAS_PHOTO
         }?.`object`
 
-    fun getUrls(): List<Pair<URLType, String>> {
+    public fun getUrls(): List<Pair<URLType, String>> {
         val selfUri = getIdentifier().toString()
         return quads
             .filter { it.subject == selfUri && it.predicate == VCARD.URL }
@@ -62,7 +62,7 @@ class ContactRDF : SolidRDFResource {
             }
     }
 
-    fun getName(): Name? {
+    public fun getName(): Name? {
         val hasNameQuad = quads.find {
             it.subject == getIdentifier().toString() && it.predicate == VCARD.HAS_NAME
         } ?: return null
@@ -76,7 +76,7 @@ class ContactRDF : SolidRDFResource {
         )
     }
 
-    fun getPhoneNumbers(): List<PhoneNumber> =
+    public fun getPhoneNumbers(): List<PhoneNumber> =
         quads
             .filter { it.subject == getIdentifier().toString() && it.predicate == VCARD.HAS_TELEPHONE }
             .mapNotNull { triple ->
@@ -84,7 +84,7 @@ class ContactRDF : SolidRDFResource {
                     ?.let { PhoneNumber(it.`object`) }
             }
 
-    fun addPhoneNumber(newPhoneNumber: String?): Boolean {
+    public fun addPhoneNumber(newPhoneNumber: String?): Boolean {
         if (newPhoneNumber.isNullOrEmpty()) return false
         val telValue = "tel:$newPhoneNumber"
         if (quads.any { it.predicate == VCARD.VALUE && it.`object` == telValue }) return false
@@ -99,7 +99,7 @@ class ContactRDF : SolidRDFResource {
         return true
     }
 
-    fun getEmails(): List<Email> =
+    public fun getEmails(): List<Email> =
         quads
             .filter { it.subject == getIdentifier().toString() && it.predicate == VCARD.HAS_EMAIL }
             .mapNotNull { triple ->
@@ -107,7 +107,7 @@ class ContactRDF : SolidRDFResource {
                     ?.let { Email(it.`object`) }
             }
 
-    fun addEmailAddress(newEmailAddress: String?): Boolean {
+    public fun addEmailAddress(newEmailAddress: String?): Boolean {
         if (newEmailAddress.isNullOrEmpty()) return false
         val mailtoValue = "mailto:$newEmailAddress"
         if (quads.any { it.predicate == VCARD.VALUE && it.`object` == mailtoValue }) return false
@@ -117,7 +117,7 @@ class ContactRDF : SolidRDFResource {
         return true
     }
 
-    fun removePhoneNumber(phoneNumber: String): Boolean {
+    public fun removePhoneNumber(phoneNumber: String): Boolean {
         val telValue = "tel:$phoneNumber"
         val valueQuad = quads.find { it.predicate == VCARD.VALUE && it.`object` == telValue }
             ?: return false
@@ -129,7 +129,7 @@ class ContactRDF : SolidRDFResource {
         return true
     }
 
-    fun removeEmailAddress(emailAddress: String): Boolean {
+    public fun removeEmailAddress(emailAddress: String): Boolean {
         val mailtoValue = "mailto:$emailAddress"
         val valueQuad = quads.find { it.predicate == VCARD.VALUE && it.`object` == mailtoValue }
             ?: return false

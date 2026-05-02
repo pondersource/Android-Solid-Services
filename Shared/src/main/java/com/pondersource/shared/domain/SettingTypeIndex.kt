@@ -20,20 +20,20 @@ import java.util.UUID
  *
  * Spec: https://solid.github.io/webid-profile/ — Type Indexes
  */
-abstract class SettingTypeIndex : SolidRDFResource {
+public abstract class SettingTypeIndex : SolidRDFResource {
 
     // String constants used by subclasses
-    protected val typeKey = RDF.TYPE
-    protected val typeRegistration = Solid.TYPE_REGISTRATION
-    protected val forClassKey = Solid.FOR_CLASS
-    protected val instanceKey = Solid.INSTANCE
-    protected val instanceContainerKey = Solid.INSTANCE_CONTAINER
-    protected val typeIndex = Solid.TYPE_INDEX
-    protected val unlistedDocument = Solid.UNLISTED_DOCUMENT
-    protected val listedDocument = Solid.LISTED_DOCUMENT
-    protected val addressBook = VCARD.ADDRESS_BOOK
+    protected val typeKey : String = RDF.TYPE
+    protected val typeRegistration : String = Solid.TYPE_REGISTRATION
+    protected val forClassKey : String = Solid.FOR_CLASS
+    protected val instanceKey : String = Solid.INSTANCE
+    protected val instanceContainerKey : String = Solid.INSTANCE_CONTAINER
+    protected val typeIndex : String = Solid.TYPE_INDEX
+    protected val unlistedDocument : String = Solid.UNLISTED_DOCUMENT
+    protected val listedDocument : String = Solid.LISTED_DOCUMENT
+    protected val addressBook : String = VCARD.ADDRESS_BOOK
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType,
         quads: List<RdfQuad>?,
@@ -44,12 +44,12 @@ abstract class SettingTypeIndex : SolidRDFResource {
         setTypes()
     }
 
-    abstract fun setTypes()
+    internal abstract fun setTypes()
 
     /**
      * Returns all `solid:instance` URIs registered for the given [forClass] IRI.
      */
-    fun getInstances(forClass: String): List<String> =
+    public fun getInstances(forClass: String): List<String> =
         quads
             .filter { it.predicate == Solid.FOR_CLASS && it.`object` == forClass }
             .mapNotNull { registration ->
@@ -59,7 +59,7 @@ abstract class SettingTypeIndex : SolidRDFResource {
     /**
      * Returns all `solid:instanceContainer` URIs registered for the given [forClass] IRI.
      */
-    fun getInstanceContainers(forClass: String): List<String> =
+    public fun getInstanceContainers(forClass: String): List<String> =
         quads
             .filter { it.predicate == Solid.FOR_CLASS && it.`object` == forClass }
             .mapNotNull { registration ->
@@ -69,7 +69,7 @@ abstract class SettingTypeIndex : SolidRDFResource {
     /**
      * Registers a `solid:instance` entry for [forClass] pointing to [instanceUri].
      */
-    fun addInstance(forClass: String, instanceUri: String) {
+    public fun addInstance(forClass: String, instanceUri: String) {
         val subject = "${getIdentifier()}#${UUID.randomUUID()}"
         addQuad(subject, RDF.TYPE, Solid.TYPE_REGISTRATION, maxNumber = Int.MAX_VALUE)
         addQuad(subject, Solid.FOR_CLASS, forClass, maxNumber = Int.MAX_VALUE)
@@ -80,7 +80,7 @@ abstract class SettingTypeIndex : SolidRDFResource {
      * Registers a `solid:instanceContainer` entry for [forClass] pointing to
      * [containerUri].
      */
-    fun addInstanceContainer(forClass: String, containerUri: String) {
+    public fun addInstanceContainer(forClass: String, containerUri: String) {
         val subject = "${getIdentifier()}#${UUID.randomUUID()}"
         addQuad(subject, RDF.TYPE, Solid.TYPE_REGISTRATION, maxNumber = Int.MAX_VALUE)
         addQuad(subject, Solid.FOR_CLASS, forClass, maxNumber = Int.MAX_VALUE)
@@ -91,23 +91,23 @@ abstract class SettingTypeIndex : SolidRDFResource {
      * Returns `true` if [resourceUri] is registered (as either instance or
      * instanceContainer) for any class.
      */
-    fun containsResource(resourceUri: String): Boolean =
+    public fun containsResource(resourceUri: String): Boolean =
         quads.any { it.`object` == resourceUri }
 
     /**
      * Removes the registration entry that points to [resourceUri] (removes
      * the entire registration node including forClass and type triples).
      */
-    fun removeResource(resourceUri: String) {
+    public fun removeResource(resourceUri: String) {
         val anchor = quads.find { it.`object` == resourceUri } ?: return
         quads.removeAll { it.subject == anchor.subject || it.`object` == anchor.subject }
     }
 
-    fun getAddressBooks(): List<String> = getInstances(VCARD.ADDRESS_BOOK)
+    public fun getAddressBooks(): List<String> = getInstances(VCARD.ADDRESS_BOOK)
 
-    fun addAddressBook(addressBook: String) = addInstance(VCARD.ADDRESS_BOOK, addressBook)
+    public fun addAddressBook(addressBook: String): Unit = addInstance(VCARD.ADDRESS_BOOK, addressBook)
 
-    fun containsAddressBook(addressBookUri: String): Boolean = containsResource(addressBookUri)
+    public fun containsAddressBook(addressBookUri: String): Boolean = containsResource(addressBookUri)
 
-    fun removeAddressBook(addressBookUri: String) = removeResource(addressBookUri)
+    public fun removeAddressBook(addressBookUri: String): Unit = removeResource(addressBookUri)
 }

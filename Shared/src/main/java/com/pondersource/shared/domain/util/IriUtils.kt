@@ -13,7 +13,7 @@ import java.net.URISyntaxException
  *
  * Spec: https://solidproject.org/TR/protocol — IRI handling
  */
-object IriUtils {
+public object IriUtils {
 
     private val VALID_SCHEMES = setOf("http", "https")
 
@@ -21,7 +21,7 @@ object IriUtils {
      * Returns `true` if [iri] is a syntactically valid absolute IRI with an
      * `http` or `https` scheme (the only schemes used in Solid).
      */
-    fun isValid(iri: String): Boolean {
+    public fun isValid(iri: String): Boolean {
         if (iri.isBlank()) return false
         return try {
             val uri = URI(iri)
@@ -36,18 +36,18 @@ object IriUtils {
      * Per the Solid Protocol, the `/` character indicates a hierarchical
      * container relationship.
      */
-    fun isContainer(iri: String): Boolean = iri.endsWith("/")
+    public fun isContainer(iri: String): Boolean = iri.endsWith("/")
 
     /**
      * Appends a trailing slash to [iri] if absent, returning a container IRI.
      */
-    fun toContainerIri(iri: String): String =
+    public fun toContainerIri(iri: String): String =
         if (iri.endsWith("/")) iri else "$iri/"
 
     /**
      * Strips the trailing slash from [iri] if present.
      */
-    fun stripTrailingSlash(iri: String): String =
+    public fun stripTrailingSlash(iri: String): String =
         if (iri.endsWith("/")) iri.dropLast(1) else iri
 
     /**
@@ -59,7 +59,7 @@ object IriUtils {
      * - `https://pod.example/foo/bar/`     → `https://pod.example/foo/`
      * - `https://pod.example/`             → `null`
      */
-    fun parentContainer(iri: String): String? {
+    public fun parentContainer(iri: String): String? {
         val normalized = stripTrailingSlash(iri)
         val lastSlash = normalized.lastIndexOf('/')
         if (lastSlash <= normalized.indexOf("//") + 1) return null
@@ -74,7 +74,7 @@ object IriUtils {
      * - `https://pod.example/foo/bar.ttl`  → `bar.ttl`
      * - `https://pod.example/foo/bar/`     → `bar`
      */
-    fun resourceName(iri: String): String {
+    public fun resourceName(iri: String): String {
         val normalized = stripTrailingSlash(iri)
         return normalized.substringAfterLast('/')
     }
@@ -83,13 +83,13 @@ object IriUtils {
      * Attempts to parse [iri] as a [URI], returning `null` on failure instead
      * of throwing.
      */
-    fun toUriOrNull(iri: String): URI? =
+    public fun toUriOrNull(iri: String): URI? =
         runCatching { URI.create(iri) }.getOrNull()
 
     /**
      * Resolves [reference] against [base], returning the resolved IRI string.
      * Handles relative references such as `/path/to/resource`.
      */
-    fun resolve(base: String, reference: String): String =
+    public fun resolve(base: String, reference: String): String =
         URI.create(base).resolve(reference).toString()
 }

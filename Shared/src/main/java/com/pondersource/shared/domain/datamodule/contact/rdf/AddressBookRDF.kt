@@ -11,9 +11,9 @@ import com.pondersource.shared.vocab.XSD
 import okhttp3.Headers
 import java.net.URI
 
-class AddressBookRDF : SolidRDFResource {
+public class AddressBookRDF : SolidRDFResource {
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType? = null,
         quads: List<RdfQuad>? = null,
@@ -24,31 +24,31 @@ class AddressBookRDF : SolidRDFResource {
         addQuad(getIdentifier().toString(), RDF.TYPE, VCARD.ADDRESS_BOOK)
     }
 
-    fun getOwner(): String =
+    public fun getOwner(): String =
         quads.find { it.predicate == ACL.OWNER }!!.`object`
 
-    fun setOwner(owner: String) {
+    public fun setOwner(owner: String) {
         addQuad(getIdentifier().toString(), ACL.OWNER, owner)
     }
 
-    fun getTitle(): String =
+    public fun getTitle(): String =
         quads.find { it.predicate == DC.TITLE || it.predicate == DC.TITLE_LEGACY }!!.`object`
 
-    fun setTitle(title: String) {
+    public fun setTitle(title: String) {
         addQuadLiteral(getIdentifier().toString(), DC.TITLE, title, XSD.STRING)
     }
 
-    fun getNameEmailIndex(): String =
+    public fun getNameEmailIndex(): String =
         quads.find { it.predicate == VCARD.NAME_EMAIL_INDEX }!!.`object`
 
-    fun setNameEmailIndex(peopleIndex: String) {
+    public fun setNameEmailIndex(peopleIndex: String) {
         addQuad(getIdentifier().toString(), VCARD.NAME_EMAIL_INDEX, peopleIndex)
     }
 
-    fun getGroupsIndex(): String =
+    public fun getGroupsIndex(): String =
         quads.find { it.predicate == VCARD.GROUP_INDEX }!!.`object`
 
-    fun setGroupsIndex(groupsIndex: String) {
+    public fun setGroupsIndex(groupsIndex: String) {
         addQuad(getIdentifier().toString(), VCARD.GROUP_INDEX, groupsIndex)
     }
 }

@@ -6,7 +6,7 @@ package com.pondersource.shared.domain.resource
  * All Solid resources return [SolidMetadata] populated from the HTTP response headers
  * (ACL URL, WAC-Allow, allowed methods, resource types, ETag, etc.).
  */
-interface SolidResource : Resource {
+public interface SolidResource : Resource {
 
-    fun getMetadata(): SolidMetadata
+    public fun getMetadata(): SolidMetadata
 }

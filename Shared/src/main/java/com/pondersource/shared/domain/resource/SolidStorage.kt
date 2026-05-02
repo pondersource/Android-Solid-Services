@@ -18,28 +18,28 @@ import java.net.URI
  *
  * Spec: https://solidproject.org/TR/protocol — Storage
  */
-class SolidStorage : SolidContainer {
+public class SolidStorage : SolidContainer {
 
-    constructor(identifier: URI) : this(identifier, null, null)
+    public constructor(identifier: URI) : this(identifier, null, null)
 
-    constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
+    public constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
             this(identifier, MediaType.JSON_LD, quads, headers)
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType,
         quads: List<RdfQuad>?,
         headers: Headers?
     ) : super(identifier, mediaType, quads, headers)
 
-    fun getOwner(): URI? {
+    public fun getOwner(): URI? {
         val fromDataset = findPropertyForSubject(getIdentifier().toString(), Solid.OWNER)
             ?.let { runCatching { URI.create(it) }.getOrNull() }
         if (fromDataset != null) return fromDataset
         return getHeaders().getOwnerUri()
     }
 
-    fun getStorageDescriptionUri(): URI? {
+    public fun getStorageDescriptionUri(): URI? {
         val fromDataset =
             findPropertyForSubject(getIdentifier().toString(), Solid.STORAGE_DESCRIPTION)
                 ?.let { runCatching { URI.create(it) }.getOrNull() }
@@ -47,7 +47,7 @@ class SolidStorage : SolidContainer {
         return getHeaders().getStorageDescriptionUri()
     }
 
-    fun isStorageType(): Boolean =
+    public fun isStorageType(): Boolean =
         quads.any {
             it.subject == getIdentifier().toString() &&
                     it.predicate == RDF.TYPE &&

@@ -11,16 +11,16 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 import java.net.URI
 
-open class NonRDFResource : Resource {
+public open class NonRDFResource : Resource {
 
     private val identifier: URI
     private val contentType: String
     private val headers: Headers
     private val entity: InputStream
 
-    companion object {
+    public companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<NonRDFResource> {
+        public val CREATOR: Parcelable.Creator<NonRDFResource> = object : Parcelable.Creator<NonRDFResource> {
             override fun createFromParcel(parcel: Parcel): NonRDFResource {
                 return NonRDFResource(parcel)
             }
@@ -42,7 +42,7 @@ open class NonRDFResource : Resource {
         this.entity = inParcel.readString()!!.byteInputStream()
     }
 
-    constructor(
+    public constructor(
         identifier: URI,
         contentType: String,
         headers: Headers?,
@@ -54,7 +54,7 @@ open class NonRDFResource : Resource {
         this.entity = entity
     }
 
-    constructor(
+    public constructor(
         identifier: URI,
         contentType: String,
         entity: InputStream

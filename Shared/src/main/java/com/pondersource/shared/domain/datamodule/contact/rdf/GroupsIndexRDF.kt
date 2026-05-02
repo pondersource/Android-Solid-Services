@@ -10,16 +10,16 @@ import com.pondersource.shared.vocab.XSD
 import okhttp3.Headers
 import java.net.URI
 
-class GroupsIndexRDF : SolidRDFResource {
+public class GroupsIndexRDF : SolidRDFResource {
 
-    constructor(
+    public constructor(
         identifier: URI,
         mediaType: MediaType? = null,
         quads: List<RdfQuad>? = null,
         headers: Headers? = null
     ) : super(identifier, mediaType ?: MediaType.JSON_LD, quads, headers)
 
-    fun getGroups(addressBookUri: String): List<Group> =
+    public fun getGroups(addressBookUri: String): List<Group> =
         quads
             .filter { it.predicate == VCARD.INCLUDES_GROUP && it.subject == addressBookUri }
             .mapNotNull { triple ->
@@ -29,14 +29,14 @@ class GroupsIndexRDF : SolidRDFResource {
                 Group(triple.`object`, groupName)
             }
 
-    fun addGroup(addressBookUri: String, group: GroupRDF) {
+    public fun addGroup(addressBookUri: String, group: GroupRDF) {
         val groupUri = group.getIdentifier().toString()
         addQuad(groupUri, RDF.TYPE, VCARD.GROUP)
         addQuadLiteral(groupUri, VCARD.FN, group.getTitle(), XSD.STRING)
         addQuad(addressBookUri, VCARD.INCLUDES_GROUP, groupUri, maxNumber = Int.MAX_VALUE)
     }
 
-    fun removeGroup(groupUri: URI): Boolean {
+    public fun removeGroup(groupUri: URI): Boolean {
         val groupStr = groupUri.toString()
         val affected = quads.filter { it.subject == groupStr || it.`object` == groupStr }
         if (affected.isEmpty()) return false

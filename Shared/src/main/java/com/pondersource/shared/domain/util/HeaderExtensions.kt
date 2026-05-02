@@ -14,47 +14,47 @@ import java.net.URI
  * Spec: https://solidproject.org/TR/protocol
  */
 
-fun Headers.getContentLength(): Long {
+public fun Headers.getContentLength(): Long {
     return this["content-length"]?.toLongOrNull() ?: -1L
 }
 
-fun Headers.getContentType(): String? = get(HTTPHeaderName.CONTENT_TYPE)
+public fun Headers.getContentType(): String? = get(HTTPHeaderName.CONTENT_TYPE)
 
-fun Headers.getAcceptPatch(): List<String> =
+public fun Headers.getAcceptPatch(): List<String> =
     get(HTTPHeaderName.ACCEPT_PATCH)
         ?.split(",")
         ?.map { it.trim() }
         ?.filter { it.isNotEmpty() }
         ?: emptyList()
 
-fun Headers.getAcceptPost(): List<String> =
+public fun Headers.getAcceptPost(): List<String> =
     get(HTTPHeaderName.ACCEPT_POST)
         ?.split(",")
         ?.map { it.trim() }
         ?.filter { it.isNotEmpty() }
         ?: emptyList()
 
-fun Headers.getAcceptPut(): List<String> =
+public fun Headers.getAcceptPut(): List<String> =
     get(HTTPHeaderName.ACCEPT_PUT)
         ?.split(",")
         ?.map { it.trim() }
         ?.filter { it.isNotEmpty() }
         ?: emptyList()
 
-fun Headers.getWwwAuthenticate(): String? = get(HTTPHeaderName.WWW_AUTHENTICATE)
+public fun Headers.getWwwAuthenticate(): String? = get(HTTPHeaderName.WWW_AUTHENTICATE)
 
 /**
  * Returns the URI of the WAC / ACP access-control resource advertised by
  * `Link: <...>; rel="acl"`, or `null` if absent.
  */
-fun Headers.getAclUri(): URI? =
+public fun Headers.getAclUri(): URI? =
     parseLinkRelation(this, HTTPLinkRelation.ACL)
 
 /**
  * Returns the URI of the description resource advertised by
  * `Link: <...>; rel="describedby"`, or `null` if absent.
  */
-fun Headers.getDescribedByUri(): URI? =
+public fun Headers.getDescribedByUri(): URI? =
     parseLinkRelation(this, HTTPLinkRelation.DESCRIBED_BY)
 
 /**
@@ -62,7 +62,7 @@ fun Headers.getDescribedByUri(): URI? =
  * `Link: <...>; rel="http://www.w3.org/ns/solid/terms#storageDescription"`,
  * or `null` if absent.
  */
-fun Headers.getStorageDescriptionUri(): URI? =
+public fun Headers.getStorageDescriptionUri(): URI? =
     parseLinkRelation(this, HTTPLinkRelation.STORAGE_DESCRIPTION)
 
 /**
@@ -70,7 +70,7 @@ fun Headers.getStorageDescriptionUri(): URI? =
  * `Link: <...>; rel="http://www.w3.org/ns/solid/terms#owner"`,
  * or `null` if absent.
  */
-fun Headers.getOwnerUri(): URI? =
+public fun Headers.getOwnerUri(): URI? =
     parseLinkRelation(this, HTTPLinkRelation.OWNER)
 
 /**
@@ -80,7 +80,7 @@ fun Headers.getOwnerUri(): URI? =
  *
  * Spec: https://solidproject.org/TR/oidc — Solid-OIDC issuer discovery
  */
-fun Headers.getOidcIssuerUri(): URI? =
+public fun Headers.getOidcIssuerUri(): URI? =
     parseLinkRelation(this, HTTPLinkRelation.OIDC_ISSUER)
 
 /**
@@ -88,7 +88,7 @@ fun Headers.getOidcIssuerUri(): URI? =
  * `rel="type" <http://www.w3.org/ns/pim/space#Storage>`,
  * indicating this resource is a Solid pod storage root.
  */
-fun Headers.isStorage(): Boolean {
+public fun Headers.isStorage(): Boolean {
     return values(HTTPHeaderName.LINK).any { headerValue ->
         // The type value may appear as the full URI or a shortened form
         headerValue.contains(PIM.STORAGE_TYPE) &&
@@ -101,18 +101,18 @@ fun Headers.isStorage(): Boolean {
  * Returns the bare ETag value from the `ETag` response header, with surrounding quotes stripped.
  * Returns `null` if the header is absent.
  */
-fun Headers.getETag(): String? = get(HTTPHeaderName.ETAG)?.removeSurrounding("\"")
+public fun Headers.getETag(): String? = get(HTTPHeaderName.ETAG)?.removeSurrounding("\"")
 
 /**
  * Returns the `Last-Modified` header value, or `null` if absent.
  */
-fun Headers.getLastModified(): String? = get(HTTPHeaderName.LAST_MODIFIED)
+public fun Headers.getLastModified(): String? = get(HTTPHeaderName.LAST_MODIFIED)
 
 /**
  * Returns the `Location` header value as a [URI], or `null` if absent.
  * This is set on 201 Created responses.
  */
-fun Headers.getLocation(): URI? =
+public fun Headers.getLocation(): URI? =
     get(HTTPHeaderName.LOCATION)?.let { runCatching { URI.create(it) }.getOrNull() }
 
 /**
@@ -120,7 +120,7 @@ fun Headers.getLocation(): URI? =
  * or an empty set if the header is absent.
  * Example: `Allow: GET, HEAD, OPTIONS, PUT, PATCH, DELETE`
  */
-fun Headers.getAllowedMethods(): Set<String> =
+public fun Headers.getAllowedMethods(): Set<String> =
     get(HTTPHeaderName.ALLOW)
         ?.split(",")
         ?.map { it.trim() }
@@ -132,13 +132,13 @@ fun Headers.getAllowedMethods(): Set<String> =
  * Returns the parsed [WacAllow] from the `WAC-Allow` response header,
  * or `null` if the header is absent or malformed.
  */
-fun Headers.getWacAllow(): WacAllow? =
+public fun Headers.getWacAllow(): WacAllow? =
     WacAllow.parse(get(HTTPHeaderName.WAC_ALLOW))
 
 /**
  * Returns all `rel` values listed in `Link` headers as a flat list of strings.
  */
-fun Headers.getLinkRelTypes(): List<String> {
+public fun Headers.getLinkRelTypes(): List<String> {
     val results = mutableListOf<String>()
     values(HTTPHeaderName.LINK).forEach { headerValue ->
         val relRegex = Regex("""rel="?([^";,\s]+)"?""")
@@ -151,7 +151,7 @@ fun Headers.getLinkRelTypes(): List<String> {
  * Returns the set of type URIs advertised via `Link: <uri>; rel="type"` headers.
  * Used to identify resource types such as `ldp:BasicContainer` or `pim:Storage`.
  */
-fun Headers.getLinkTypeUris(): Set<URI> {
+public fun Headers.getLinkTypeUris(): Set<URI> {
     val results = mutableSetOf<URI>()
     values(HTTPHeaderName.LINK).forEach { headerValue ->
         headerValue.split(Regex(",(?=\\s*<)")).forEach { segment ->
