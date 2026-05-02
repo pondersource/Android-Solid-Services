@@ -4,6 +4,7 @@ import android.content.Context
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.profile.Profile
 import com.pondersource.shared.domain.resource.Resource
+import com.pondersource.solidandroidapi.auth.Authenticator
 import com.pondersource.solidandroidapi.resource.implementation.SolidAccountResourceManagerImplementation
 import java.net.URI
 
@@ -23,8 +24,8 @@ public interface SolidAccountResourceManager {
          * @param context Any [Context]; the application context is used internally.
          * @param profile The profile whose WebID will be used for all operations.
          */
-        public fun getInstance(context: Context, profile: Profile): SolidAccountResourceManager =
-            SolidAccountResourceManagerImplementation(context, profile)
+        public fun getInstance(authenticator: Authenticator, profile: Profile): SolidAccountResourceManager =
+            SolidAccountResourceManagerImplementation(authenticator, profile)
     }
 
     /**

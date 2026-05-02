@@ -5,6 +5,7 @@ import com.pondersource.shared.domain.crud.N3Patch
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.resource.Resource
 import com.pondersource.shared.domain.resource.SolidMetadata
+import com.pondersource.solidandroidapi.auth.Authenticator
 import com.pondersource.solidandroidapi.resource.implementation.SolidResourceManagerImplementation
 import java.net.URI
 
@@ -22,10 +23,10 @@ interface SolidResourceManager {
     public companion object {
         /**
          * Returns the application-scoped singleton [SolidResourceManager].
-         * @param context Any [Context]; the application context is used internally.
+         * @param authenticator Any [Authenticator]; The one used for authentication.
          */
-        fun getInstance(context: Context): SolidResourceManager =
-            SolidResourceManagerImplementation.getInstance(context)
+        public fun getInstance(authenticator: Authenticator): SolidResourceManager =
+            SolidResourceManagerImplementation.getInstance(authenticator)
     }
 
     /**

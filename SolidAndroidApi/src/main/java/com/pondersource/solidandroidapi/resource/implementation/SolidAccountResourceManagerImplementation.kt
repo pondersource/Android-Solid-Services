@@ -1,20 +1,20 @@
 package com.pondersource.solidandroidapi.resource.implementation
 
-import android.content.Context
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.profile.Profile
 import com.pondersource.shared.domain.resource.Resource
+import com.pondersource.solidandroidapi.auth.Authenticator
 import com.pondersource.solidandroidapi.resource.SolidAccountResourceManager
 import com.pondersource.solidandroidapi.resource.SolidResourceManager
 import java.net.URI
 import java.security.InvalidParameterException
 
 internal class SolidAccountResourceManagerImplementation(
-    context: Context,
+    authenticator: Authenticator,
     private val profile: Profile,
 ) : SolidAccountResourceManager {
 
-    private val resourceManager = SolidResourceManager.getInstance(context)
+    private val resourceManager = SolidResourceManager.getInstance(authenticator)
 
     init {
         if (profile.userInfo?.webId.isNullOrEmpty()) {

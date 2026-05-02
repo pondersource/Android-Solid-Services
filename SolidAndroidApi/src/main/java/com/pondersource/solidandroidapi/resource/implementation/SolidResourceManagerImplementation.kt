@@ -1,6 +1,5 @@
 package com.pondersource.solidandroidapi.resource.implementation
 
-import android.content.Context
 import com.pondersource.shared.domain.crud.N3Patch
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.resource.Resource
@@ -20,17 +19,17 @@ internal class SolidResourceManagerImplementation : SolidResourceManager {
         @Volatile
         private var INSTANCE: SolidResourceManager? = null
 
-        fun getInstance(context: Context): SolidResourceManager {
+        internal fun getInstance(authenticator: Authenticator): SolidResourceManager {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: SolidResourceManagerImplementation(context).also { INSTANCE = it }
+                INSTANCE ?: SolidResourceManagerImplementation(authenticator).also { INSTANCE = it }
             }
         }
     }
 
     private val solidHttpClient: SolidHttpClient
 
-    private constructor(context: Context) {
-        solidHttpClient = SolidHttpClient(Authenticator.getInstance(context))
+    private constructor(authenticator: Authenticator) {
+        solidHttpClient = SolidHttpClient(authenticator)
     }
 
     override suspend fun head(

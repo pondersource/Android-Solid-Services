@@ -1,6 +1,5 @@
 package com.pondersource.solidandroidapi.datamodule.contacts.implementation
 
-import android.content.Context
 import com.pondersource.shared.domain.datamodule.DataModuleResult
 import com.pondersource.shared.domain.datamodule.contact.AddressBook
 import com.pondersource.shared.domain.datamodule.contact.AddressBookList
@@ -8,7 +7,9 @@ import com.pondersource.shared.domain.datamodule.contact.CONTACTS_DIRECTORY_SUFF
 import com.pondersource.shared.domain.datamodule.contact.FullContact
 import com.pondersource.shared.domain.datamodule.contact.FullGroup
 import com.pondersource.shared.domain.datamodule.contact.NewContact
+import com.pondersource.solidandroidapi.auth.Authenticator
 import com.pondersource.solidandroidapi.datamodule.contacts.SolidContactsDataModule
+import com.pondersource.solidandroidapi.resource.SolidResourceManager
 import java.net.URI
 
 internal class SolidContactsDataModuleImplementation : SolidContactsDataModule {
@@ -18,18 +19,30 @@ internal class SolidContactsDataModuleImplementation : SolidContactsDataModule {
         private var INSTANCE: SolidContactsDataModule? = null
 
         fun getInstance(
-            context: Context,
+            authenticator: Authenticator,
         ): SolidContactsDataModule {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: SolidContactsDataModuleImplementation(context).also { INSTANCE = it }
+                INSTANCE ?: SolidContactsDataModuleImplementation(authenticator).also { INSTANCE = it }
+            }
+        }
+
+        fun getInstance(
+            resourceManager: SolidResourceManager,
+        ): SolidContactsDataModule {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SolidContactsDataModuleImplementation(resourceManager).also { INSTANCE = it }
             }
         }
     }
 
     val helper: SolidContactsDataModuleHelper
 
-    private constructor(context: Context) {
-        this.helper = SolidContactsDataModuleHelper.getInstance(context)
+    private constructor(authenticator: Authenticator) {
+        this.helper = SolidContactsDataModuleHelper.getInstance(authenticator)
+    }
+
+    private constructor(resourceManager: SolidResourceManager) {
+        this.helper = SolidContactsDataModuleHelper.getInstance(resourceManager)
     }
 
     override suspend fun getAddressBooks(

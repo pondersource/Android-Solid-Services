@@ -43,16 +43,16 @@ class LocalModule {
     @Provides
     @Singleton
     fun provideSolidResourceManager(
-        @ApplicationContext context: Context,
+        authenticator: Authenticator,
     ): SolidResourceManager {
-        return SolidResourceManager.getInstance(context)
+        return SolidResourceManager.getInstance(authenticator)
     }
 
     @Provides
     @Singleton
     fun provideSolidContactsDataModule(
-        @ApplicationContext context: Context,
+        authenticator: Authenticator,
     ): SolidContactsDataModule {
-        return SolidContactsDataModule.getInstance(context)
+        return SolidContactsDataModule.getInstance(authenticator)
     }
 }

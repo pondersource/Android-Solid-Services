@@ -7,7 +7,9 @@ import com.pondersource.shared.domain.datamodule.contact.AddressBookList
 import com.pondersource.shared.domain.datamodule.contact.FullContact
 import com.pondersource.shared.domain.datamodule.contact.FullGroup
 import com.pondersource.shared.domain.datamodule.contact.NewContact
+import com.pondersource.solidandroidapi.auth.Authenticator
 import com.pondersource.solidandroidapi.datamodule.contacts.implementation.SolidContactsDataModuleImplementation
+import com.pondersource.solidandroidapi.resource.SolidResourceManager
 
 /**
  * Manages Solid Contacts data (address books, contacts, groups) on a user's Solid pod.
@@ -20,9 +22,16 @@ import com.pondersource.solidandroidapi.datamodule.contacts.implementation.Solid
  */
 interface SolidContactsDataModule {
 
-    companion object {
-        fun getInstance(context: Context): SolidContactsDataModule =
-            SolidContactsDataModuleImplementation.getInstance(context)
+    public companion object {
+        /**
+         * Returns the application-scoped singleton [SolidContactsDataModule].
+         * @param context Any [Context]; the application context is used internally.
+         */
+        public fun getInstance(authenticator: Authenticator): SolidContactsDataModule =
+            SolidContactsDataModuleImplementation.getInstance(authenticator)
+
+        public fun getInstance(resourceManager: SolidResourceManager): SolidContactsDataModule =
+            SolidContactsDataModuleImplementation.getInstance(resourceManager)
     }
 
     //region AddressBooks

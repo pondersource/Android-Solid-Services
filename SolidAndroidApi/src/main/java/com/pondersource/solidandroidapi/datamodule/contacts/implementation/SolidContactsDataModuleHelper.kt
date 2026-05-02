@@ -16,6 +16,7 @@ import com.pondersource.shared.domain.datamodule.contact.rdf.GroupRDF
 import com.pondersource.shared.domain.datamodule.contact.rdf.GroupsIndexRDF
 import com.pondersource.shared.domain.datamodule.contact.rdf.NameEmailIndexRDF
 import com.pondersource.shared.domain.profile.WebId
+import com.pondersource.solidandroidapi.auth.Authenticator
 import com.pondersource.solidandroidapi.resource.SolidResourceManager
 import java.net.URI
 import java.util.UUID
@@ -27,18 +28,30 @@ internal class SolidContactsDataModuleHelper {
         private var INSTANCE: SolidContactsDataModuleHelper? = null
 
         fun getInstance(
-            context: Context,
+            authenticator: Authenticator,
         ): SolidContactsDataModuleHelper {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: SolidContactsDataModuleHelper(context).also { INSTANCE = it }
+                INSTANCE ?: SolidContactsDataModuleHelper(authenticator).also { INSTANCE = it }
+            }
+        }
+
+        fun getInstance(
+            resourceManager: SolidResourceManager,
+        ): SolidContactsDataModuleHelper {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SolidContactsDataModuleHelper(resourceManager).also { INSTANCE = it }
             }
         }
     }
 
     val solidResourceManager: SolidResourceManager
 
-    private constructor(context: Context) {
-        this.solidResourceManager = SolidResourceManager.getInstance(context)
+    private constructor(authenticator: Authenticator) {
+        this.solidResourceManager = SolidResourceManager.getInstance(authenticator)
+    }
+
+    private constructor(resourceManager: SolidResourceManager) {
+        this.solidResourceManager = resourceManager
     }
 
     suspend fun createAddressBook(
