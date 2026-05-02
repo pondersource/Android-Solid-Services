@@ -7,6 +7,7 @@ import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.shared.vocab.OWL
 import com.pondersource.shared.vocab.RDF
 import com.pondersource.shared.vocab.VCARD
+import com.pondersource.shared.vocab.XSD
 import okhttp3.Headers
 import java.net.URI
 
@@ -29,7 +30,7 @@ class GroupRDF : SolidRDFResource {
         }!!.`object`
 
     fun setTitle(title: String) {
-        addQuadLiteral(getIdentifier().toString(), VCARD.FN, title, null)
+        addQuadLiteral(getIdentifier().toString(), VCARD.FN, title, XSD.STRING)
     }
 
     fun setIncludesInAddressBook(addressBookUri: String) {
@@ -61,7 +62,7 @@ class GroupRDF : SolidRDFResource {
             contact.getIdentifier().toString(),
             maxNumber = Int.MAX_VALUE
         )
-        addQuadLiteral(contact.getIdentifier().toString(), VCARD.FN, contact.getFullName(), null)
+        addQuadLiteral(contact.getIdentifier().toString(), VCARD.FN, contact.getFullName(), XSD.STRING)
     }
 
     fun removeMember(contactURI: URI): Boolean {

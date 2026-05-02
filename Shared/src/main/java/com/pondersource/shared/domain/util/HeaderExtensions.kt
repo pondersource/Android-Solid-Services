@@ -98,10 +98,10 @@ fun Headers.isStorage(): Boolean {
 }
 
 /**
- * Returns the ETag value from the `ETag` response header, or `null` if absent.
- * Includes surrounding quotes if present (e.g. `"abc123"`).
+ * Returns the bare ETag value from the `ETag` response header, with surrounding quotes stripped.
+ * Returns `null` if the header is absent.
  */
-fun Headers.getETag(): String? = get(HTTPHeaderName.ETAG)
+fun Headers.getETag(): String? = get(HTTPHeaderName.ETAG)?.removeSurrounding("\"")
 
 /**
  * Returns the `Last-Modified` header value, or `null` if absent.

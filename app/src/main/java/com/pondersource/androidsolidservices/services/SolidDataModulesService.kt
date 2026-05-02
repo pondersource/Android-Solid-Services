@@ -94,7 +94,7 @@ class SolidDataModulesService : LifecycleService() {
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 callback.valueChanged(
-                    solidContactsDataModule.deleteAddressBook(uri, ownerWebId ?: webId).getOrNull()
+                    solidContactsDataModule.deleteAddressBook(ownerWebId ?: webId, uri).getOrNull()
                 )
             }
         }

@@ -9,6 +9,7 @@ import com.pondersource.shared.domain.network.HTTPAcceptType
 import com.pondersource.shared.domain.network.HTTPHeaderName
 import com.pondersource.shared.domain.resource.RDFResource
 import com.pondersource.shared.domain.resource.SolidContainer
+import com.pondersource.solidandroidapi.domain.SolidRawResponse
 import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI
