@@ -20,7 +20,7 @@ import com.pondersource.solidandroidapi.resource.SolidResourceManager
  *
  * Obtain an instance via [SolidContactsDataModule.getInstance].
  */
-interface SolidContactsDataModule {
+public interface SolidContactsDataModule {
 
     public companion object {
         /**
@@ -35,11 +35,11 @@ interface SolidContactsDataModule {
     }
 
     //region AddressBooks
-    suspend fun getAddressBooks(
+    public suspend fun getAddressBooks(
         ownerWebId: String
     ): DataModuleResult<AddressBookList>
 
-    suspend fun createAddressBook(
+    public suspend fun createAddressBook(
         ownerWebId: String,
         title: String,
         isPrivate: Boolean = true,
@@ -47,67 +47,67 @@ interface SolidContactsDataModule {
         container: String? = null,
     ): DataModuleResult<AddressBook>
 
-    suspend fun getAddressBook(
+    public suspend fun getAddressBook(
         ownerWebId: String,
         addressBookUri: String,
     ): DataModuleResult<AddressBook>
 
-    suspend fun renameAddressBook(
+    public suspend fun renameAddressBook(
         ownerWebId: String,
         addressBookUri: String,
         newName: String,
     ): DataModuleResult<AddressBook>
 
-    suspend fun deleteAddressBook(
+    public suspend fun deleteAddressBook(
         ownerWebId: String,
         addressBookUri: String,
     ): DataModuleResult<AddressBook>
     //endregion
 
     //region Contacts
-    suspend fun createNewContact(
+    public suspend fun createNewContact(
         ownerWebId: String,
         addressBookString: String,
         newContact: NewContact,
         groupStrings: List<String> = emptyList(),
     ): DataModuleResult<FullContact>
 
-    suspend fun getContact(
+    public suspend fun getContact(
         ownerWebId: String,
         contactString: String
     ): DataModuleResult<FullContact>
 
-    suspend fun renameContact(
+    public suspend fun renameContact(
         ownerWebId: String,
         contactString: String,
         newName: String,
     ): DataModuleResult<FullContact>
 
-    suspend fun addNewPhoneNumber(
+    public suspend fun addNewPhoneNumber(
         ownerWebId: String,
         contactString: String,
         newPhoneNumber: String,
     ): DataModuleResult<FullContact>
 
-    suspend fun addNewEmailAddress(
+    public suspend fun addNewEmailAddress(
         ownerWebId: String,
         contactString: String,
         newEmailAddress: String,
     ): DataModuleResult<FullContact>
 
-    suspend fun removePhoneNumber(
+    public suspend fun removePhoneNumber(
         ownerWebId: String,
         contactString: String,
         phoneNumber: String,
     ): DataModuleResult<FullContact>
 
-    suspend fun removeEmailAddress(
+    public suspend fun removeEmailAddress(
         ownerWebId: String,
         contactString: String,
         emailAddress: String,
     ): DataModuleResult<FullContact>
 
-    suspend fun deleteContact(
+    public suspend fun deleteContact(
         ownerWebId: String,
         addressBookUri: String,
         contactUri: String,
@@ -115,31 +115,31 @@ interface SolidContactsDataModule {
     //endregion
 
     //region Groups
-    suspend fun createNewGroup(
+    public suspend fun createNewGroup(
         ownerWebId: String,
         addressBookString: String,
         title: String,
         contactUris: List<String> = emptyList(),
     ): DataModuleResult<FullGroup>
 
-    suspend fun getGroup(
+    public suspend fun getGroup(
         ownerWebId: String,
         groupString: String,
     ): DataModuleResult<FullGroup>
 
-    suspend fun deleteGroup(
+    public suspend fun deleteGroup(
         ownerWebId: String,
         addressBookString: String,
         groupString: String
     ): DataModuleResult<FullGroup>
 
-    suspend fun addContactToGroup(
+    public suspend fun addContactToGroup(
         ownerWebId: String,
         contactString: String,
         groupString: String,
     ): DataModuleResult<FullGroup>
 
-    suspend fun removeContactFromGroup(
+    public suspend fun removeContactFromGroup(
         ownerWebId: String,
         contactString: String,
         groupString: String,

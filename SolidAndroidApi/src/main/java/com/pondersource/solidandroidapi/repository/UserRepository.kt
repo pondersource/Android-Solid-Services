@@ -3,9 +3,10 @@ package com.pondersource.solidandroidapi.repository
 import android.content.Context
 import com.pondersource.shared.domain.profile.Profile
 import com.pondersource.shared.domain.profile.ProfileList
+import com.pondersource.solidandroidapi.repository.implementation.UserRepositoryImplementation
 import kotlinx.coroutines.flow.Flow
 
-interface UserRepository {
+internal interface UserRepository {
 
     companion object {
         fun getInstance(context: Context): UserRepository =

@@ -18,7 +18,7 @@ import java.net.URI
  *
  * Obtain an instance via [SolidResourceManager.getInstance].
  */
-interface SolidResourceManager {
+public interface SolidResourceManager {
 
     public companion object {
         /**
@@ -43,7 +43,7 @@ interface SolidResourceManager {
      * @param uri   The URI of the resource to HEAD.
      * @return [SolidNetworkResponse.Success] with [SolidMetadata], or an error/exception variant.
      */
-    suspend fun head(
+    public suspend fun head(
         webid: String,
         uri: URI,
     ): SolidNetworkResponse<SolidMetadata>
@@ -55,7 +55,7 @@ interface SolidResourceManager {
      * @param clazz The expected resource type (e.g. [com.pondersource.shared.domain.resource.RDFResource]).
      * @return [SolidNetworkResponse.Success] with the resource, or an error/exception variant.
      */
-    suspend fun <T : Resource> read(
+    public suspend fun <T : Resource> read(
         webid: String,
         resource: URI,
         clazz: Class<T>,
@@ -70,7 +70,7 @@ interface SolidResourceManager {
      * @param resource The resource to create; its identifier determines the target URI.
      * @return [SolidNetworkResponse.Success] with the created resource.
      */
-    suspend fun <T : Resource> create(
+    public suspend fun <T : Resource> create(
         webid: String,
         resource: T
     ): SolidNetworkResponse<T>
@@ -91,7 +91,7 @@ interface SolidResourceManager {
      * @param ifMatch  Optional ETag for a conditional PUT (prevents lost-update races).
      * @return [SolidNetworkResponse.Success] with the updated resource.
      */
-    suspend fun <T : Resource> update(
+    public suspend fun <T : Resource> update(
         webid: String,
         newResource: T,
         ifMatch: String? = null,
@@ -116,7 +116,7 @@ interface SolidResourceManager {
      * @param ifMatch Optional ETag for a conditional PATCH.
      * @return [SolidNetworkResponse.Success] with [Unit] on success.
      */
-    suspend fun patch(
+    public suspend fun patch(
         webid: String,
         uri: URI,
         patch: N3Patch,
@@ -139,7 +139,7 @@ interface SolidResourceManager {
      * @param ifMatch   Optional ETag for a conditional PATCH.
      * @return [SolidNetworkResponse.Success] with [Unit] on success.
      */
-    suspend fun patchRaw(
+    public suspend fun patchRaw(
         webid: String,
         uri: URI,
         n3Body: String,
@@ -156,7 +156,7 @@ interface SolidResourceManager {
      * @param resource The resource to delete.
      * @return [SolidNetworkResponse.Success] with the deleted resource.
      */
-    suspend fun <T : Resource> delete(
+    public suspend fun <T : Resource> delete(
         webid: String,
         resource: T,
     ): SolidNetworkResponse<T>
@@ -171,7 +171,7 @@ interface SolidResourceManager {
      * @param resourceUri The URI of the resource or container to delete.
      * @return [SolidNetworkResponse.Success] with `true` on success.
      */
-    suspend fun delete(
+    public suspend fun delete(
         webid: String,
         resourceUri: URI,
     ): SolidNetworkResponse<Boolean>
