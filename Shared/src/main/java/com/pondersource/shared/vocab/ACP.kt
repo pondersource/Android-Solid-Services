@@ -5,100 +5,100 @@ package com.pondersource.shared.vocab
  * http://www.w3.org/ns/solid/acp#
  * Spec: https://solidproject.org/TR/acp
  */
-object ACP {
-    const val NAMESPACE = "http://www.w3.org/ns/solid/acp#"
+public object ACP {
+    public const val NAMESPACE: String = "http://www.w3.org/ns/solid/acp#"
 
     //Types
     /** Connects a resource to its access controls. Linked via Link: rel="acl". */
-    const val ACCESS_CONTROL_RESOURCE = "${NAMESPACE}AccessControlResource"
+    public const val ACCESS_CONTROL_RESOURCE: String = "${NAMESPACE}AccessControlResource"
 
     /** Connects an AccessControlResource to Policies. */
-    const val ACCESS_CONTROL_TYPE = "${NAMESPACE}AccessControl"
+    public const val ACCESS_CONTROL_TYPE: String = "${NAMESPACE}AccessControl"
 
     /** Defines allowed/denied access modes and matcher conditions. */
-    const val POLICY = "${NAMESPACE}Policy"
+    public const val POLICY: String = "${NAMESPACE}Policy"
 
     /** Describes matching context attributes for a policy. */
-    const val MATCHER = "${NAMESPACE}Matcher"
+    public const val MATCHER: String = "${NAMESPACE}Matcher"
 
     /** Extensible base class for access modes. */
-    const val ACCESS_MODE = "${NAMESPACE}AccessMode"
+    public const val ACCESS_MODE: String = "${NAMESPACE}AccessMode"
 
     /** Describes a resource access instance (target, agent, client, issuer). */
-    const val CONTEXT_TYPE = "${NAMESPACE}Context"
+    public const val CONTEXT_TYPE: String = "${NAMESPACE}Context"
 
     /** Defines access modes granted in a given context. */
-    const val ACCESS_GRANT = "${NAMESPACE}AccessGrant"
+    public const val ACCESS_GRANT: String = "${NAMESPACE}AccessGrant"
 
     //ACR predicates
     /** Connects an ACR to the resource it controls. */
-    const val RESOURCE = "${NAMESPACE}resource"
+    public const val RESOURCE: String = "${NAMESPACE}resource"
 
     /** Connects an ACR to access controls that apply directly to the resource. */
-    const val ACCESS_CONTROL = "${NAMESPACE}accessControl"
+    public const val ACCESS_CONTROL: String = "${NAMESPACE}accessControl"
 
     /** Connects an ACR to access controls that apply transitively to member resources. */
-    const val MEMBER_ACCESS_CONTROL = "${NAMESPACE}memberAccessControl"
+    public const val MEMBER_ACCESS_CONTROL: String = "${NAMESPACE}memberAccessControl"
 
     //AccessControl predicates
     /** References policies applied by this access control. */
-    const val APPLY = "${NAMESPACE}apply"
+    public const val APPLY: String = "${NAMESPACE}apply"
 
     //Policy predicates
     /** Access modes granted when the policy is satisfied. */
-    const val ALLOW = "${NAMESPACE}allow"
+    public const val ALLOW: String = "${NAMESPACE}allow"
 
     /** Access modes denied when the policy is satisfied. */
-    const val DENY = "${NAMESPACE}deny"
+    public const val DENY: String = "${NAMESPACE}deny"
 
     /** All referenced matchers must be satisfied. */
-    const val ALL_OF = "${NAMESPACE}allOf"
+    public const val ALL_OF: String = "${NAMESPACE}allOf"
 
     /** At least one referenced matcher must be satisfied. */
-    const val ANY_OF = "${NAMESPACE}anyOf"
+    public const val ANY_OF: String = "${NAMESPACE}anyOf"
 
     /** None of the referenced matchers must be satisfied. */
-    const val NONE_OF = "${NAMESPACE}noneOf"
+    public const val NONE_OF: String = "${NAMESPACE}noneOf"
 
     //Matcher/ Context attributes
-    const val AGENT = "${NAMESPACE}agent"
-    const val CLIENT = "${NAMESPACE}client"
-    const val ISSUER = "${NAMESPACE}issuer"
-    const val VC = "${NAMESPACE}vc"
-    const val TARGET = "${NAMESPACE}target"
-    const val MODE = "${NAMESPACE}mode"
-    const val CREATOR = "${NAMESPACE}creator"
-    const val OWNER = "${NAMESPACE}owner"
+    public const val AGENT: String = "${NAMESPACE}agent"
+    public const val CLIENT: String = "${NAMESPACE}client"
+    public const val ISSUER: String = "${NAMESPACE}issuer"
+    public const val VC: String = "${NAMESPACE}vc"
+    public const val TARGET: String = "${NAMESPACE}target"
+    public const val MODE: String = "${NAMESPACE}mode"
+    public const val CREATOR: String = "${NAMESPACE}creator"
+    public const val OWNER: String = "${NAMESPACE}owner"
 
     /** Base property for custom context attributes. */
-    const val ATTRIBUTE = "${NAMESPACE}attribute"
+    public const val ATTRIBUTE: String = "${NAMESPACE}attribute"
 
     //AccessGrant predicates
     /** Access modes granted in this context. */
-    const val GRANT = "${NAMESPACE}grant"
+    public const val GRANT: String = "${NAMESPACE}grant"
 
     /** Context associated with this access grant. */
-    const val CONTEXT = "${NAMESPACE}context"
+    public const val CONTEXT: String = "${NAMESPACE}context"
 
     //Special named individuals
     /** Matches all agents (authenticated and public). */
-    const val PUBLIC_AGENT = "${NAMESPACE}PublicAgent"
+    public const val PUBLIC_AGENT: String = "${NAMESPACE}PublicAgent"
 
     /** Matches only authenticated agents. */
-    const val AUTHENTICATED_AGENT = "${NAMESPACE}AuthenticatedAgent"
+    public const val AUTHENTICATED_AGENT: String = "${NAMESPACE}AuthenticatedAgent"
 
     /** Matches when the requesting agent is the resource creator. */
-    const val CREATOR_AGENT = "${NAMESPACE}CreatorAgent"
+    public const val CREATOR_AGENT: String = "${NAMESPACE}CreatorAgent"
 
     /** Matches when the requesting agent is the storage owner. */
-    const val OWNER_AGENT = "${NAMESPACE}OwnerAgent"
+    public const val OWNER_AGENT: String = "${NAMESPACE}OwnerAgent"
 
     /** Matches all client applications. */
-    const val PUBLIC_CLIENT = "${NAMESPACE}PublicClient"
+    public const val PUBLIC_CLIENT: String = "${NAMESPACE}PublicClient"
 
     /** Matches all issuers. */
-    const val PUBLIC_ISSUER = "${NAMESPACE}PublicIssuer"
+    public const val PUBLIC_ISSUER: String = "${NAMESPACE}PublicIssuer"
 
     /** Matcher that is always satisfied. */
-    const val ALWAYS_SATISFIED_RESTRICTION = "${NAMESPACE}AlwaysSatisfiedRestriction"
+    public const val ALWAYS_SATISFIED_RESTRICTION: String = "${NAMESPACE}AlwaysSatisfiedRestriction"
 }

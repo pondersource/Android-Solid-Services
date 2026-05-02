@@ -5,54 +5,54 @@ package com.pondersource.shared.vocab
  * http://www.w3.org/ns/auth/acl#
  * Spec: https://solidproject.org/TR/wac
  */
-object ACL {
-    const val NAMESPACE = "http://www.w3.org/ns/auth/acl#"
+public object ACL {
+    public const val NAMESPACE: String = "http://www.w3.org/ns/auth/acl#"
 
-    const val AUTHORIZATION = "${NAMESPACE}Authorization"
+    public const val AUTHORIZATION : String = "${NAMESPACE}Authorization"
 
-    const val READ = "${NAMESPACE}Read"
-    const val WRITE = "${NAMESPACE}Write"
-    const val APPEND = "${NAMESPACE}Append"
+    public const val READ : String = "${NAMESPACE}Read"
+    public const val WRITE : String = "${NAMESPACE}Write"
+    public const val APPEND : String = "${NAMESPACE}Append"
 
     /** Allows reading and modifying the ACL resource itself. */
-    const val CONTROL = "${NAMESPACE}Control"
+    public const val CONTROL : String = "${NAMESPACE}Control"
 
     //Authorization predicates
     /** Links an Authorization to a specific resource it protects. */
-    const val ACCESS_TO = "${NAMESPACE}accessTo"
+    public const val ACCESS_TO : String = "${NAMESPACE}accessTo"
 
     /** Links an Authorization to a container; inherited by all members. */
-    const val DEFAULT = "${NAMESPACE}default"
+    public const val DEFAULT : String = "${NAMESPACE}default"
 
     /** Access mode(s) granted by this Authorization. */
-    const val MODE = "${NAMESPACE}mode"
+    public const val MODE : String = "${NAMESPACE}mode"
 
     /** Individual agent (by WebID) granted access. */
-    const val AGENT = "${NAMESPACE}agent"
+    public const val AGENT : String = "${NAMESPACE}agent"
 
     /** Class of agents granted access (e.g. foaf:Agent, acl:AuthenticatedAgent). */
-    const val AGENT_CLASS = "${NAMESPACE}agentClass"
+    public const val AGENT_CLASS : String = "${NAMESPACE}agentClass"
 
     /** Group resource (vcard:Group) whose members are granted access. */
-    const val AGENT_GROUP = "${NAMESPACE}agentGroup"
+    public const val AGENT_GROUP : String = "${NAMESPACE}agentGroup"
 
     /** HTTP Origin that is allowed to make requests. */
-    const val ORIGIN = "${NAMESPACE}origin"
+    public const val ORIGIN : String = "${NAMESPACE}origin"
 
     //Agent class constants
     /** Any agent, authenticated or not. */
-    const val AGENT_PUBLIC = "http://xmlns.com/foaf/0.1/Agent"
+    public const val AGENT_PUBLIC : String = "http://xmlns.com/foaf/0.1/Agent"
 
     /** Any authenticated agent. */
-    const val AUTHENTICATED_AGENT = "${NAMESPACE}AuthenticatedAgent"
+    public const val AUTHENTICATED_AGENT : String = "${NAMESPACE}AuthenticatedAgent"
 
     //Legacy/storage
     /** Links a storage to its owner. */
-    const val OWNER = "${NAMESPACE}owner"
+    public const val OWNER : String = "${NAMESPACE}owner"
 
     /** Trusted application with allowed origins and modes. */
-    const val TRUSTED_APP = "${NAMESPACE}trustedApp"
+    public const val TRUSTED_APP : String = "${NAMESPACE}trustedApp"
 
     /** Access modes allowed for a trusted application. */
-    const val TRUSTED_MODE = "${NAMESPACE}trustedMode"
+    public const val TRUSTED_MODE: String = "${NAMESPACE}trustedMode"
 }

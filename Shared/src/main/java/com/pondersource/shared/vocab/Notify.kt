@@ -5,46 +5,46 @@ package com.pondersource.shared.vocab
  * http://www.w3.org/ns/solid/notifications#
  * Spec: https://solidproject.org/TR/notifications-protocol
  */
-object Notify {
-    const val NAMESPACE = "http://www.w3.org/ns/solid/notifications#"
+public object Notify {
+    public const val NAMESPACE: String = "http://www.w3.org/ns/solid/notifications#"
 
     //Channel types
-    const val WEB_SOCKET_CHANNEL_2023 = "${NAMESPACE}WebSocketChannel2023"
-    const val EVENT_SOURCE_CHANNEL_2023 = "${NAMESPACE}EventSourceChannel2023"
-    const val WEBHOOK_CHANNEL_2023 = "${NAMESPACE}WebhookChannel2023"
-    const val STREAMING_HTTP_CHANNEL_2023 = "${NAMESPACE}StreamingHTTPChannel2023"
-    const val LDN_CHANNEL_2023 = "${NAMESPACE}LDNChannel2023"
+    public const val WEB_SOCKET_CHANNEL_2023: String = "${NAMESPACE}WebSocketChannel2023"
+    public const val EVENT_SOURCE_CHANNEL_2023: String = "${NAMESPACE}EventSourceChannel2023"
+    public const val WEBHOOK_CHANNEL_2023: String = "${NAMESPACE}WebhookChannel2023"
+    public const val STREAMING_HTTP_CHANNEL_2023: String = "${NAMESPACE}StreamingHTTPChannel2023"
+    public const val LDN_CHANNEL_2023: String = "${NAMESPACE}LDNChannel2023"
 
     //Subscription predicates
     /** The resource being subscribed to. */
-    const val TOPIC = "${NAMESPACE}topic"
+    public const val TOPIC: String = "${NAMESPACE}topic"
 
     /** The channel type IRI. */
-    const val CHANNEL_TYPE = "${NAMESPACE}channelType"
+    public const val CHANNEL_TYPE: String = "${NAMESPACE}channelType"
 
     /** Send notifications to this endpoint (push/webhook pattern). */
-    const val SEND_TO = "${NAMESPACE}sendTo"
+    public const val SEND_TO: String = "${NAMESPACE}sendTo"
 
     /** Receive notifications from this endpoint (pull/SSE/WS pattern). */
-    const val RECEIVE_FROM = "${NAMESPACE}receiveFrom"
+    public const val RECEIVE_FROM: String = "${NAMESPACE}receiveFrom"
 
     //Channel feature predicates
     /** Start sending notifications after this datetime (xsd:dateTime). */
-    const val START_AT = "${NAMESPACE}startAt"
+    public const val START_AT: String = "${NAMESPACE}startAt"
 
     /** Stop sending notifications after this datetime (xsd:dateTime). */
-    const val END_AT = "${NAMESPACE}endAt"
+    public const val END_AT: String = "${NAMESPACE}endAt"
 
     /** Last known state of the resource (xsd:string). */
-    const val STATE = "${NAMESPACE}state"
+    public const val STATE: String = "${NAMESPACE}state"
 
     /** Minimum duration between notifications (xsd:duration). */
-    const val RATE = "${NAMESPACE}rate"
+    public const val RATE: String = "${NAMESPACE}rate"
 
     /** Accepted media types for notifications. */
-    const val ACCEPT = "${NAMESPACE}accept"
+    public const val ACCEPT: String = "${NAMESPACE}accept"
 
     //Notification message predicates
     /** The last known ETag / state of the resource at time of notification. */
-    const val LAST_KNOWN_STATE = "${NAMESPACE}lastKnownState"
+    public const val LAST_KNOWN_STATE: String = "${NAMESPACE}lastKnownState"
 }

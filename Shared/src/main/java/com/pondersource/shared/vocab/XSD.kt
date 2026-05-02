@@ -4,49 +4,49 @@ package com.pondersource.shared.vocab
  * XML Schema Datatypes (XSD) vocabulary constants.
  * http://www.w3.org/2001/XMLSchema#
  */
-object XSD {
-    const val NAMESPACE = "http://www.w3.org/2001/XMLSchema#"
+public object XSD {
+    public const val NAMESPACE: String = "http://www.w3.org/2001/XMLSchema#"
 
     //String types
-    const val STRING = "${NAMESPACE}string"
-    const val NORMALIZED_STRING = "${NAMESPACE}normalizedString"
-    const val TOKEN = "${NAMESPACE}token"
-    const val LANGUAGE = "${NAMESPACE}language"
-    const val ANY_URI = "${NAMESPACE}anyURI"
-    const val LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+    public const val STRING: String = "${NAMESPACE}string"
+    public const val NORMALIZED_STRING: String = "${NAMESPACE}normalizedString"
+    public const val TOKEN: String = "${NAMESPACE}token"
+    public const val LANGUAGE: String = "${NAMESPACE}language"
+    public const val ANY_URI: String = "${NAMESPACE}anyURI"
+    public const val LANG_STRING: String = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
 
     //Numeric types
-    const val INTEGER = "${NAMESPACE}integer"
-    const val LONG = "${NAMESPACE}long"
-    const val INT = "${NAMESPACE}int"
-    const val SHORT = "${NAMESPACE}short"
-    const val BYTE = "${NAMESPACE}byte"
-    const val DECIMAL = "${NAMESPACE}decimal"
-    const val FLOAT = "${NAMESPACE}float"
-    const val DOUBLE = "${NAMESPACE}double"
-    const val NON_NEGATIVE_INTEGER = "${NAMESPACE}nonNegativeInteger"
-    const val POSITIVE_INTEGER = "${NAMESPACE}positiveInteger"
-    const val NON_POSITIVE_INTEGER = "${NAMESPACE}nonPositiveInteger"
-    const val NEGATIVE_INTEGER = "${NAMESPACE}negativeInteger"
-    const val UNSIGNED_LONG = "${NAMESPACE}unsignedLong"
-    const val UNSIGNED_INT = "${NAMESPACE}unsignedInt"
+    public const val INTEGER: String = "${NAMESPACE}integer"
+    public const val LONG: String = "${NAMESPACE}long"
+    public const val INT: String = "${NAMESPACE}int"
+    public const val SHORT: String = "${NAMESPACE}short"
+    public const val BYTE: String = "${NAMESPACE}byte"
+    public const val DECIMAL: String = "${NAMESPACE}decimal"
+    public const val FLOAT: String = "${NAMESPACE}float"
+    public const val DOUBLE: String = "${NAMESPACE}double"
+    public const val NON_NEGATIVE_INTEGER: String = "${NAMESPACE}nonNegativeInteger"
+    public const val POSITIVE_INTEGER: String = "${NAMESPACE}positiveInteger"
+    public const val NON_POSITIVE_INTEGER: String = "${NAMESPACE}nonPositiveInteger"
+    public const val NEGATIVE_INTEGER: String = "${NAMESPACE}negativeInteger"
+    public const val UNSIGNED_LONG: String = "${NAMESPACE}unsignedLong"
+    public const val UNSIGNED_INT: String = "${NAMESPACE}unsignedInt"
 
     //Boolean
-    const val BOOLEAN = "${NAMESPACE}boolean"
+    public const val BOOLEAN: String = "${NAMESPACE}boolean"
 
     //Date/time types
-    const val DATE_TIME = "${NAMESPACE}dateTime"
-    const val DATE_TIME_STAMP = "${NAMESPACE}dateTimeStamp"
-    const val DATE = "${NAMESPACE}date"
-    const val TIME = "${NAMESPACE}time"
-    const val DURATION = "${NAMESPACE}duration"
-    const val YEAR_MONTH_DURATION = "${NAMESPACE}yearMonthDuration"
-    const val DAY_TIME_DURATION = "${NAMESPACE}dayTimeDuration"
-    const val G_YEAR = "${NAMESPACE}gYear"
-    const val G_MONTH = "${NAMESPACE}gMonth"
-    const val G_DAY = "${NAMESPACE}gDay"
+    public const val DATE_TIME: String = "${NAMESPACE}dateTime"
+    public const val DATE_TIME_STAMP: String = "${NAMESPACE}dateTimeStamp"
+    public const val DATE: String = "${NAMESPACE}date"
+    public const val TIME: String = "${NAMESPACE}time"
+    public const val DURATION: String = "${NAMESPACE}duration"
+    public const val YEAR_MONTH_DURATION: String = "${NAMESPACE}yearMonthDuration"
+    public const val DAY_TIME_DURATION: String = "${NAMESPACE}dayTimeDuration"
+    public const val G_YEAR: String = "${NAMESPACE}gYear"
+    public const val G_MONTH: String = "${NAMESPACE}gMonth"
+    public const val G_DAY: String = "${NAMESPACE}gDay"
 
     //Binary
-    const val BASE64_BINARY = "${NAMESPACE}base64Binary"
-    const val HEX_BINARY = "${NAMESPACE}hexBinary"
+    public const val BASE64_BINARY: String = "${NAMESPACE}base64Binary"
+    public const val HEX_BINARY: String = "${NAMESPACE}hexBinary"
 }

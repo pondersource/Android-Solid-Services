@@ -4,45 +4,45 @@ package com.pondersource.shared.vocab
  * Friend of a Friend (FOAF) vocabulary constants.
  * http://xmlns.com/foaf/0.1/
  */
-object FOAF {
-    const val NAMESPACE = "http://xmlns.com/foaf/0.1/"
+public object FOAF {
+    public const val NAMESPACE: String = "http://xmlns.com/foaf/0.1/"
 
     //Types
-    const val AGENT = "${NAMESPACE}Agent"
-    const val PERSON = "${NAMESPACE}Person"
-    const val ORGANIZATION = "${NAMESPACE}Organization"
-    const val DOCUMENT = "${NAMESPACE}Document"
-    const val PERSONAL_PROFILE_DOCUMENT = "${NAMESPACE}PersonalProfileDocument"
-    const val ONLINE_ACCOUNT = "${NAMESPACE}OnlineAccount"
+    public const val AGENT: String = "${NAMESPACE}Agent"
+    public const val PERSON: String = "${NAMESPACE}Person"
+    public const val ORGANIZATION: String = "${NAMESPACE}Organization"
+    public const val DOCUMENT: String = "${NAMESPACE}Document"
+    public const val PERSONAL_PROFILE_DOCUMENT: String = "${NAMESPACE}PersonalProfileDocument"
+    public const val ONLINE_ACCOUNT: String = "${NAMESPACE}OnlineAccount"
 
     //Identity predicates
-    const val NAME = "${NAMESPACE}name"
-    const val GIVEN_NAME = "${NAMESPACE}givenName"
-    const val FAMILY_NAME = "${NAMESPACE}familyName"
-    const val TITLE = "${NAMESPACE}title"
-    const val NICK = "${NAMESPACE}nick"
-    const val MBOX = "${NAMESPACE}mbox"
-    const val MBOX_SHA1_SUM = "${NAMESPACE}mbox_sha1sum"
+    public const val NAME: String = "${NAMESPACE}name"
+    public const val GIVEN_NAME: String = "${NAMESPACE}givenName"
+    public const val FAMILY_NAME: String = "${NAMESPACE}familyName"
+    public const val TITLE: String = "${NAMESPACE}title"
+    public const val NICK: String = "${NAMESPACE}nick"
+    public const val MBOX: String = "${NAMESPACE}mbox"
+    public const val MBOX_SHA1_SUM: String = "${NAMESPACE}mbox_sha1sum"
 
     //Profile / social
-    const val IMG = "${NAMESPACE}img"
-    const val DEPICTION = "${NAMESPACE}depiction"
-    const val HOMEPAGE = "${NAMESPACE}homepage"
-    const val WEBLOG = "${NAMESPACE}weblog"
-    const val ACCOUNT = "${NAMESPACE}account"
-    const val KNOWS = "${NAMESPACE}knows"
-    const val MEMBER = "${NAMESPACE}member"
+    public const val IMG: String = "${NAMESPACE}img"
+    public const val DEPICTION: String = "${NAMESPACE}depiction"
+    public const val HOMEPAGE: String = "${NAMESPACE}homepage"
+    public const val WEBLOG: String = "${NAMESPACE}weblog"
+    public const val ACCOUNT: String = "${NAMESPACE}account"
+    public const val KNOWS: String = "${NAMESPACE}knows"
+    public const val MEMBER: String = "${NAMESPACE}member"
 
     //Document predicates
-    const val PRIMARY_TOPIC = "${NAMESPACE}primaryTopic"
-    const val IS_PRIMARY_TOPIC_OF = "${NAMESPACE}isPrimaryTopicOf"
-    const val MAKER = "${NAMESPACE}maker"
-    const val MADE = "${NAMESPACE}made"
-    const val TOPIC = "${NAMESPACE}topic"
-    const val PAGE = "${NAMESPACE}page"
+    public const val PRIMARY_TOPIC: String = "${NAMESPACE}primaryTopic"
+    public const val IS_PRIMARY_TOPIC_OF: String = "${NAMESPACE}isPrimaryTopicOf"
+    public const val MAKER: String = "${NAMESPACE}maker"
+    public const val MADE: String = "${NAMESPACE}made"
+    public const val TOPIC: String = "${NAMESPACE}topic"
+    public const val PAGE: String = "${NAMESPACE}page"
 
     //Account predicates
-    const val ACCOUNT_NAME = "${NAMESPACE}accountName"
-    const val ACCOUNT_SERVICE_HOMEPAGE = "${NAMESPACE}accountServiceHomepage"
-    const val OPENID = "${NAMESPACE}openid"
+    public const val ACCOUNT_NAME: String = "${NAMESPACE}accountName"
+    public const val ACCOUNT_SERVICE_HOMEPAGE: String = "${NAMESPACE}accountServiceHomepage"
+    public const val OPENID: String = "${NAMESPACE}openid"
 }

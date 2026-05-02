@@ -6,49 +6,49 @@ package com.pondersource.shared.vocab
  * Used by the Solid Notifications Protocol for notification message types.
  * Spec: https://solidproject.org/TR/notifications-protocol
  */
-object AS {
-    const val NAMESPACE = "https://www.w3.org/ns/activitystreams#"
+public object AS {
+    public const val NAMESPACE: String = "https://www.w3.org/ns/activitystreams#"
 
     //Activity types (notification event types) 
-    const val CREATE = "${NAMESPACE}Create"
-    const val UPDATE = "${NAMESPACE}Update"
-    const val DELETE = "${NAMESPACE}Delete"
-    const val ADD = "${NAMESPACE}Add"
-    const val REMOVE = "${NAMESPACE}Remove"
-    const val MOVE = "${NAMESPACE}Move"
-    const val ANNOUNCE = "${NAMESPACE}Announce"
+    public const val CREATE: String = "${NAMESPACE}Create"
+    public const val UPDATE: String = "${NAMESPACE}Update"
+    public const val DELETE: String = "${NAMESPACE}Delete"
+    public const val ADD: String = "${NAMESPACE}Add"
+    public const val REMOVE: String = "${NAMESPACE}Remove"
+    public const val MOVE: String = "${NAMESPACE}Move"
+    public const val ANNOUNCE: String = "${NAMESPACE}Announce"
 
     //Object types
-    const val OBJECT_TYPE = "${NAMESPACE}Object"
-    const val ACTIVITY = "${NAMESPACE}Activity"
-    const val COLLECTION = "${NAMESPACE}Collection"
-    const val ORDERED_COLLECTION = "${NAMESPACE}OrderedCollection"
-    const val LINK = "${NAMESPACE}Link"
+    public const val OBJECT_TYPE: String = "${NAMESPACE}Object"
+    public const val ACTIVITY: String = "${NAMESPACE}Activity"
+    public const val COLLECTION: String = "${NAMESPACE}Collection"
+    public const val ORDERED_COLLECTION: String = "${NAMESPACE}OrderedCollection"
+    public const val LINK: String = "${NAMESPACE}Link"
 
     // Predicates
     /** The object affected by the activity. */
-    const val OBJECT = "${NAMESPACE}object"
+    public const val OBJECT: String = "${NAMESPACE}object"
 
     /** Target resource(s) for the activity. */
-    const val TARGET = "${NAMESPACE}target"
+    public const val TARGET: String = "${NAMESPACE}target"
 
     /** When the notification was published (xsd:dateTime). */
-    const val PUBLISHED = "${NAMESPACE}published"
+    public const val PUBLISHED: String = "${NAMESPACE}published"
 
     /** Unique identifier for the notification. */
-    const val ID = "${NAMESPACE}id"
+    public const val ID: String = "${NAMESPACE}id"
 
     /** Agent that performed the activity. */
-    const val ACTOR = "${NAMESPACE}actor"
+    public const val ACTOR: String = "${NAMESPACE}actor"
 
     /** Summary of the activity. */
-    const val SUMMARY = "${NAMESPACE}summary"
+    public const val SUMMARY: String = "${NAMESPACE}summary"
 
-    const val ITEMS = "${NAMESPACE}items"
-    const val ORDERED_ITEMS = "${NAMESPACE}orderedItems"
-    const val FIRST = "${NAMESPACE}first"
-    const val LAST = "${NAMESPACE}last"
-    const val NEXT = "${NAMESPACE}next"
-    const val PREV = "${NAMESPACE}prev"
-    const val TOTAL_ITEMS = "${NAMESPACE}totalItems"
+    public const val ITEMS: String = "${NAMESPACE}items"
+    public const val ORDERED_ITEMS: String = "${NAMESPACE}orderedItems"
+    public const val FIRST: String = "${NAMESPACE}first"
+    public const val LAST: String = "${NAMESPACE}last"
+    public const val NEXT: String = "${NAMESPACE}next"
+    public const val PREV: String = "${NAMESPACE}prev"
+    public const val TOTAL_ITEMS: String = "${NAMESPACE}totalItems"
 }

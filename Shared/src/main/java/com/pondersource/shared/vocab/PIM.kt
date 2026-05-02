@@ -5,29 +5,29 @@ package com.pondersource.shared.vocab
  * http://www.w3.org/ns/pim/space#
  * Used by Solid for storage and preferences.
  */
-object PIM {
-    const val NAMESPACE = "http://www.w3.org/ns/pim/space#"
+public object PIM {
+    public const val NAMESPACE: String = "http://www.w3.org/ns/pim/space#"
 
     //Types
     /** A Solid pod storage root container. */
-    const val STORAGE_TYPE = "${NAMESPACE}Storage"
+    public const val STORAGE_TYPE: String = "${NAMESPACE}Storage"
 
     /** A configuration / preferences file. */
-    const val CONFIGURATION_FILE = "${NAMESPACE}ConfigurationFile"
+    public const val CONFIGURATION_FILE: String = "${NAMESPACE}ConfigurationFile"
 
     /** A workspace for personal data. */
-    const val WORKSPACE_TYPE = "${NAMESPACE}Workspace"
+    public const val WORKSPACE_TYPE: String = "${NAMESPACE}Workspace"
 
-    const val CONTROLLED_STORAGE = "${NAMESPACE}ControlledStorage"
-    const val PERSONAL_STORAGE = "${NAMESPACE}PersonalStorage"
+    public const val CONTROLLED_STORAGE: String = "${NAMESPACE}ControlledStorage"
+    public const val PERSONAL_STORAGE: String = "${NAMESPACE}PersonalStorage"
 
     //Predicates
     /** Links a WebID to its storage root(s). */
-    const val STORAGE = "${NAMESPACE}storage"
+    public const val STORAGE: String = "${NAMESPACE}storage"
 
     /** Links a WebID to its preferences / configuration file. */
-    const val PREFERENCES_FILE = "${NAMESPACE}preferencesFile"
+    public const val PREFERENCES_FILE: String = "${NAMESPACE}preferencesFile"
 
-    const val WORKSPACE = "${NAMESPACE}workspace"
-    const val MASTER_WORKSPACE = "${NAMESPACE}masterWorkspace"
+    public const val WORKSPACE: String = "${NAMESPACE}workspace"
+    public const val MASTER_WORKSPACE: String = "${NAMESPACE}masterWorkspace"
 }

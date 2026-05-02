@@ -8,206 +8,206 @@ package com.pondersource.shared.vocab
  * SAI defines how applications request and receive delegated access to
  * data across Solid pods via registries, access needs, and access grants.
  */
-object SAI {
-    const val NAMESPACE = "http://www.w3.org/ns/solid/interop#"
+public object SAI {
+    public const val NAMESPACE: String = "http://www.w3.org/ns/solid/interop#"
 
     //Agent types
     /** An individual, group, or organization identifiable by a WebID. */
-    const val SOCIAL_AGENT = "${NAMESPACE}SocialAgent"
+    public const val SOCIAL_AGENT: String = "${NAMESPACE}SocialAgent"
 
     /** A software-based agent (app) used to access and manage pod data. */
-    const val APPLICATION = "${NAMESPACE}Application"
+    public const val APPLICATION: String = "${NAMESPACE}Application"
 
     /** The authorization agent application managing data access on behalf of an agent. */
-    const val AUTHORIZATION_AGENT = "${NAMESPACE}AuthorizationAgent"
+    public const val AUTHORIZATION_AGENT: String = "${NAMESPACE}AuthorizationAgent"
 
     //Registry types
     /** Links to all registries owned by a social agent. */
-    const val REGISTRY_SET = "${NAMESPACE}RegistrySet"
+    public const val REGISTRY_SET: String = "${NAMESPACE}RegistrySet"
 
     /** A collection of agent registrations (known apps and social agents). */
-    const val AGENT_REGISTRY = "${NAMESPACE}AgentRegistry"
+    public const val AGENT_REGISTRY: String = "${NAMESPACE}AgentRegistry"
 
     /** A collection of data registrations for a specific shape tree. */
-    const val DATA_REGISTRY = "${NAMESPACE}DataRegistry"
+    public const val DATA_REGISTRY: String = "${NAMESPACE}DataRegistry"
 
     /** Stores data instances for a specific shape tree within a data registry. */
-    const val DATA_REGISTRATION = "${NAMESPACE}DataRegistration"
+    public const val DATA_REGISTRATION: String = "${NAMESPACE}DataRegistration"
 
     /** Records metadata about an application used by a social agent. */
-    const val APPLICATION_REGISTRATION = "${NAMESPACE}ApplicationRegistration"
+    public const val APPLICATION_REGISTRATION: String = "${NAMESPACE}ApplicationRegistration"
 
     /** Records another social agent that has been interacted with. */
-    const val SOCIAL_AGENT_REGISTRATION = "${NAMESPACE}SocialAgentRegistration"
+    public const val SOCIAL_AGENT_REGISTRATION: String = "${NAMESPACE}SocialAgentRegistration"
 
     /** A secure way to initiate a data-sharing relationship. */
-    const val SOCIAL_AGENT_INVITATION = "${NAMESPACE}SocialAgentInvitation"
+    public const val SOCIAL_AGENT_INVITATION: String = "${NAMESPACE}SocialAgentInvitation"
 
     //Access need types
     /** A group of related access needs communicated together. */
-    const val ACCESS_NEED_GROUP = "${NAMESPACE}AccessNeedGroup"
+    public const val ACCESS_NEED_GROUP: String = "${NAMESPACE}AccessNeedGroup"
 
     /** A requirement for access to one specific data type / shape tree. */
-    const val ACCESS_NEED = "${NAMESPACE}AccessNeed"
+    public const val ACCESS_NEED: String = "${NAMESPACE}AccessNeed"
 
     /** Sent from one agent to another to communicate access need groups. */
-    const val ACCESS_REQUEST = "${NAMESPACE}AccessRequest"
+    public const val ACCESS_REQUEST: String = "${NAMESPACE}AccessRequest"
 
     //Authorization / grant types
     /** Records the decision to grant access to data for an agent. */
-    const val ACCESS_AUTHORIZATION = "${NAMESPACE}AccessAuthorization"
+    public const val ACCESS_AUTHORIZATION: String = "${NAMESPACE}AccessAuthorization"
 
     /** Authorizes access to a specific data type within an access authorization. */
-    const val DATA_AUTHORIZATION = "${NAMESPACE}DataAuthorization"
+    public const val DATA_AUTHORIZATION: String = "${NAMESPACE}DataAuthorization"
 
     /** Describes the access that has been granted to an agent. */
-    const val ACCESS_GRANT = "${NAMESPACE}AccessGrant"
+    public const val ACCESS_GRANT: String = "${NAMESPACE}AccessGrant"
 
     /** Detailed access description for a specific data type within an access grant. */
-    const val DATA_GRANT = "${NAMESPACE}DataGrant"
+    public const val DATA_GRANT: String = "${NAMESPACE}DataGrant"
 
     /** A data grant that re-shares access from a grantee to another agent. */
-    const val DELEGATED_DATA_GRANT = "${NAMESPACE}DelegatedDataGrant"
+    public const val DELEGATED_DATA_GRANT: String = "${NAMESPACE}DelegatedDataGrant"
 
     //Registry predicates
     /** Links a social agent to their registry set. */
-    const val HAS_REGISTRY_SET = "${NAMESPACE}hasRegistrySet"
+    public const val HAS_REGISTRY_SET: String = "${NAMESPACE}hasRegistrySet"
 
     /** Links a social agent to their authorization agent application. */
-    const val HAS_AUTHORIZATION_AGENT = "${NAMESPACE}hasAuthorizationAgent"
+    public const val HAS_AUTHORIZATION_AGENT: String = "${NAMESPACE}hasAuthorizationAgent"
 
     /** Links a registry set to an agent registry. */
-    const val HAS_AGENT_REGISTRY = "${NAMESPACE}hasAgentRegistry"
+    public const val HAS_AGENT_REGISTRY: String = "${NAMESPACE}hasAgentRegistry"
 
     /** Links a registry set to a data registry. */
-    const val HAS_DATA_REGISTRY = "${NAMESPACE}hasDataRegistry"
+    public const val HAS_DATA_REGISTRY: String = "${NAMESPACE}hasDataRegistry"
 
     /** Links an agent registry to a social agent registration. */
-    const val HAS_SOCIAL_AGENT_REGISTRATION = "${NAMESPACE}hasSocialAgentRegistration"
+    public const val HAS_SOCIAL_AGENT_REGISTRATION: String = "${NAMESPACE}hasSocialAgentRegistration"
 
     /** Links an agent registry to an application registration. */
-    const val HAS_APPLICATION_REGISTRATION = "${NAMESPACE}hasApplicationRegistration"
+    public const val HAS_APPLICATION_REGISTRATION: String = "${NAMESPACE}hasApplicationRegistration"
 
     /** Links a data registry to a data registration. */
-    const val HAS_DATA_REGISTRATION = "${NAMESPACE}hasDataRegistration"
+    public const val HAS_DATA_REGISTRATION: String = "${NAMESPACE}hasDataRegistration"
 
     /** Links a data registration to a specific data instance. */
-    const val HAS_DATA_INSTANCE = "${NAMESPACE}hasDataInstance"
+    public const val HAS_DATA_INSTANCE: String = "${NAMESPACE}hasDataInstance"
 
     //Registration predicates
     /** The social agent that created this registration. */
-    const val REGISTERED_BY = "${NAMESPACE}registeredBy"
+    public const val REGISTERED_BY: String = "${NAMESPACE}registeredBy"
 
     /** The application used to create this registration. */
-    const val REGISTERED_WITH = "${NAMESPACE}registeredWith"
+    public const val REGISTERED_WITH: String = "${NAMESPACE}registeredWith"
 
     /** Timestamp when the registration was created (xsd:dateTime). */
-    const val REGISTERED_AT = "${NAMESPACE}registeredAt"
+    public const val REGISTERED_AT: String = "${NAMESPACE}registeredAt"
 
     /** Timestamp when the registration was last updated (xsd:dateTime). */
-    const val UPDATED_AT = "${NAMESPACE}updatedAt"
+    public const val UPDATED_AT: String = "${NAMESPACE}updatedAt"
 
     /** The agent (app or social agent) that was registered. */
-    const val REGISTERED_AGENT = "${NAMESPACE}registeredAgent"
+    public const val REGISTERED_AGENT: String = "${NAMESPACE}registeredAgent"
 
     /** The shape tree that describes the registered data type. */
-    const val REGISTERED_SHAPE_TREE = "${NAMESPACE}registeredShapeTree"
+    public const val REGISTERED_SHAPE_TREE: String = "${NAMESPACE}registeredShapeTree"
 
     //Application description predicates
     /** Human-readable name of the application. */
-    const val APPLICATION_NAME = "${NAMESPACE}applicationName"
+    public const val APPLICATION_NAME: String = "${NAMESPACE}applicationName"
 
     /** Human-readable description of the application's function. */
-    const val APPLICATION_DESCRIPTION = "${NAMESPACE}applicationDescription"
+    public const val APPLICATION_DESCRIPTION: String = "${NAMESPACE}applicationDescription"
 
     /** The social agent who authored this application. */
-    const val APPLICATION_AUTHOR = "${NAMESPACE}applicationAuthor"
+    public const val APPLICATION_AUTHOR: String = "${NAMESPACE}applicationAuthor"
 
     /** URI of a thumbnail image for the application. */
-    const val APPLICATION_THUMBNAIL = "${NAMESPACE}applicationThumbnail"
+    public const val APPLICATION_THUMBNAIL: String = "${NAMESPACE}applicationThumbnail"
 
     /** URI the authorization agent redirects to after authorization. */
-    const val HAS_AUTHORIZATION_CALLBACK_ENDPOINT = "${NAMESPACE}hasAuthorizationCallbackEndpoint"
+    public const val HAS_AUTHORIZATION_CALLBACK_ENDPOINT: String = "${NAMESPACE}hasAuthorizationCallbackEndpoint"
 
     /** URI the authorization agent uses for authorization redirects. */
-    const val HAS_AUTHORIZATION_REDIRECT_ENDPOINT = "${NAMESPACE}hasAuthorizationRedirectEndpoint"
+    public const val HAS_AUTHORIZATION_REDIRECT_ENDPOINT: String = "${NAMESPACE}hasAuthorizationRedirectEndpoint"
 
     //Access need predicates
     /** Links an access need group to its constituent access needs. */
-    const val HAS_ACCESS_NEED = "${NAMESPACE}hasAccessNeed"
+    public const val HAS_ACCESS_NEED: String = "${NAMESPACE}hasAccessNeed"
 
     /** Links an authorization or grant to its access need groups. */
-    const val HAS_ACCESS_NEED_GROUP = "${NAMESPACE}hasAccessNeedGroup"
+    public const val HAS_ACCESS_NEED_GROUP: String = "${NAMESPACE}hasAccessNeedGroup"
 
     /** Marks an access need as required (`interop:Required`) or optional (`interop:Optional`). */
-    const val ACCESS_NECESSITY = "${NAMESPACE}accessNecessity"
+    public const val ACCESS_NECESSITY: String = "${NAMESPACE}accessNecessity"
 
     /** Context for presenting the access need (`interop:PersonalAccess`, `interop:SharedAccess`). */
-    const val ACCESS_SCENARIO = "${NAMESPACE}accessScenario"
+    public const val ACCESS_SCENARIO: String = "${NAMESPACE}accessScenario"
 
     /** The requested access modes (e.g. `acl:Read`, `acl:Write`). */
-    const val ACCESS_MODE = "${NAMESPACE}accessMode"
+    public const val ACCESS_MODE: String = "${NAMESPACE}accessMode"
 
     /** Additional access modes granted to the data creator. */
-    const val CREATOR_ACCESS_MODE = "${NAMESPACE}creatorAccessMode"
+    public const val CREATOR_ACCESS_MODE: String = "${NAMESPACE}creatorAccessMode"
 
     /** References a parent access need this need inherits from. */
-    const val INHERITS_FROM_NEED = "${NAMESPACE}inheritsFromNeed"
+    public const val INHERITS_FROM_NEED: String = "${NAMESPACE}inheritsFromNeed"
 
     //Authorization / grant predicates
     /** Links a social agent registration or access grant to an access grant. */
-    const val HAS_ACCESS_GRANT = "${NAMESPACE}hasAccessGrant"
+    public const val HAS_ACCESS_GRANT: String = "${NAMESPACE}hasAccessGrant"
 
     /** The social agent who granted the authorization. */
-    const val GRANTED_BY = "${NAMESPACE}grantedBy"
+    public const val GRANTED_BY: String = "${NAMESPACE}grantedBy"
 
     /** The application used to perform the authorization. */
-    const val GRANTED_WITH = "${NAMESPACE}grantedWith"
+    public const val GRANTED_WITH: String = "${NAMESPACE}grantedWith"
 
     /** Timestamp when the authorization was granted (xsd:dateTime). */
-    const val GRANTED_AT = "${NAMESPACE}grantedAt"
+    public const val GRANTED_AT: String = "${NAMESPACE}grantedAt"
 
     /** The agent receiving the authorization or grant. */
-    const val GRANTEE = "${NAMESPACE}grantee"
+    public const val GRANTEE: String = "${NAMESPACE}grantee"
 
     /** The social agent who owns the authorized data. */
-    const val DATA_OWNER = "${NAMESPACE}dataOwner"
+    public const val DATA_OWNER: String = "${NAMESPACE}dataOwner"
 
     /** Scope of the authorization (`All`, `AllFromAgent`, `AllFromRegistry`, `SelectedFromRegistry`, `Inherited`). */
-    const val SCOPE_OF_AUTHORIZATION = "${NAMESPACE}scopeOfAuthorization"
+    public const val SCOPE_OF_AUTHORIZATION: String = "${NAMESPACE}scopeOfAuthorization"
 
     /** Scope of the grant (mirrors scopeOfAuthorization for the issued grant). */
-    const val SCOPE_OF_GRANT = "${NAMESPACE}scopeOfGrant"
+    public const val SCOPE_OF_GRANT: String = "${NAMESPACE}scopeOfGrant"
 
     /** Links a data grant to the access need it satisfies. */
-    const val SATISFIES_ACCESS_NEED = "${NAMESPACE}satisfiesAccessNeed"
+    public const val SATISFIES_ACCESS_NEED: String = "${NAMESPACE}satisfiesAccessNeed"
 
     /** References a parent authorization this authorization inherits from. */
-    const val INHERITS_FROM_AUTHORIZATION = "${NAMESPACE}inheritsFromAuthorization"
+    public const val INHERITS_FROM_AUTHORIZATION: String = "${NAMESPACE}inheritsFromAuthorization"
 
     /** References a parent data grant this grant inherits from. */
-    const val INHERITS_FROM_GRANT = "${NAMESPACE}inheritsFromGrant"
+    public const val INHERITS_FROM_GRANT: String = "${NAMESPACE}inheritsFromGrant"
 
     /** The data grant this delegated grant re-shares. */
-    const val DELEGATION_OF_GRANT = "${NAMESPACE}delegationOfGrant"
+    public const val DELEGATION_OF_GRANT: String = "${NAMESPACE}delegationOfGrant"
 
     /** References the mutual registration in the other agent's registry. */
-    const val RECIPROCAL_REGISTRATION = "${NAMESPACE}reciprocalRegistration"
+    public const val RECIPROCAL_REGISTRATION: String = "${NAMESPACE}reciprocalRegistration"
 
     /** A secure URL for accepting a social agent invitation. */
-    const val CAPABILITY_URL = "${NAMESPACE}capabilityUrl"
+    public const val CAPABILITY_URL: String = "${NAMESPACE}capabilityUrl"
 
     //Access necessity named individuals
     /** Marks an access need as required. */
-    const val REQUIRED = "${NAMESPACE}Required"
+    public const val REQUIRED: String = "${NAMESPACE}Required"
 
     /** Marks an access need as optional. */
-    const val OPTIONAL = "${NAMESPACE}Optional"
+    public const val OPTIONAL: String = "${NAMESPACE}Optional"
 
     //Access scenario named individuals
     /** Access for the agent's own personal data. */
-    const val PERSONAL_ACCESS = "${NAMESPACE}PersonalAccess"
+    public const val PERSONAL_ACCESS: String = "${NAMESPACE}PersonalAccess"
 
     /** Access shared with or from other agents. */
-    const val SHARED_ACCESS = "${NAMESPACE}SharedAccess"
+    public const val SHARED_ACCESS: String = "${NAMESPACE}SharedAccess"
 }

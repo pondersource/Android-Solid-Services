@@ -4,24 +4,24 @@ package com.pondersource.shared.vocab
  * RDF core vocabulary constants.
  * http://www.w3.org/1999/02/22-rdf-syntax-ns#
  */
-object RDF {
-    const val NAMESPACE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+public object RDF {
+    public const val NAMESPACE: String = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 
-    const val TYPE = "${NAMESPACE}type"
-    const val PROPERTY = "${NAMESPACE}Property"
-    const val STATEMENT = "${NAMESPACE}Statement"
-    const val SUBJECT = "${NAMESPACE}subject"
-    const val PREDICATE = "${NAMESPACE}predicate"
-    const val OBJECT = "${NAMESPACE}object"
-    const val BAG = "${NAMESPACE}Bag"
-    const val SEQ = "${NAMESPACE}Seq"
-    const val ALT = "${NAMESPACE}Alt"
-    const val VALUE = "${NAMESPACE}value"
-    const val LANG_STRING = "${NAMESPACE}langString"
-    const val HTML = "${NAMESPACE}HTML"
-    const val XML_LITERAL = "${NAMESPACE}XMLLiteral"
-    const val NIL = "${NAMESPACE}nil"
-    const val FIRST = "${NAMESPACE}first"
-    const val REST = "${NAMESPACE}rest"
-    const val LIST = "${NAMESPACE}List"
+    public const val TYPE: String = "${NAMESPACE}type"
+    public const val PROPERTY: String = "${NAMESPACE}Property"
+    public const val STATEMENT: String = "${NAMESPACE}Statement"
+    public const val SUBJECT: String = "${NAMESPACE}subject"
+    public const val PREDICATE: String = "${NAMESPACE}predicate"
+    public const val OBJECT: String = "${NAMESPACE}object"
+    public const val BAG: String = "${NAMESPACE}Bag"
+    public const val SEQ: String = "${NAMESPACE}Seq"
+    public const val ALT: String = "${NAMESPACE}Alt"
+    public const val VALUE: String = "${NAMESPACE}value"
+    public const val LANG_STRING: String = "${NAMESPACE}langString"
+    public const val HTML: String = "${NAMESPACE}HTML"
+    public const val XML_LITERAL: String = "${NAMESPACE}XMLLiteral"
+    public const val NIL: String = "${NAMESPACE}nil"
+    public const val FIRST: String = "${NAMESPACE}first"
+    public const val REST: String = "${NAMESPACE}rest"
+    public const val LIST: String = "${NAMESPACE}List"
 }

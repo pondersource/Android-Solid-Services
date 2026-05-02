@@ -5,27 +5,27 @@ package com.pondersource.shared.vocab
  * http://www.w3.org/ns/auth/cert#
  * Used in WebID profiles to advertise public keys for WebID-TLS authentication.
  */
-object Cert {
-    const val NAMESPACE = "http://www.w3.org/ns/auth/cert#"
+public object Cert {
+    public const val NAMESPACE: String = "http://www.w3.org/ns/auth/cert#"
 
     //Types
-    const val KEY_TYPE = "${NAMESPACE}Key"
-    const val RSA_PUBLIC_KEY = "${NAMESPACE}RSAPublicKey"
-    const val CERTIFICATE = "${NAMESPACE}Certificate"
+    public const val KEY_TYPE: String = "${NAMESPACE}Key"
+    public const val RSA_PUBLIC_KEY: String = "${NAMESPACE}RSAPublicKey"
+    public const val CERTIFICATE: String = "${NAMESPACE}Certificate"
 
     //Predicates
     /** Links a WebID to a public key. */
-    const val KEY = "${NAMESPACE}key"
+    public const val KEY: String = "${NAMESPACE}key"
 
     /** The RSA modulus (hex or integer). */
-    const val MODULUS = "${NAMESPACE}modulus"
+    public const val MODULUS: String = "${NAMESPACE}modulus"
 
     /** The RSA public exponent. */
-    const val EXPONENT = "${NAMESPACE}exponent"
+    public const val EXPONENT: String = "${NAMESPACE}exponent"
 
     /** The label of a key. */
-    const val LABEL = "${NAMESPACE}label"
+    public const val LABEL: String = "${NAMESPACE}label"
 
     /** The identity the key belongs to. */
-    const val IDENTITY = "${NAMESPACE}identity"
+    public const val IDENTITY: String = "${NAMESPACE}identity"
 }

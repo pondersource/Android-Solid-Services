@@ -1,35 +1,35 @@
 package com.pondersource.shared.vocab
 
-object DC {
-    const val NAMESPACE = "http://purl.org/dc/terms/"
-    const val ELEMENT_NAMESPACE = "http://purl.org/dc/elements/1.1/"
+public object DC {
+    public const val NAMESPACE: String = "http://purl.org/dc/terms/"
+    public const val ELEMENT_NAMESPACE: String = "http://purl.org/dc/elements/1.1/"
 
     // Dates
-    const val CREATED = "${NAMESPACE}created"
-    const val MODIFIED = "${NAMESPACE}modified"
-    const val ISSUED = "${NAMESPACE}issued"
-    const val DATE = "${NAMESPACE}date"
+    public const val CREATED: String = "${NAMESPACE}created"
+    public const val MODIFIED: String = "${NAMESPACE}modified"
+    public const val ISSUED: String = "${NAMESPACE}issued"
+    public const val DATE: String = "${NAMESPACE}date"
 
     // Descriptive
-    const val TITLE = "${NAMESPACE}title"
-    const val TITLE_LEGACY = "https://purl.org/dc/terms/title"
-    const val DESCRIPTION = "${NAMESPACE}description"
-    const val SUBJECT = "${NAMESPACE}subject"
-    const val LANGUAGE = "${NAMESPACE}language"
-    const val RIGHTS = "${NAMESPACE}rights"
-    const val SOURCE = "${NAMESPACE}source"
-    const val FORMAT = "${NAMESPACE}format"
+    public const val TITLE: String = "${NAMESPACE}title"
+    public const val TITLE_LEGACY: String = "https://purl.org/dc/terms/title"
+    public const val DESCRIPTION: String = "${NAMESPACE}description"
+    public const val SUBJECT: String = "${NAMESPACE}subject"
+    public const val LANGUAGE: String = "${NAMESPACE}language"
+    public const val RIGHTS: String = "${NAMESPACE}rights"
+    public const val SOURCE: String = "${NAMESPACE}source"
+    public const val FORMAT: String = "${NAMESPACE}format"
 
     // Identity
-    const val IDENTIFIER = "${NAMESPACE}identifier"
-    const val PUBLISHER = "${NAMESPACE}publisher"
-    const val CREATOR = "${NAMESPACE}creator"
-    const val CONTRIBUTOR = "${NAMESPACE}contributor"
+    public const val IDENTIFIER: String = "${NAMESPACE}identifier"
+    public const val PUBLISHER: String = "${NAMESPACE}publisher"
+    public const val CREATOR: String = "${NAMESPACE}creator"
+    public const val CONTRIBUTOR: String = "${NAMESPACE}contributor"
 
     // Relations
-    const val RELATION = "${NAMESPACE}relation"
-    const val IS_PART_OF = "${NAMESPACE}isPartOf"
-    const val HAS_PART = "${NAMESPACE}hasPart"
-    const val REPLACES = "${NAMESPACE}replaces"
-    const val REQUIRES = "${NAMESPACE}requires"
+    public const val RELATION: String = "${NAMESPACE}relation"
+    public const val IS_PART_OF: String = "${NAMESPACE}isPartOf"
+    public const val HAS_PART: String = "${NAMESPACE}hasPart"
+    public const val REPLACES: String = "${NAMESPACE}replaces"
+    public const val REQUIRES: String = "${NAMESPACE}requires"
 }

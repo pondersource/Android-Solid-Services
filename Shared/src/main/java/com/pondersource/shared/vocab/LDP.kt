@@ -4,35 +4,35 @@ package com.pondersource.shared.vocab
  * Linked Data Platform (LDP) vocabulary constants.
  * https://www.w3.org/ns/ldp#
  */
-object LDP {
-    const val NAMESPACE = "http://www.w3.org/ns/ldp#"
+public object LDP {
+    public const val NAMESPACE: String = "http://www.w3.org/ns/ldp#"
 
     //Resource Types
-    const val RESOURCE = "${NAMESPACE}Resource"
-    const val RDF_SOURCE = "${NAMESPACE}RDFSource"
-    const val NON_RDF_SOURCE = "${NAMESPACE}NonRDFSource"
-    const val CONTAINER = "${NAMESPACE}Container"
-    const val BASIC_CONTAINER = "${NAMESPACE}BasicContainer"
-    const val DIRECT_CONTAINER = "${NAMESPACE}DirectContainer"
-    const val INDIRECT_CONTAINER = "${NAMESPACE}IndirectContainer"
+    public const val RESOURCE: String = "${NAMESPACE}Resource"
+    public const val RDF_SOURCE: String = "${NAMESPACE}RDFSource"
+    public const val NON_RDF_SOURCE: String = "${NAMESPACE}NonRDFSource"
+    public const val CONTAINER: String = "${NAMESPACE}Container"
+    public const val BASIC_CONTAINER: String = "${NAMESPACE}BasicContainer"
+    public const val DIRECT_CONTAINER: String = "${NAMESPACE}DirectContainer"
+    public const val INDIRECT_CONTAINER: String = "${NAMESPACE}IndirectContainer"
 
     //Container Predicates
     /** Links a container to the resources it contains. */
-    const val CONTAINS = "${NAMESPACE}contains"
+    public const val CONTAINS: String = "${NAMESPACE}contains"
 
     /** Container membership predicate (DirectContainer / IndirectContainer). */
-    const val MEMBERSHIP_RESOURCE = "${NAMESPACE}membershipResource"
-    const val HAS_MEMBER_RELATION = "${NAMESPACE}hasMemberRelation"
-    const val IS_MEMBER_OF_RELATION = "${NAMESPACE}isMemberOfRelation"
-    const val INSERTED_CONTENT_RELATION = "${NAMESPACE}insertedContentRelation"
-    const val MEMBER = "${NAMESPACE}member"
+    public const val MEMBERSHIP_RESOURCE: String = "${NAMESPACE}membershipResource"
+    public const val HAS_MEMBER_RELATION: String = "${NAMESPACE}hasMemberRelation"
+    public const val IS_MEMBER_OF_RELATION: String = "${NAMESPACE}isMemberOfRelation"
+    public const val INSERTED_CONTENT_RELATION: String = "${NAMESPACE}insertedContentRelation"
+    public const val MEMBER: String = "${NAMESPACE}member"
 
     //Paging
-    const val PAGE_SEQUENCE = "${NAMESPACE}pageSequence"
-    const val NEXT_PAGE = "${NAMESPACE}nextPage"
-    const val PAGE = "${NAMESPACE}Page"
+    public const val PAGE_SEQUENCE: String = "${NAMESPACE}pageSequence"
+    public const val NEXT_PAGE: String = "${NAMESPACE}nextPage"
+    public const val PAGE: String = "${NAMESPACE}Page"
 
     //Other predicates
-    const val INBOX = "${NAMESPACE}inbox"
-    const val CONSTRAINED_BY = "${NAMESPACE}constrainedBy"
+    public const val INBOX: String = "${NAMESPACE}inbox"
+    public const val CONSTRAINED_BY: String = "${NAMESPACE}constrainedBy"
 }
