@@ -19,6 +19,11 @@ plugins {
     alias(libs.plugins.google.hilt.android) apply false
     alias(libs.plugins.google.protobuf) apply false
     alias(libs.plugins.vanniktech.maven.publish) apply false
+    alias(libs.plugins.kotlinx.binary.compatibility.validator)
+}
+
+apiValidation {
+    ignoredProjects += setOf("app")
 }
 
 tasks.register("clean", Delete::class) {

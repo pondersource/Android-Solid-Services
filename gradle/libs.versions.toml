@@ -36,6 +36,7 @@ jakartaJson = "2.0.1"
 lifecycleRuntime = "2.10.0"
 vanniktechMavenPublish = "0.36.0"
 jjwt = "0.13.0"
+binaryCompatibilityValidator = "0.17.0"
 
 [libraries]
 jetbrains-kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
@@ -141,5 +142,6 @@ androidx-navigation-safeargs-kotlin = { id = "androidx.navigation.safeargs.kotli
 google-protobuf = { id = "com.google.protobuf", version.ref = "googleProtobuf" }
 
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }
+kotlinx-binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
 
 [bundles]

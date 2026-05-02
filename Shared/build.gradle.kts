@@ -48,6 +48,7 @@ android {
 }
 
 kotlin {
+    explicitApiWarning()
     compilerOptions {
         jvmTarget = JvmTarget.JVM_17
     }
