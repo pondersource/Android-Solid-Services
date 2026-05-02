@@ -43,7 +43,7 @@ import org.json.JSONObject
 import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
-import kotlin.io.encoding.Base64.Default.decode
+
 
 internal class AuthenticatorImplementation private constructor(
     context: Context,
@@ -402,7 +402,7 @@ internal class AuthenticatorImplementation private constructor(
     private fun getWebIdFromToken(idToken: String): String {
         return try {
             val payload = idToken.split(".")[1]
-            val decoded = decode(
+            val decoded = Base64.decode(
                 payload,
                 Base64.URL_SAFE or Base64.NO_PADDING,
             )
