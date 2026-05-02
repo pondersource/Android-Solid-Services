@@ -29,9 +29,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * 3. Call [requestLogin] to prompt the user to grant access.
  * 4. Use [disconnectFromSolid] to revoke access when the user signs out.
  */
-class SolidSignInClient {
+public class SolidSignInClient {
 
-    companion object {
+    public companion object {
         @Volatile
         private var INSTANCE: SolidSignInClient? = null
 
@@ -43,7 +43,7 @@ class SolidSignInClient {
          * @param hasInstalledAndroidSolidServices A lambda that returns `true` when the
          *   Android Solid Services app is installed on the device.
          */
-        fun getInstance(
+        public fun getInstance(
             context: Context,
             applicationInfo: ApplicationInfo,
             hasInstalledAndroidSolidServices: () -> Boolean
@@ -97,13 +97,13 @@ class SolidSignInClient {
      * Hot [Flow] of the IPC service connection state.
      * Emits `true` once the bound service connects and `false` if it disconnects.
      */
-    fun authServiceConnectionState(): Flow<Boolean> {
+    public fun authServiceConnectionState(): Flow<Boolean> {
         return connectionFlow
     }
 
     private fun hasConnectedToService() = iASSAuthService != null
 
-    fun checkConnectionWithASS(onContinue: () -> Unit) {
+    private fun checkConnectionWithASS(onContinue: () -> Unit) {
         return if (hasInstalledAndroidSolidServices()) {
             if (hasConnectedToService()) {
                 if (iASSAuthService!!.hasLoggedIn()) {
@@ -119,7 +119,6 @@ class SolidSignInClient {
         }
     }
 
-
     /**
      * Returns a [SolidSignInAccount] if this app is authorized for [webId], or `null` if not yet
      * granted access.
@@ -128,7 +127,7 @@ class SolidSignInClient {
      * @throws SolidException.SolidNotLoggedInException if no user is logged in.
      */
     @Throws(Exception::class)
-    fun getAccount(webId: String): SolidSignInAccount? {
+    public fun getAccount(webId: String): SolidSignInAccount? {
         if (hasInstalledAndroidSolidServices()) {
             if (hasConnectedToService()) {
                 if (iASSAuthService!!.hasLoggedIn()) {
@@ -160,7 +159,7 @@ class SolidSignInClient {
      * Use the returned [selectedWebId] for all subsequent [SolidResourceClient] and
      * [SolidContactsDataModule] calls.
      */
-    fun requestLogin(callBack: (String?, SolidException?) -> Unit) {
+    public fun requestLogin(callBack: (String?, SolidException?) -> Unit) {
         checkConnectionWithASS {
             iASSAuthService!!.requestLogin(object : IASSLoginCallback.Stub() {
                 override fun onResult(granted: Boolean, selectedWebId: String) {
@@ -177,7 +176,7 @@ class SolidSignInClient {
     /**
      * Revokes this app's access to [webId]'s Solid pod.  [callBack] receives `true` on success.
      */
-    fun disconnectFromSolid(webId: String, callBack: (Boolean) -> Unit) {
+    public fun disconnectFromSolid(webId: String, callBack: (Boolean) -> Unit) {
         checkConnectionWithASS {
             iASSAuthService!!.disconnectFromSolid(webId, object : IASSLogoutCallback.Stub() {
                 override fun onResult(granted: Boolean) {

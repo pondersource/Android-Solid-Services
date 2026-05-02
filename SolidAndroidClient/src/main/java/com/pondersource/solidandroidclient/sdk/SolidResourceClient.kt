@@ -46,9 +46,9 @@ import kotlin.coroutines.resume
  *
  * @see Solid.getResourceClient
  */
-class SolidResourceClient {
+public class SolidResourceClient {
 
-    companion object {
+    public companion object {
         @Volatile
         private var INSTANCE: SolidResourceClient? = null
 
@@ -58,7 +58,7 @@ class SolidResourceClient {
          * @param hasInstalledAndroidSolidServices A lambda that returns `true` when the
          *   Android Solid Services app is installed on the device.
          */
-        fun getInstance(
+        public fun getInstance(
             context: Context,
             hasInstalledAndroidSolidServices: () -> Boolean
         ): SolidResourceClient {
@@ -102,7 +102,7 @@ class SolidResourceClient {
      * Hot [Flow] of the IPC service connection state.
      * Emits `true` once the bound service connects and `false` if it disconnects.
      */
-    fun resourceServiceConnectionState(): Flow<Boolean> = connectionFlow
+    public fun resourceServiceConnectionState(): Flow<Boolean> = connectionFlow
 
     private fun checkBasicConditions(): SolidNetworkResponse<Nothing>? {
         if (!hasInstalledAndroidSolidServices())
@@ -111,8 +111,6 @@ class SolidResourceClient {
             return SolidNetworkResponse.Exception(SolidException.SolidServiceConnectionException())
         return null
     }
-
-    // ── Reconstruction helpers ────────────────────────────────────────────────
 
     @Suppress("UNCHECKED_CAST")
     private fun <T : SolidResource> reconstructRdf(source: SolidRDFResource, clazz: Class<T>): T {
@@ -140,13 +138,11 @@ class SolidResourceClient {
         )
     }
 
-    // ── Public API ────────────────────────────────────────────────────────────
-
     /**
      * Fetches and parses the WebID document for [webId] from their pod.
      * @return [SolidNetworkResponse.Success] with the [WebId], or an error/exception variant.
      */
-    suspend fun getWebId(webId: String): SolidNetworkResponse<WebId> {
+    public suspend fun getWebId(webId: String): SolidNetworkResponse<WebId> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<WebId>
@@ -193,7 +189,7 @@ class SolidResourceClient {
      * @param resourceUrl The full URL of the resource.
      * @return [SolidNetworkResponse.Success] with [SolidMetadata], or an error/exception variant.
      */
-    suspend fun head(webId: String, resourceUrl: String): SolidNetworkResponse<SolidMetadata> {
+    public suspend fun head(webId: String, resourceUrl: String): SolidNetworkResponse<SolidMetadata> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<SolidMetadata>
@@ -221,7 +217,7 @@ class SolidResourceClient {
      * @param clazz The expected resource type; must extend [RDFResource] or [NonRDFResource].
      * @return [SolidNetworkResponse.Success] with the resource, or an error/exception variant.
      */
-    suspend fun <T : SolidResource> read(
+    public suspend fun <T : SolidResource> read(
         webId: String,
         resourceUrl: String,
         clazz: Class<T>
@@ -299,7 +295,7 @@ class SolidResourceClient {
      * Creates a new resource on the pod at the URI specified by [resource] for [webId].
      * @return [SolidNetworkResponse.Success] with the created resource.
      */
-    suspend fun <T : SolidResource> create(webId: String, resource: T): SolidNetworkResponse<T> {
+    public suspend fun <T : SolidResource> create(webId: String, resource: T): SolidNetworkResponse<T> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<T>
@@ -381,7 +377,7 @@ class SolidResourceClient {
      * @param ifMatch     Optional ETag for a conditional PUT.
      * @return [SolidNetworkResponse.Success] with the updated resource.
      */
-    suspend fun <T : SolidResource> update(
+    public suspend fun <T : SolidResource> update(
         webId: String,
         resource: T,
         ifMatch: String? = null
@@ -468,7 +464,7 @@ class SolidResourceClient {
      * @param patch The patch to apply.
      * @return [SolidNetworkResponse.Success] with [Unit] on success.
      */
-    suspend fun patch(webId: String, uri: URI, patch: N3Patch): SolidNetworkResponse<Unit> {
+    public suspend fun patch(webId: String, uri: URI, patch: N3Patch): SolidNetworkResponse<Unit> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<Unit>
@@ -495,7 +491,7 @@ class SolidResourceClient {
      * Deletes a resource from the pod for [webId].
      * @return [SolidNetworkResponse.Success] with the deleted resource.
      */
-    suspend fun <T : SolidResource> delete(webId: String, resource: T): SolidNetworkResponse<T> {
+    public suspend fun <T : SolidResource> delete(webId: String, resource: T): SolidNetworkResponse<T> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<T>
@@ -567,8 +563,8 @@ class SolidResourceClient {
      * Reads an LDP container from the pod, with each contained resource enriched by
      * its own HTTP HEAD metadata.
      *
-     * Each [com.pondersource.shared.domain.container.SolidSourceReference] in the returned
-     * [SolidContainer] includes a populated [com.pondersource.shared.domain.container.SolidSourceReference.headMetadata]
+     * Each [com.pondersource.shared.domain.resource.SolidSourceReference] in the returned
+     * [SolidContainer] includes a populated [com.pondersource.shared.domain.resource.SolidSourceReference.headMetadata]
      * field carrying the full [SolidMetadata] for that item — ETag, Content-Type,
      * Content-Length, WAC-Allow, Allow, Link relations, Accept-Patch/Post/Put,
      * Last-Modified, and WWW-Authenticate.
@@ -577,7 +573,7 @@ class SolidResourceClient {
      * @param containerUrl The full URL of the LDP container (should end with `/`).
      * @return [SolidNetworkResponse.Success] with the enriched [SolidContainer], or an error/exception variant.
      */
-    suspend fun readContainer(
+    public suspend fun readContainer(
         webId: String,
         containerUrl: String
     ): SolidNetworkResponse<SolidContainer> {
@@ -606,7 +602,7 @@ class SolidResourceClient {
      * @param containerUri The URI of the LDP container to delete (must end with `/`).
      * @return [SolidNetworkResponse.Success] with `true` on success.
      */
-    suspend fun deleteContainer(webId: String, containerUri: URI): SolidNetworkResponse<Boolean> {
+    public suspend fun deleteContainer(webId: String, containerUri: URI): SolidNetworkResponse<Boolean> {
         checkBasicConditions()?.let {
             @Suppress("UNCHECKED_CAST")
             return it as SolidNetworkResponse<Boolean>

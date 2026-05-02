@@ -5,30 +5,30 @@ import com.pondersource.solidandroidclient.sdk.SolidException.SolidNotLoggedInEx
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidResourceException
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidServicesDrawPermissionDeniedException
 
-sealed class SolidException(message: String) : Exception(message) {
-    class SolidServicesDrawPermissionDeniedException(message: String = "Android Solid Services doesn't have permission to draw overlay.") :
+public sealed class SolidException(message: String) : Exception(message) {
+    public class SolidServicesDrawPermissionDeniedException(message: String = "Android Solid Services doesn't have permission to draw overlay.") :
         SolidException(message)
 
-    class SolidServiceConnectionException(message: String = "Unable to connect to Android Solid Services.") :
+    public class SolidServiceConnectionException(message: String = "Unable to connect to Android Solid Services.") :
         SolidException(message)
 
-    class SolidAppNotFoundException(message: String = "Android Solid Services has not been installed.") :
+    public class SolidAppNotFoundException(message: String = "Android Solid Services has not been installed.") :
         SolidException(message)
 
-    class SolidNotLoggedInException(message: String = "User has not logged in.") :
+    public class SolidNotLoggedInException(message: String = "User has not logged in.") :
         SolidException(message)
 
-    sealed class SolidResourceException(message: String) : SolidException(message) {
-        class NotSupportedClassException(message: String) : SolidResourceException(message)
-        class NotPermissionException(message: String) : SolidResourceException(message)
-        class NullWebIdException(message: String = "WebID is missing!") :
+    public sealed class SolidResourceException(message: String) : SolidException(message) {
+        public class NotSupportedClassException(message: String) : SolidResourceException(message)
+        public class NotPermissionException(message: String) : SolidResourceException(message)
+        public class NullWebIdException(message: String = "WebID is missing!") :
             SolidResourceException(message)
 
-        class UnknownException(message: String) : SolidResourceException(message)
+        public class UnknownException(message: String) : SolidResourceException(message)
     }
 }
 
-fun handleSolidException(errorCode: Int, errorMessage: String): SolidException {
+public fun handleSolidException(errorCode: Int, errorMessage: String): SolidException {
     return when (errorCode) {
         ExceptionsErrorCode.DRAW_OVERLAY_NOT_PERMITTED -> SolidServicesDrawPermissionDeniedException(
             errorMessage

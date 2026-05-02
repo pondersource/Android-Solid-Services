@@ -23,12 +23,12 @@ import com.pondersource.solidandroidclient.sdk.Solid.Companion.getSignInClient
  * ### Typical setup (in `Application.onCreate` or a Hilt module):
  * ```kotlin
  * val signIn = Solid.getSignInClient(context)
- * signIn.requestLogin { selectedWebId, error -> ... }
+ * signIn.requestLogin { selectedWebId, _ -> ... }
  * ```
  */
-class Solid {
+public class Solid {
 
-    companion object {
+    public companion object {
 
         /**
          * Returns the [SolidSignInClient] singleton.
@@ -37,7 +37,7 @@ class Solid {
          * disconnect from Solid.
          * @param context Any [Context]; the application context is used internally.
          */
-        fun getSignInClient(context: Context): SolidSignInClient {
+        public fun getSignInClient(context: Context): SolidSignInClient {
             return SolidSignInClient.getInstance(
                 context,
                 context.applicationInfo,
@@ -54,7 +54,7 @@ class Solid {
          * Requires the user to be signed in via [getSignInClient].
          * @param context Any [Context]; the application context is used internally.
          */
-        fun getResourceClient(context: Context): SolidResourceClient {
+        public fun getResourceClient(context: Context): SolidResourceClient {
             return SolidResourceClient.getInstance(
                 context,
                 hasInstalledAndroidSolidServices = {
@@ -71,7 +71,7 @@ class Solid {
          * Requires the user to be signed in via [getSignInClient].
          * @param context Any [Context]; the application context is used internally.
          */
-        fun getContactsDataModule(context: Context): SolidContactsDataModule {
+        public fun getContactsDataModule(context: Context): SolidContactsDataModule {
             return SolidContactsDataModule.getInstance(
                 context,
             )
