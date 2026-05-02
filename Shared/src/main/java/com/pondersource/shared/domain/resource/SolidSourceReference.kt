@@ -1,9 +1,8 @@
-package com.pondersource.shared.domain.container
+package com.pondersource.shared.domain.resource
 
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
-import com.pondersource.shared.domain.resource.SolidMetadata
 import com.pondersource.shared.vocab.LDP
 
 /**

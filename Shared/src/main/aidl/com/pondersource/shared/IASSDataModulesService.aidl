@@ -1,7 +1,7 @@
 // IASSDataModulesService.aidl
-package com.pondersource.solidandroidclient;
+package com.pondersource.shared;
 
-import com.pondersource.solidandroidclient.contacts.IASSContactsModuleInterface;
+import com.pondersource.shared.domain.datamodule.contact.IASSContactsModuleInterface;
 import com.pondersource.shared.domain.datamodule.contact.AddressBook;
 import com.pondersource.shared.domain.datamodule.contact.AddressBookList;
 import com.pondersource.shared.domain.datamodule.contact.Contact;

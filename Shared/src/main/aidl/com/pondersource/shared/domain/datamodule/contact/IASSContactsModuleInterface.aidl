@@ -1,5 +1,5 @@
 // IASSContactsModuleInterface.aidl
-package com.pondersource.solidandroidclient.contacts;
+package com.pondersource.shared.domain.datamodule.contact;
 
 import com.pondersource.shared.domain.datamodule.contact.AddressBook;
 import com.pondersource.shared.domain.datamodule.contact.AddressBookList;
@@ -11,10 +11,10 @@ import com.pondersource.shared.domain.datamodule.contact.PhoneNumber;
 import com.pondersource.shared.domain.datamodule.contact.Name;
 import com.pondersource.shared.domain.datamodule.contact.Group;
 import com.pondersource.shared.domain.datamodule.contact.FullGroup;
-import com.pondersource.solidandroidclient.contacts.IASSContactModuleAddressBookListCallback;
-import com.pondersource.solidandroidclient.contacts.IASSContactModuleAddressBookCallback;
-import com.pondersource.solidandroidclient.contacts.IASSContactModuleFullContactCallback;
-import com.pondersource.solidandroidclient.contacts.IASSContactModuleFullGroupCallback;
+import com.pondersource.shared.domain.datamodule.contact.IASSContactModuleAddressBookListCallback;
+import com.pondersource.shared.domain.datamodule.contact.IASSContactModuleAddressBookCallback;
+import com.pondersource.shared.domain.datamodule.contact.IASSContactModuleFullContactCallback;
+import com.pondersource.shared.domain.datamodule.contact.IASSContactModuleFullGroupCallback;
 
 interface IASSContactsModuleInterface {
 

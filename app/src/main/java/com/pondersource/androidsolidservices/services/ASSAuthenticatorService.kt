@@ -13,9 +13,9 @@ import com.pondersource.androidsolidservices.ui.ProfileSelectionActivity
 import com.pondersource.shared.domain.error.ExceptionsErrorCode.DRAW_OVERLAY_NOT_PERMITTED
 import com.pondersource.shared.domain.error.ExceptionsErrorCode.SOLID_NOT_LOGGED_IN
 import com.pondersource.solidandroidapi.Authenticator
-import com.pondersource.solidandroidclient.IASSAuthenticatorService
-import com.pondersource.solidandroidclient.IASSLoginCallback
-import com.pondersource.solidandroidclient.IASSLogoutCallback
+import com.pondersource.shared.IASSAuthenticatorService
+import com.pondersource.shared.domain.auth.IASSLoginCallback
+import com.pondersource.shared.domain.auth.IASSLogoutCallback
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.UUID

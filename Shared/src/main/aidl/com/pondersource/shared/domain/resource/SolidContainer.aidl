@@ -1,4 +1,4 @@
 // SolidContainer.aidl
-package com.pondersource.shared.domain.container;
+package com.pondersource.shared.domain.resource;
 
 parcelable SolidContainer;

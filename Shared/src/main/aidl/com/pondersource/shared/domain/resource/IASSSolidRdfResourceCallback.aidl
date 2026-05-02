@@ -1,5 +1,5 @@
 // IASSSolidRdfResourceCallback.aidl
-package com.pondersource.solidandroidclient;
+package com.pondersource.shared.domain.resource;
 
 import com.pondersource.shared.domain.resource.SolidRDFResource;
 

@@ -1,10 +1,10 @@
 package com.pondersource.solidandroidapi
 
 import android.content.Context
-import com.pondersource.shared.domain.container.SolidContainer
 import com.pondersource.shared.domain.crud.N3Patch
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.resource.Resource
+import com.pondersource.shared.domain.resource.SolidContainer
 import com.pondersource.shared.domain.resource.SolidMetadata
 import com.pondersource.shared.vocab.LDP
 import java.net.URI

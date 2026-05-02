@@ -1,7 +1,6 @@
-package com.pondersource.shared.domain.container
+package com.pondersource.shared.domain.resource
 
 import com.apicatalog.jsonld.http.media.MediaType
-import com.pondersource.shared.domain.resource.RdfQuad
 import com.pondersource.shared.domain.util.getOwnerUri
 import com.pondersource.shared.domain.util.getStorageDescriptionUri
 import com.pondersource.shared.vocab.PIM

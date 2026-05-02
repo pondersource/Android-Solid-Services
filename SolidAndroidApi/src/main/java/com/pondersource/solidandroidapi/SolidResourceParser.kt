@@ -5,10 +5,10 @@ import com.apicatalog.jsonld.JsonLdVersion
 import com.apicatalog.jsonld.document.JsonDocument
 import com.apicatalog.jsonld.http.media.MediaType
 import com.apicatalog.jsonld.uri.UriValidationPolicy
-import com.pondersource.shared.domain.container.SolidContainer
 import com.pondersource.shared.domain.network.HTTPAcceptType
 import com.pondersource.shared.domain.network.HTTPHeaderName
 import com.pondersource.shared.domain.resource.RDFResource
+import com.pondersource.shared.domain.resource.SolidContainer
 import okhttp3.Headers
 import java.io.InputStream
 import java.net.URI

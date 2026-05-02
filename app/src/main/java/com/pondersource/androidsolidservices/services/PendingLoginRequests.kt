@@ -1,6 +1,6 @@
 package com.pondersource.androidsolidservices.services
 
-import com.pondersource.solidandroidclient.IASSLoginCallback
+import com.pondersource.shared.domain.auth.IASSLoginCallback
 import java.util.concurrent.ConcurrentHashMap
 
 data class PendingLoginRequest(

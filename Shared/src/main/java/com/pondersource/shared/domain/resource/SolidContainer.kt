@@ -1,10 +1,8 @@
-package com.pondersource.shared.domain.container
+package com.pondersource.shared.domain.resource
 
 import android.os.Parcel
 import android.os.Parcelable
 import com.apicatalog.jsonld.http.media.MediaType
-import com.pondersource.shared.domain.resource.RdfQuad
-import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.shared.domain.util.encodeUriString
 import com.pondersource.shared.vocab.DC
 import com.pondersource.shared.vocab.LDP

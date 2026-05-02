@@ -1,7 +1,7 @@
 // IASSContainerCallback.aidl
-package com.pondersource.solidandroidclient;
+package com.pondersource.shared.domain.resource;
 
-import com.pondersource.shared.domain.container.SolidContainer;
+import com.pondersource.shared.domain.resource.SolidContainer;
 
 interface IASSContainerCallback {
     void onResult(in SolidContainer result);

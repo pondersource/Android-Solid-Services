@@ -1,5 +1,5 @@
 // IASSLogoutCallback.aidl
-package com.pondersource.solidandroidclient;
+package com.pondersource.shared.domain.auth;
 
 interface IASSLogoutCallback {
      void onResult(boolean granted);

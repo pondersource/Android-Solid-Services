@@ -7,7 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import com.pondersource.androidsolidservices.model.PermissionType
 import com.pondersource.androidsolidservices.repository.AccessGrantRepository
 import com.pondersource.androidsolidservices.repository.ResourcePermissionRepository
-import com.pondersource.shared.domain.container.SolidContainer
+import com.pondersource.shared.domain.resource.SolidContainer
 import com.pondersource.shared.domain.error.ExceptionsErrorCode.NOT_PERMISSION
 import com.pondersource.shared.domain.error.ExceptionsErrorCode.NULL_WEBID
 import com.pondersource.shared.domain.error.ExceptionsErrorCode.SOLID_NOT_LOGGED_IN
@@ -17,12 +17,12 @@ import com.pondersource.shared.domain.resource.SolidNonRDFResource
 import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.solidandroidapi.Authenticator
 import com.pondersource.solidandroidapi.SolidResourceManager
-import com.pondersource.solidandroidclient.IASSContainerCallback
-import com.pondersource.solidandroidclient.IASSResourceService
-import com.pondersource.solidandroidclient.IASSSolidMetadataCallback
-import com.pondersource.solidandroidclient.IASSSolidNonRdfResourceCallback
-import com.pondersource.solidandroidclient.IASSSolidRdfResourceCallback
-import com.pondersource.solidandroidclient.IASSUnitCallback
+import com.pondersource.shared.IASSResourceService
+import com.pondersource.shared.domain.IASSUnitCallback
+import com.pondersource.shared.domain.resource.IASSContainerCallback
+import com.pondersource.shared.domain.resource.IASSSolidMetadataCallback
+import com.pondersource.shared.domain.resource.IASSSolidNonRdfResourceCallback
+import com.pondersource.shared.domain.resource.IASSSolidRdfResourceCallback
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -329,7 +329,7 @@ class ASSResourceService : LifecycleService() {
                 { code, message -> callback.onError(code, message) }
             ) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    when (val result = solidResourceManager.deleteContainer(webId, URI.create(containerUrl))) {
+                    when (val result = solidResourceManager.delete(webId, URI.create(containerUrl))) {
                         is SolidNetworkResponse.Success -> callback.onResult()
                         is SolidNetworkResponse.Error -> callback.onError(UNKNOWN, result.errorMessage)
                         is SolidNetworkResponse.Exception -> callback.onError(UNKNOWN, result.exception.message ?: "")

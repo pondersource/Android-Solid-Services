@@ -8,9 +8,9 @@ import android.content.pm.ApplicationInfo
 import android.os.IBinder
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_AUTH_SERVICE
 import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
-import com.pondersource.solidandroidclient.IASSAuthenticatorService
-import com.pondersource.solidandroidclient.IASSLoginCallback
-import com.pondersource.solidandroidclient.IASSLogoutCallback
+import com.pondersource.shared.IASSAuthenticatorService
+import com.pondersource.shared.domain.auth.IASSLoginCallback
+import com.pondersource.shared.domain.auth.IASSLogoutCallback
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidAppNotFoundException
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidNotLoggedInException
 import com.pondersource.solidandroidclient.sdk.SolidException.SolidServiceConnectionException
