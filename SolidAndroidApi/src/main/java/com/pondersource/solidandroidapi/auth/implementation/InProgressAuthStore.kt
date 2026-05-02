@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidapi
+package com.pondersource.solidandroidapi.auth.implementation
 
 import com.pondersource.shared.domain.profile.Profile
 import kotlinx.coroutines.flow.MutableStateFlow

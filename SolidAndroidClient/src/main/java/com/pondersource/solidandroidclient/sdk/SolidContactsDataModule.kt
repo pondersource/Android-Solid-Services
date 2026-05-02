@@ -10,8 +10,8 @@ import com.pondersource.shared.domain.datamodule.contact.AddressBookList
 import com.pondersource.shared.domain.datamodule.contact.FullContact
 import com.pondersource.shared.domain.datamodule.contact.FullGroup
 import com.pondersource.shared.domain.datamodule.contact.NewContact
-import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_DATA_MODULES_SERVICE
-import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
+import com.pondersource.solidandroidclient.internal.ANDROID_SOLID_SERVICES_DATA_MODULES_SERVICE
+import com.pondersource.solidandroidclient.internal.ANDROID_SOLID_SERVICES_PACKAGE_NAME
 import com.pondersource.shared.IASSDataModulesService
 import com.pondersource.shared.domain.datamodule.contact.IASSContactModuleAddressBookCallback
 import com.pondersource.shared.domain.datamodule.contact.IASSContactModuleAddressBookListCallback

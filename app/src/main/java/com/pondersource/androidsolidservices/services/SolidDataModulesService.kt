@@ -6,8 +6,8 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.pondersource.shared.domain.datamodule.contact.NewContact
 import com.pondersource.shared.domain.datamodule.getOrNull
-import com.pondersource.solidandroidapi.Authenticator
-import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
+import com.pondersource.solidandroidapi.auth.Authenticator
+import com.pondersource.solidandroidapi.datamodule.contacts.SolidContactsDataModule
 import com.pondersource.shared.IASSDataModulesService
 import com.pondersource.shared.domain.datamodule.contact.IASSContactModuleAddressBookCallback
 import com.pondersource.shared.domain.datamodule.contact.IASSContactModuleAddressBookListCallback

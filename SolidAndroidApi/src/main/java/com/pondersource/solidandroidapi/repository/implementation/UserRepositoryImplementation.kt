@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidapi.repository
+package com.pondersource.solidandroidapi.repository.implementation
 
 import android.content.Context
 import androidx.datastore.core.CorruptionException
@@ -11,6 +11,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.pondersource.shared.domain.profile.Profile
 import com.pondersource.shared.domain.profile.ProfileList
 import com.pondersource.shared.domain.profile.contains
+import com.pondersource.solidandroidapi.repository.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

@@ -1,4 +1,5 @@
 package com.pondersource.solidandroidclient.sdk
+import com.pondersource.solidandroidclient.internal.hasInstalledAndroidSolidServices
 
 import android.content.Context
 import com.pondersource.solidandroidclient.sdk.Solid.Companion.getContactsDataModule

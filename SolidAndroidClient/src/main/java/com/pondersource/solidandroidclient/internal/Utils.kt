@@ -1,10 +1,9 @@
-package com.pondersource.solidandroidclient.sdk
+package com.pondersource.solidandroidclient.internal
 
 import android.content.Context
 import android.content.pm.PackageManager
-import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
 
-fun hasInstalledAndroidSolidServices(context: Context): Boolean {
+public fun hasInstalledAndroidSolidServices(context: Context): Boolean {
     try {
         context.packageManager.getPackageInfo(ANDROID_SOLID_SERVICES_PACKAGE_NAME, 0)
         return true

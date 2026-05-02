@@ -1,7 +1,7 @@
 package com.pondersource.androidsolidservices.ui.startup
 
 import com.pondersource.androidsolidservices.base.BaseViewModel
-import com.pondersource.solidandroidapi.Authenticator
+import com.pondersource.solidandroidapi.auth.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

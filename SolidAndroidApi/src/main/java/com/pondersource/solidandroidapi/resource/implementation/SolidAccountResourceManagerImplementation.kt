@@ -1,9 +1,11 @@
-package com.pondersource.solidandroidapi
+package com.pondersource.solidandroidapi.resource.implementation
 
 import android.content.Context
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.profile.Profile
 import com.pondersource.shared.domain.resource.Resource
+import com.pondersource.solidandroidapi.resource.SolidAccountResourceManager
+import com.pondersource.solidandroidapi.resource.SolidResourceManager
 import java.net.URI
 import java.security.InvalidParameterException
 

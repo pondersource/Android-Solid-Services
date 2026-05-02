@@ -52,7 +52,7 @@ import com.pondersource.androidsolidservices.repository.AccessGrantRepository
 import com.pondersource.androidsolidservices.services.PendingLoginRequests
 import com.pondersource.androidsolidservices.ui.theme.ASSAppTheme
 import com.pondersource.shared.domain.profile.Profile
-import com.pondersource.solidandroidapi.Authenticator
+import com.pondersource.solidandroidapi.auth.Authenticator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject

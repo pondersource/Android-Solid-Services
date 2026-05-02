@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidapi
+package com.pondersource.solidandroidapi.resource.implementation
 
 import android.content.Context
 import com.pondersource.shared.domain.crud.N3Patch
@@ -7,6 +7,8 @@ import com.pondersource.shared.domain.resource.Resource
 import com.pondersource.shared.domain.resource.SolidContainer
 import com.pondersource.shared.domain.resource.SolidMetadata
 import com.pondersource.shared.vocab.LDP
+import com.pondersource.solidandroidapi.auth.Authenticator
+import com.pondersource.solidandroidapi.resource.SolidResourceManager
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope

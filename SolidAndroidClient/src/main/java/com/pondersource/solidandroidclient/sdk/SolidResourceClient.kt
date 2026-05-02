@@ -22,8 +22,8 @@ import com.pondersource.shared.domain.resource.SolidMetadata
 import com.pondersource.shared.domain.resource.SolidNonRDFResource
 import com.pondersource.shared.domain.resource.SolidRDFResource
 import com.pondersource.shared.domain.resource.SolidResource
-import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_CRUD_SERVICE
-import com.pondersource.solidandroidclient.ANDROID_SOLID_SERVICES_PACKAGE_NAME
+import com.pondersource.solidandroidclient.internal.ANDROID_SOLID_SERVICES_CRUD_SERVICE
+import com.pondersource.solidandroidclient.internal.ANDROID_SOLID_SERVICES_PACKAGE_NAME
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine

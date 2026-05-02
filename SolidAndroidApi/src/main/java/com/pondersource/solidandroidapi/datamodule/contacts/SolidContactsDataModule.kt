@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidapi.datamodule
+package com.pondersource.solidandroidapi.datamodule.contacts
 
 import android.content.Context
 import com.pondersource.shared.domain.datamodule.DataModuleResult
@@ -7,6 +7,7 @@ import com.pondersource.shared.domain.datamodule.contact.AddressBookList
 import com.pondersource.shared.domain.datamodule.contact.FullContact
 import com.pondersource.shared.domain.datamodule.contact.FullGroup
 import com.pondersource.shared.domain.datamodule.contact.NewContact
+import com.pondersource.solidandroidapi.datamodule.contacts.implementation.SolidContactsDataModuleImplementation
 
 /**
  * Manages Solid Contacts data (address books, contacts, groups) on a user's Solid pod.

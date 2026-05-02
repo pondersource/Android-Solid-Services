@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.pondersource.androidsolidservices.base.BaseViewModel
 import com.pondersource.androidsolidservices.base.Constants
 import com.pondersource.shared.domain.profile.Profile
-import com.pondersource.solidandroidapi.Authenticator
+import com.pondersource.solidandroidapi.auth.Authenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

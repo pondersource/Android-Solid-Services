@@ -1,7 +1,10 @@
-package com.pondersource.solidandroidapi
+package com.pondersource.solidandroidapi.auth.implementation
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import com.pondersource.solidandroidapi.BuildConfig
+import com.pondersource.solidandroidapi.auth.supportedDPopAlgorithms
+import com.pondersource.solidandroidapi.auth.supportsDPop
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.SignatureAlgorithm
@@ -18,7 +21,7 @@ import java.util.UUID
 import javax.security.auth.x500.X500Principal
 
 
-class DPoPGenerator private constructor(
+internal class DPoPGenerator private constructor(
     val authDiscovery: AuthorizationServiceDiscovery,
 ) {
     companion object {

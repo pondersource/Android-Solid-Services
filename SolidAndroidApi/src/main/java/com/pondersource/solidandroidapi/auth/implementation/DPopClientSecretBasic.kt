@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidapi
+package com.pondersource.solidandroidapi.auth.implementation
 
 import android.util.Base64
 import com.pondersource.shared.domain.network.HTTPHeaderName
@@ -6,15 +6,11 @@ import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ClientAuthentication
 import net.openid.appauth.internal.UriUtil
 
-class DPopClientSecretBasic(
+internal class DPopClientSecretBasic(
     private val clientSecret: String,
     private val configuration: AuthorizationServiceConfiguration,
     private val refreshToken: String? = null,
 ) : ClientAuthentication {
-
-    companion object Companion {
-        const val NAME: String = "client_secret_basic"
-    }
 
     override fun getRequestHeaders(clientId: String): Map<String?, String?> {
         val encodedClientId = UriUtil.formUrlEncodeValue(clientId)

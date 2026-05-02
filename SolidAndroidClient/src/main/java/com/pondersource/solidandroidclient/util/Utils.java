@@ -3,7 +3,7 @@ package com.pondersource.solidandroidclient.util;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
-import com.pondersource.solidandroidclient.ConstantsKt;
+import com.pondersource.solidandroidclient.internal.ConstantsKt;
 
 public class Utils {
     public static boolean hasAndroidSolidServicesInstalled(Context context) {

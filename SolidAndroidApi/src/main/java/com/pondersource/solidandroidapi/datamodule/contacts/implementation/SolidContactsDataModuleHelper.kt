@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidapi.datamodule
+package com.pondersource.solidandroidapi.datamodule.contacts.implementation
 
 import android.content.Context
 import com.apicatalog.jsonld.http.media.MediaType
@@ -16,8 +16,7 @@ import com.pondersource.shared.domain.datamodule.contact.rdf.GroupRDF
 import com.pondersource.shared.domain.datamodule.contact.rdf.GroupsIndexRDF
 import com.pondersource.shared.domain.datamodule.contact.rdf.NameEmailIndexRDF
 import com.pondersource.shared.domain.profile.WebId
-import com.pondersource.solidandroidapi.SolidResourceManager
-import com.pondersource.solidandroidapi.SolidResourceManagerImplementation
+import com.pondersource.solidandroidapi.resource.SolidResourceManager
 import java.net.URI
 import java.util.UUID
 

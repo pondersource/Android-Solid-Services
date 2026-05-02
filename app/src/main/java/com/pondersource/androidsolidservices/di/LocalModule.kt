@@ -3,9 +3,9 @@ package com.pondersource.androidsolidservices.di
 import android.accounts.AccountManager
 import android.content.Context
 import com.pondersource.androidsolidservices.base.Constants
-import com.pondersource.solidandroidapi.Authenticator
-import com.pondersource.solidandroidapi.SolidResourceManager
-import com.pondersource.solidandroidapi.datamodule.SolidContactsDataModule
+import com.pondersource.solidandroidapi.auth.Authenticator
+import com.pondersource.solidandroidapi.resource.SolidResourceManager
+import com.pondersource.solidandroidapi.datamodule.contacts.SolidContactsDataModule
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

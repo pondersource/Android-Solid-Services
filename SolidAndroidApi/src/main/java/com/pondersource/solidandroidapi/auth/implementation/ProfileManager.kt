@@ -1,10 +1,9 @@
-package com.pondersource.solidandroidapi
+package com.pondersource.solidandroidapi.auth.implementation
 
 import android.content.Context
 import com.pondersource.shared.domain.profile.Profile
 import com.pondersource.shared.domain.profile.ProfileList
 import com.pondersource.solidandroidapi.repository.UserRepository
-import com.pondersource.solidandroidapi.repository.UserRepositoryImplementation
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +32,7 @@ internal class ProfileManager private constructor(
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val userRepository: UserRepository = UserRepositoryImplementation.getInstance(context)
+    private val userRepository: UserRepository = UserRepository.getInstance(context)
     private val initDeferred = CompletableDeferred<Unit>()
 
     val allProfilesFlow: StateFlow<ProfileList> = userRepository.readAllProfiles()
@@ -127,7 +126,6 @@ internal class ProfileManager private constructor(
     suspend fun removeProfile(webId: String) {
         userRepository.removeProfile(webId)
         if (activeWebIdFlow.value == webId) {
-            // Auto-switch to another logged-in profile or clear
             val remaining = allProfilesFlow.value.profiles
                 .filter { (key, p) -> key != webId && p.authState.isAuthorized && p.userInfo != null }
             val newActiveId = remaining.keys.firstOrNull()

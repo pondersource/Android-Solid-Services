@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidapi
+package com.pondersource.solidandroidapi.auth.implementation
 
 import android.content.Context
 import android.content.Intent
@@ -6,6 +6,8 @@ import androidx.core.net.toUri
 import com.pondersource.shared.domain.network.HTTPHeaderName
 import com.pondersource.shared.domain.profile.Profile
 import com.pondersource.shared.domain.profile.UserInfo
+import com.pondersource.solidandroidapi.auth.Authenticator
+import com.pondersource.solidandroidapi.auth.supportsDPop
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
@@ -94,7 +96,6 @@ internal class AuthenticatorImplementation private constructor(
         val regResponse = registerToOpenId(conf, appName, redirectUri)
             ?: return Pair(null, "Cannot register to OpenId.")
 
-        // Store the registration in the in-progress auth state
         val authState = AuthState(conf)
         authState.update(regResponse)
         inProgressAuth.set(Profile(authState = authState))
@@ -382,7 +383,7 @@ internal class AuthenticatorImplementation private constructor(
     }
 }
 
-fun AuthState.createTokenRequest(isRefresh: Boolean): TokenRequest {
+private fun AuthState.createTokenRequest(isRefresh: Boolean): TokenRequest {
     return if (isRefresh) {
         this.createTokenRefreshRequest()
     } else {

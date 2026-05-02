@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidapi
+package com.pondersource.solidandroidapi.resource.implementation
 
 import com.pondersource.shared.domain.resource.SolidContainer
 import com.pondersource.shared.domain.crud.N3Patch
@@ -10,6 +10,7 @@ import com.pondersource.shared.domain.resource.Resource
 import com.pondersource.shared.domain.resource.SolidMetadata
 import com.pondersource.shared.domain.util.encodeUri
 import com.pondersource.shared.vocab.LDP
+import com.pondersource.solidandroidapi.auth.Authenticator
 import com.pondersource.solidandroidapi.domain.SolidRawResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

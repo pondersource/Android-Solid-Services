@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidapi.datamodule
+package com.pondersource.solidandroidapi.datamodule.contacts.implementation
 
 import android.content.Context
 import com.pondersource.shared.domain.datamodule.DataModuleResult
@@ -8,6 +8,7 @@ import com.pondersource.shared.domain.datamodule.contact.CONTACTS_DIRECTORY_SUFF
 import com.pondersource.shared.domain.datamodule.contact.FullContact
 import com.pondersource.shared.domain.datamodule.contact.FullGroup
 import com.pondersource.shared.domain.datamodule.contact.NewContact
+import com.pondersource.solidandroidapi.datamodule.contacts.SolidContactsDataModule
 import java.net.URI
 
 internal class SolidContactsDataModuleImplementation : SolidContactsDataModule {

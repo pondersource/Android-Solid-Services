@@ -1,4 +1,4 @@
-package com.pondersource.solidandroidclient.sdk.ui
+package com.pondersource.solidandroidclient.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -34,7 +34,7 @@ import com.pondersource.solidandroidclient.R
  * ```
  */
 @Composable
-fun SignInButton(
+public fun SignInButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,

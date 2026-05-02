@@ -15,8 +15,8 @@ import com.pondersource.shared.domain.error.ExceptionsErrorCode.UNKNOWN
 import com.pondersource.shared.domain.network.SolidNetworkResponse
 import com.pondersource.shared.domain.resource.SolidNonRDFResource
 import com.pondersource.shared.domain.resource.SolidRDFResource
-import com.pondersource.solidandroidapi.Authenticator
-import com.pondersource.solidandroidapi.SolidResourceManager
+import com.pondersource.solidandroidapi.auth.Authenticator
+import com.pondersource.solidandroidapi.resource.SolidResourceManager
 import com.pondersource.shared.IASSResourceService
 import com.pondersource.shared.domain.IASSUnitCallback
 import com.pondersource.shared.domain.resource.IASSContainerCallback
