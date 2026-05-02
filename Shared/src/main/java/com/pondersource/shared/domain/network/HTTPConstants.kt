@@ -39,7 +39,7 @@ object HTTPHeaderName {
     const val ACCEPT_PUT = "Accept-Put"
 
     //DPoP (Solid-OIDC)
-    const val DPOP = "DPoP"
+    public const val DPOP : String = "DPoP"
     const val DPOP_NONCE = "DPoP-Nonce"
 
     //WAC (Web Access Control)

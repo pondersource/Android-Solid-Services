@@ -2,11 +2,25 @@ package com.pondersource.solidandroidapi.auth.implementation
 
 import android.content.Context
 import android.content.Intent
+import android.util.Base64
 import androidx.core.net.toUri
 import com.pondersource.shared.domain.network.HTTPHeaderName
 import com.pondersource.shared.domain.profile.Profile
 import com.pondersource.shared.domain.profile.UserInfo
 import com.pondersource.solidandroidapi.auth.Authenticator
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.AUTHORIZATION_REQUEST_PROMPT_CONSENT
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.AUTHORIZATION_REQUEST_PROMPT_LOGIN
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.AUTHORIZATION_REQUEST_SCOPE_OFFLINE_ACCESS
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.AUTHORIZATION_REQUEST_SCOPE_OPENID
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.AUTHORIZATION_REQUEST_SCOPE_WEBID
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.REGISTRATION_REQUEST_CLIENT_NAME
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.REGISTRATION_REQUEST_GRANT_TYPE_AUTHORIZATION_CODE
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.REGISTRATION_REQUEST_GRANT_TYPE_REFRESH_TOKEN
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.REGISTRATION_REQUEST_ID_TOKEN_SIGNED_RESPONSE_ALG
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.REGISTRATION_REQUEST_SUBJECT_TYPE_PUBLIC
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.TOKEN_ENDPOINT_AUTH_METHOD_CLIENT_SECRET_BASIC
+import com.pondersource.solidandroidapi.auth.preferredIdTokenAlgorithm
+import com.pondersource.solidandroidapi.auth.preferredTokenEndpointAuthMethod
 import com.pondersource.solidandroidapi.auth.supportsDPop
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -21,11 +35,15 @@ import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ClientSecretBasic
 import net.openid.appauth.EndSessionRequest
 import net.openid.appauth.RegistrationRequest
+import net.openid.appauth.RegistrationResponse
 import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.TokenRequest
 import net.openid.appauth.TokenResponse
+import org.json.JSONObject
+import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
+import kotlin.io.encoding.Base64.Default.decode
 
 internal class AuthenticatorImplementation private constructor(
     context: Context,
@@ -79,9 +97,12 @@ internal class AuthenticatorImplementation private constructor(
                     },
                     nonceSink = { nonce -> updateInProgressDPoPNonce(nonce) },
                 )
-                webIdProfile.getOidcIssuers()[0].toString()
+                val issuers = webIdProfile.getOidcIssuers()
+                if (issuers.isEmpty()) {
+                    return Pair(null, "No OIDC issuers found in WebID profile.")
+                }
+                issuers[0].toString()
             }
-
             else -> return Pair(null, "Either webId or oidcIssuer must be provided.")
         }
 
@@ -93,12 +114,19 @@ internal class AuthenticatorImplementation private constructor(
             )
         }
 
-        val regResponse = registerToOpenId(conf, appName, redirectUri)
+        val existingRegistration = findExistingRegistration(conf.discoveryDoc?.issuer)
+        val regResponse = existingRegistration
+            ?: registerToOpenId(conf, appName, redirectUri)
             ?: return Pair(null, "Cannot register to OpenId.")
 
         val authState = AuthState(conf)
         authState.update(regResponse)
         inProgressAuth.set(Profile(authState = authState))
+
+        val existingProfile = if (webId != null) profileManager.getProfileOrNull(webId) else null
+        val sameProvider = existingProfile?.authState?.authorizationServiceConfiguration
+            ?.discoveryDoc?.issuer == conf.discoveryDoc?.issuer
+        val prompt = if (existingProfile?.authState?.isAuthorized == true && sameProvider) AUTHORIZATION_REQUEST_PROMPT_LOGIN else AUTHORIZATION_REQUEST_PROMPT_CONSENT
 
         val authRequest = AuthorizationRequest.Builder(
             conf,
@@ -106,8 +134,8 @@ internal class AuthenticatorImplementation private constructor(
             ResponseTypeValues.CODE,
             redirectUri.toUri(),
         )
-            .setScopes("webid", "openid", "offline_access")
-            .setPrompt("consent")
+            .setScopes(AUTHORIZATION_REQUEST_SCOPE_WEBID, AUTHORIZATION_REQUEST_SCOPE_OPENID, AUTHORIZATION_REQUEST_SCOPE_OFFLINE_ACCESS)
+            .setPrompt(prompt)
             .setResponseMode(AuthorizationRequest.ResponseMode.QUERY)
             .build()
 
@@ -137,7 +165,15 @@ internal class AuthenticatorImplementation private constructor(
         updatedAfterToken.update(tokenResponse, tokenException)
         inProgressAuth.set(inProgressAuth.get()!!.copy(authState = updatedAfterToken))
 
-        val userInfo = getUserInfoFromIdToken(inProgressAuth.get()!!.authState.idToken!!)
+        val idToken = inProgressAuth.get()!!.authState.idToken ?: return ""
+        val jwksUri = inProgressAuth.get()!!.authState.authorizationServiceConfiguration
+            ?.discoveryDoc?.jwksUri
+        if (jwksUri == null || !IdTokenVerifier.verify(idToken, URI.create(jwksUri.toString()))) {
+            inProgressAuth.clear()
+            return ""
+        }
+
+        val userInfo = getUserInfoFromIdToken(idToken)
 
         val webIdProfile = webIdResolver.resolve(
             webIdUri = userInfo.webId,
@@ -145,6 +181,16 @@ internal class AuthenticatorImplementation private constructor(
             authHeadersProvider = { method, uri -> buildInProgressAuthHeaders(method, uri) },
             nonceSink = { nonce -> updateInProgressDPoPNonce(nonce) },
         )
+
+        val issuers = webIdProfile.getOidcIssuers()
+        if (issuers.isNotEmpty()) {
+            val tokenIss = extractIssFromIdToken(idToken)?.trimEnd('/')
+            val issuerUris = issuers.map { it.toString().trimEnd('/') }
+            if (tokenIss != null && !issuerUris.contains(tokenIss)) {
+                inProgressAuth.clear()
+                return ""
+            }
+        }
 
         val finalProfile = inProgressAuth.get()!!.copy(
             userInfo = userInfo,
@@ -203,7 +249,7 @@ internal class AuthenticatorImplementation private constructor(
         val headers = mutableMapOf<String, String>()
         headers[HTTPHeaderName.AUTHORIZATION] =
             "${tokenResponse.tokenType} ${tokenResponse.accessToken}"
-        if (tokenResponse.tokenType!!.lowercase() == "dpop") {
+        if (tokenResponse.tokenType?.equals(HTTPHeaderName.DPOP, true) == true) {
             headers[HTTPHeaderName.DPOP] = DPoPGenerator
                 .getInstance(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!)
                 .generateProof(httpMethod, uri, tokenResponse.accessToken)
@@ -254,23 +300,35 @@ internal class AuthenticatorImplementation private constructor(
         }
     }
 
+    private fun findExistingRegistration(issuer: String?): RegistrationResponse? {
+        if (issuer == null) return null
+        return profileManager.getAllLoggedInProfiles()
+            .firstOrNull {
+                it.authState.authorizationServiceConfiguration?.discoveryDoc?.issuer == issuer &&
+                    it.authState.lastRegistrationResponse != null
+            }
+            ?.authState?.lastRegistrationResponse
+    }
+
     private suspend fun registerToOpenId(
         conf: AuthorizationServiceConfiguration,
         appName: String,
         redirectUri: String,
-    ): net.openid.appauth.RegistrationResponse? {
+    ): RegistrationResponse? {
+        val discoveryDoc = conf.discoveryDoc!!
+        val authMethod = discoveryDoc.preferredTokenEndpointAuthMethod()
+        val additionalParams = mapOf(
+            REGISTRATION_REQUEST_CLIENT_NAME to appName,
+            REGISTRATION_REQUEST_ID_TOKEN_SIGNED_RESPONSE_ALG to discoveryDoc.preferredIdTokenAlgorithm(),
+        )
+
         val regReq = RegistrationRequest.Builder(
             conf,
             listOf(redirectUri.toUri()),
-        ).setAdditionalParameters(
-            mapOf(
-                "client_name" to appName,
-                "id_token_signed_response_alg" to conf.discoveryDoc!!.idTokenSigningAlgorithmValuesSupported[0],
-            )
-        )
-            .setSubjectType("public")
-            .setTokenEndpointAuthenticationMethod("client_secret_basic")
-            .setGrantTypeValues(listOf("authorization_code", "refresh_token"))
+        ).setAdditionalParameters(additionalParams)
+            .setSubjectType(REGISTRATION_REQUEST_SUBJECT_TYPE_PUBLIC)
+            .setTokenEndpointAuthenticationMethod(authMethod)
+            .setGrantTypeValues(listOf(REGISTRATION_REQUEST_GRANT_TYPE_AUTHORIZATION_CODE, REGISTRATION_REQUEST_GRANT_TYPE_REFRESH_TOKEN))
             .build()
 
         return suspendCancellableCoroutine { cont ->
@@ -289,16 +347,19 @@ internal class AuthenticatorImplementation private constructor(
         }
 
         val tokenRequest = profile.authState.createTokenRequest(isRefresh)
-        val clientAuthentication =
-            if (profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!.supportsDPop()) {
-                DPopClientSecretBasic(
-                    clientSecret = profile.authState.lastRegistrationResponse!!.clientSecret!!,
-                    configuration = tokenRequest.configuration,
-                    refreshToken = profile.authState.refreshToken,
-                )
-            } else {
-                ClientSecretBasic(profile.authState.lastRegistrationResponse!!.clientSecret!!)
-            }
+        val discoveryDoc = profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!
+        val authMethod = discoveryDoc.preferredTokenEndpointAuthMethod()
+        val clientSecret = profile.authState.lastRegistrationResponse?.clientSecret
+        val clientAuthentication = when {
+            discoveryDoc.supportsDPop() && authMethod == TOKEN_ENDPOINT_AUTH_METHOD_CLIENT_SECRET_BASIC && clientSecret != null ->
+                DPopClientSecretBasic(clientSecret, tokenRequest.configuration)
+            discoveryDoc.supportsDPop() ->
+                DPopNoClientAuth(tokenRequest.configuration)
+            authMethod == TOKEN_ENDPOINT_AUTH_METHOD_CLIENT_SECRET_BASIC && clientSecret != null ->
+                ClientSecretBasic(clientSecret)
+            else ->
+                NoClientAuth
+        }
 
         return suspendCancellableCoroutine { cont ->
             authService.performTokenRequest(
@@ -318,7 +379,7 @@ internal class AuthenticatorImplementation private constructor(
         if (!forceRefresh && !needsTokenRefresh(profile)) return
         mutexFor(webId).withLock {
             val currentProfile = profileManager.getProfileOrNull(webId) ?: return@withLock
-            if (!needsTokenRefresh(currentProfile)) return@withLock
+            if (!forceRefresh && !needsTokenRefresh(currentProfile)) return@withLock
 
             val (tokenResponse, exception) = requestToken(currentProfile, isRefresh = true)
             val updatedAuthState = deepCopyAuthState(currentProfile.authState)
@@ -341,14 +402,27 @@ internal class AuthenticatorImplementation private constructor(
     private fun getWebIdFromToken(idToken: String): String {
         return try {
             val payload = idToken.split(".")[1]
-            val decoded = android.util.Base64.decode(
+            val decoded = decode(
                 payload,
-                android.util.Base64.URL_SAFE or android.util.Base64.NO_PADDING,
+                Base64.URL_SAFE or Base64.NO_PADDING,
             )
-            val json = org.json.JSONObject(String(decoded))
+            val json = JSONObject(String(decoded))
             json.optString("webid").takeIf { it.isNotEmpty() } ?: json.getString("sub")
         } catch (ex: Exception) {
             throw IllegalStateException("Unable to parse ID token", ex)
+        }
+    }
+
+    private fun extractIssFromIdToken(idToken: String): String? {
+        return try {
+            val payload = idToken.split(".")[1]
+            val decoded = Base64.decode(
+                payload,
+                Base64.URL_SAFE or Base64.NO_PADDING,
+            )
+            JSONObject(String(decoded)).optString("iss").takeIf { it.isNotEmpty() }
+        } catch (ex: Exception) {
+            null
         }
     }
 
@@ -358,7 +432,7 @@ internal class AuthenticatorImplementation private constructor(
         val headers = mutableMapOf<String, String>()
         headers[HTTPHeaderName.AUTHORIZATION] =
             "${tokenResponse.tokenType} ${tokenResponse.accessToken}"
-        if (tokenResponse.tokenType!!.lowercase() == "dpop") {
+        if (tokenResponse.tokenType?.equals(HTTPHeaderName.DPOP) == true) {
             headers[HTTPHeaderName.DPOP] = DPoPGenerator
                 .getInstance(profile.authState.authorizationServiceConfiguration!!.discoveryDoc!!)
                 .generateProof(httpMethod, uri, tokenResponse.accessToken)

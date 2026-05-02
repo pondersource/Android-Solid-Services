@@ -2,6 +2,7 @@ package com.pondersource.solidandroidapi.auth.implementation
 
 import android.util.Base64
 import com.pondersource.shared.domain.network.HTTPHeaderName
+import com.pondersource.solidandroidapi.auth.implementation.OpenIDConstants.CLIENT_AUTHENTICATION_CLIENT_ID
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ClientAuthentication
 import net.openid.appauth.internal.UriUtil
@@ -9,7 +10,6 @@ import net.openid.appauth.internal.UriUtil
 internal class DPopClientSecretBasic(
     private val clientSecret: String,
     private val configuration: AuthorizationServiceConfiguration,
-    private val refreshToken: String? = null,
 ) : ClientAuthentication {
 
     override fun getRequestHeaders(clientId: String): Map<String?, String?> {
@@ -18,7 +18,7 @@ internal class DPopClientSecretBasic(
         val credentials = "$encodedClientId:$encodedClientSecret"
         val basicAuth = Base64.encodeToString(credentials.toByteArray(), Base64.NO_WRAP)
         val dpop = DPoPGenerator.getInstance(configuration.discoveryDoc!!)
-            .generateProof("POST", configuration.tokenEndpoint.toString(), refreshToken)
+            .generateProof("POST", configuration.tokenEndpoint.toString())
         return mapOf(
             HTTPHeaderName.AUTHORIZATION to "Basic $basicAuth",
             HTTPHeaderName.DPOP to dpop
@@ -26,6 +26,27 @@ internal class DPopClientSecretBasic(
     }
 
     override fun getRequestParameters(clientId: String): Map<String?, String?> {
-        return mapOf("client_id" to clientId)
+        return mapOf(CLIENT_AUTHENTICATION_CLIENT_ID to clientId)
     }
+}
+
+internal class DPopNoClientAuth(
+    private val configuration: AuthorizationServiceConfiguration,
+) : ClientAuthentication {
+
+    override fun getRequestHeaders(clientId: String): Map<String?, String?> {
+        val dpop = DPoPGenerator.getInstance(configuration.discoveryDoc!!)
+            .generateProof("POST", configuration.tokenEndpoint.toString())
+        return mapOf(HTTPHeaderName.DPOP to dpop)
+    }
+
+    override fun getRequestParameters(clientId: String): Map<String?, String?> {
+        return mapOf(CLIENT_AUTHENTICATION_CLIENT_ID to clientId)
+    }
+}
+
+internal object NoClientAuth : ClientAuthentication {
+    override fun getRequestHeaders(clientId: String): Map<String?, String?> = emptyMap()
+    override fun getRequestParameters(clientId: String): Map<String?, String?> =
+        mapOf(CLIENT_AUTHENTICATION_CLIENT_ID to clientId)
 }
