@@ -10,9 +10,9 @@ import com.pondersource.shared.domain.resource.Resource
 import com.pondersource.shared.domain.resource.SolidMetadata
 import com.pondersource.shared.domain.util.encodeUri
 import com.pondersource.shared.vocab.LDP
+import com.pondersource.solidandroidapi.domain.SolidRawResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,44 +20,12 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URI
 
-internal class SolidRawResponse(
-    val statusCode: Int,
-    val headers: Headers,
-    val bodyBytes: ByteArray,
-    val uri: URI,
-) {
-    // Decoded lazily; correct for JSON-LD / RDF text; not used for binary content.
-    val body: String by lazy { bodyBytes.toString(Charsets.UTF_8) }
-    fun isSuccessful(): Boolean = statusCode in 200..299
-}
-
-/**
- * Solid-aware HTTP client.
- *
- * ## Two operating modes
- *
- * **Unauthenticated / custom-auth** — pass no [Authenticator] at construction and use [send]
- * with explicit headers. This is the correct mode for the login flow ([WebIdResolver]) where
- * the standard auth state does not yet exist.
- *
- * **Authenticated CRUD** — pass an [Authenticator] at construction, then call [get], [put],
- * or [delete]. DPoP proof generation, nonce refresh, and token management are handled
- * entirely inside this class. Callers never see auth headers.
- */
 internal class SolidHttpClient(private val auth: Authenticator? = null) {
 
     private val httpClient = OkHttpClient.Builder()
         .followRedirects(true)
         .build()
 
-    // ---- General-purpose send (no automatic auth) ----
-
-    /**
-     * Executes a raw HTTP request with no automatic authentication.
-     *
-     * Pass explicit [headers] when authentication is required but managed externally
-     * (e.g. during the login flow before the [Authenticator] is ready).
-     */
     suspend fun send(
         method: String,
         uri: URI,
@@ -97,16 +65,6 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         SolidRawResponse(statusCode, responseHeaders, bodyBytes, effectiveUri)
     }
 
-    // ---- Authenticated CRUD operations ----
-
-    /**
-     * Fetches and parses a Solid resource into [clazz].
-     *
-     * Automatically selects `Accept: application/ld+json` for RDF resources.
-     * DPoP proof and token headers are injected and refreshed as needed.
-     *
-     * Requires an [Authenticator] at construction.
-     */
     suspend fun <T : Resource> get(
         webId: String,
         uri: URI,
@@ -126,21 +84,11 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         }
     }
 
-    /**
-     * Writes a Solid resource via HTTP PUT.
-     *
-     * Sets the correct `Link: rel="type"` header (LDP BasicContainer / RDFSource / NonRDFSource)
-     * derived from [resource]'s actual type. Auth headers are injected automatically.
-     *
-     * Pass [ifMatch] (an ETag value without quotes) to issue a conditional PUT that fails with
-     * 412 if the server's current ETag differs — preventing lost-update races.
-     *
-     * Requires an [Authenticator] at construction.
-     */
     suspend fun <T : Resource> put(
         webId: String,
         resource: T,
-        ifMatch: String? = null
+        ifMatch: String? = null,
+        ifNoneMatchStar: Boolean = false,
     ): SolidNetworkResponse<T> {
         return try {
             val linkType = when {
@@ -158,6 +106,7 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
                 linkHeader = linkType,
                 body = bodyBytes,
                 ifMatch = ifMatch,
+                ifNoneMatchStar = ifNoneMatchStar,
             )
             if (response.isSuccessful()) {
                 SolidNetworkResponse.Success(resource)
@@ -169,48 +118,15 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         }
     }
 
-    /**
-     * Applies an N3 Patch to a Solid RDF resource via HTTP PATCH.
-     *
-     * The patch body is serialized as `text/n3` with `solid:InsertDeletePatch`.
-     * Use [N3Patch.build] or [N3Patch.fromDiff] to construct the patch without
-     * writing raw N3 strings.
-     *
-     * Requires an [Authenticator] at construction.
-     */
     suspend fun patch(
         webId: String,
         uri: URI,
         patch: N3Patch,
         ifMatch: String? = null
     ): SolidNetworkResponse<Unit> {
-        return try {
-            val response = executeAuthenticated(
-                method = "PATCH",
-                webId = webId,
-                uri = uri,
-                contentType = patch.contentType,
-                body = patch.toInputStream().readBytes(),
-                ifMatch = ifMatch,
-            )
-            if (response.isSuccessful()) {
-                SolidNetworkResponse.Success(Unit)
-            } else {
-                SolidNetworkResponse.Error(response.statusCode, response.body)
-            }
-        } catch (e: Exception) {
-            SolidNetworkResponse.Exception(e)
-        }
+        return patchRaw(webId, uri, patch.toN3String(), ifMatch)
     }
 
-    /**
-     * Applies a pre-serialised N3 Patch body to a Solid RDF resource via HTTP PATCH.
-     *
-     * Identical to [patch] but accepts a raw `text/n3` string instead of a typed [N3Patch].
-     * Used when the patch document has been transported as a string (e.g. over AIDL).
-     *
-     * Requires an [Authenticator] at construction.
-     */
     suspend fun patchRaw(
         webId: String,
         uri: URI,
@@ -222,7 +138,7 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
                 method = "PATCH",
                 webId = webId,
                 uri = uri,
-                contentType = com.pondersource.shared.domain.network.HTTPAcceptType.N3,
+                contentType = HTTPAcceptType.N3,
                 body = n3Body.toByteArray(Charsets.UTF_8),
                 ifMatch = ifMatch,
             )
@@ -236,15 +152,6 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         }
     }
 
-    /**
-     * Fetches only the HTTP headers for the Solid resource at [uri] via HTTP HEAD.
-     *
-     * Returns [SolidMetadata] populated from all response headers: ETag, Content-Type,
-     * Content-Length, WAC-Allow, Allow, Link relations (acl, describedby, type,
-     * storageDescription), Accept-Patch/Post/Put, Last-Modified, and WWW-Authenticate.
-     *
-     * Requires an [Authenticator] at construction.
-     */
     suspend fun head(webId: String, uri: URI): SolidNetworkResponse<SolidMetadata> {
         return try {
             val response = executeAuthenticated("HEAD", webId, uri)
@@ -258,12 +165,6 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         }
     }
 
-    /**
-     * Deletes the Solid resource at [uri].
-     *
-     * Auth headers are injected automatically.
-     * Requires an [Authenticator] at construction.
-     */
     suspend fun delete(
         webId: String,
         uri: URI,
@@ -281,17 +182,6 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         }
     }
 
-    // ---- Internal auth machinery ----
-
-    /**
-     * Executes an authenticated HTTP request with DPoP-nonce retry.
-     *
-     * Per Solid-OIDC: if the server responds with a `DPoP-Nonce` header, the nonce is
-     * stored via [Authenticator.updateDPoPNonce] and the request is retried once on 401.
-     * On the retry the DPoP proof includes the new nonce, satisfying the challenge.
-     *
-     * [ifMatch] — when non-null, adds `If-Match: "<value>"` for a conditional request.
-     */
     private suspend fun executeAuthenticated(
         method: String,
         webId: String,
@@ -301,16 +191,17 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         linkHeader: String? = null,
         body: ByteArray? = null,
         ifMatch: String? = null,
+        ifNoneMatchStar: Boolean = false,
     ): SolidRawResponse {
         val authHeaders = buildAuthHeaders(webId, method, uri.toString())
-        val extraHeaders = if (ifMatch != null)
-            authHeaders + mapOf(HTTPHeaderName.IF_MATCH to "\"$ifMatch\"")
-        else
-            authHeaders
+        val extraHeaders = buildMap {
+            putAll(authHeaders)
+            if (ifMatch != null) put(HTTPHeaderName.IF_MATCH, if (ifMatch == "*") "*" else "\"$ifMatch\"")
+            if (ifNoneMatchStar) put(HTTPHeaderName.IF_NONE_MATCH, "*")
+        }
 
         var response = send(method, uri, contentType, accept, linkHeader, body, extraHeaders)
 
-        // Always update DPoP nonce when the server provides one.
         response.headers[HTTPHeaderName.DPOP_NONCE]?.let { nonce ->
             requireAuth().updateDPoPNonce(webId, nonce)
         }
@@ -325,11 +216,12 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
                 requireAuth().getLastTokenResponse(webId, forceRefresh = true)
             }
 
-            val retryHeaders = buildAuthHeaders(webId, method, uri.toString()).let { headers ->
-                if (ifMatch != null) headers + mapOf(HTTPHeaderName.IF_MATCH to "\"$ifMatch\"") else headers
+            val retryHeaders = buildMap {
+                putAll(buildAuthHeaders(webId, method, uri.toString()))
+                if (ifMatch != null) put(HTTPHeaderName.IF_MATCH, if (ifMatch == "*") "*" else "\"$ifMatch\"")
+                if (ifNoneMatchStar) put(HTTPHeaderName.IF_NONE_MATCH, "*")
             }
             response = send(method, uri, contentType, accept, linkHeader, body, retryHeaders)
-            // Pick up any nonce the server sends with the retry response as well.
             response.headers[HTTPHeaderName.DPOP_NONCE]?.let { nonce ->
                 requireAuth().updateDPoPNonce(webId, nonce)
             }

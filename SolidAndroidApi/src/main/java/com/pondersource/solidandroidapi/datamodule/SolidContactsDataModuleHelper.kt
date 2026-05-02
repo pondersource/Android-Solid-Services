@@ -39,7 +39,7 @@ internal class SolidContactsDataModuleHelper {
     val solidResourceManager: SolidResourceManager
 
     private constructor(context: Context) {
-        this.solidResourceManager = SolidResourceManagerImplementation.getInstance(context)
+        this.solidResourceManager = SolidResourceManager.getInstance(context)
     }
 
     suspend fun createAddressBook(
@@ -144,7 +144,7 @@ internal class SolidContactsDataModuleHelper {
 
         val addressBookMainContainer =
             addressBookUri.substring(0, addressBookUri.lastIndexOf("/") + 1)
-        solidResourceManager.deleteContainer(ownerWebId, URI.create(addressBookMainContainer))
+        solidResourceManager.delete(ownerWebId, URI.create(addressBookMainContainer))
         return addressBookRDF
     }
 
@@ -274,7 +274,7 @@ internal class SolidContactsDataModuleHelper {
             //contact is not in this address book, so no need for search in groups
         }
         val contactDir = contactUri.substring(0, contactUri.lastIndexOf("/") + 1)
-        solidResourceManager.deleteContainer(ownerWebId, URI.create(contactDir))
+        solidResourceManager.delete(ownerWebId, URI.create(contactDir))
 
     }
 

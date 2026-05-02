@@ -12,7 +12,7 @@ internal class SolidAccountResourceManagerImplementation(
     private val profile: Profile,
 ) : SolidAccountResourceManager {
 
-    private val resourceManager = SolidResourceManagerImplementation.getInstance(context)
+    private val resourceManager = SolidResourceManager.getInstance(context)
 
     init {
         if (profile.userInfo?.webId.isNullOrEmpty()) {
@@ -43,7 +43,4 @@ internal class SolidAccountResourceManagerImplementation(
         return resourceManager.delete(profile.userInfo!!.webId, resourceUri)
     }
 
-    override suspend fun deleteContainer(containerUri: URI): SolidNetworkResponse<Boolean> {
-        return resourceManager.deleteContainer(profile.userInfo!!.webId, containerUri)
-    }
 }

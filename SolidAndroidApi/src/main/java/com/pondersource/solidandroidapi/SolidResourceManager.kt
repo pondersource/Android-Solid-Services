@@ -60,7 +60,10 @@ interface SolidResourceManager {
     ): SolidNetworkResponse<T>
 
     /**
-     * Creates a new resource on the pod.
+     * Creates a new resource on the pod via conditional PUT (`If-None-Match: *`).
+     *
+     * Fails with 409 Conflict if a resource already exists at the target URI.
+     *
      * @param webid The WebID of the authenticated user making the request.
      * @param resource The resource to create; its identifier determines the target URI.
      * @return [SolidNetworkResponse.Success] with the created resource.
@@ -77,9 +80,9 @@ interface SolidResourceManager {
      * atomic and avoids a full read-modify-write cycle. Use [update] when you have the
      * complete new representation (e.g. uploading a new photo or rewriting a full document).
      *
-     * Pass [ifMatch] (the ETag from a previous [read] call) to issue a conditional PUT
-     * that fails with 412 Precondition Failed if the resource was modified in the meantime.
-     * This is the safe update pattern for [com.pondersource.shared.domain.resource.SolidNonRDFResource].
+     * When [ifMatch] is null, a conditional `If-Match: *` is used to ensure the resource
+     * exists before writing. Pass the ETag from a previous [read] or [head] call to get
+     * full optimistic-concurrency protection (412 Precondition Failed on version mismatch).
      *
      * @param webid    The WebID of the authenticated user making the request.
      * @param newResource The updated resource; its identifier determines the target URI.
@@ -99,18 +102,23 @@ interface SolidResourceManager {
      * and does not require reading the full resource first. Use [N3Patch.build] or
      * [N3Patch.fromDiff] to construct the patch without writing raw N3 strings.
      *
-     * Not applicable to [com.pondersource.shared.domain.resource.SolidNonRDFResource] —
+     * Not applicable to [com.pondersource.shared.domain.resource.SolidNonRDFSource] —
      * use [update] for binary resources.
      *
-     * @param webid The WebID of the authenticated user making the request.
-     * @param uri   The URI of the RDF resource to patch.
-     * @param patch The patch to apply.
+     * Pass [ifMatch] (the ETag from a previous [read] or [head] call) to issue a conditional
+     * PATCH that fails with 412 if the resource was modified in the meantime.
+     *
+     * @param webid   The WebID of the authenticated user making the request.
+     * @param uri     The URI of the RDF resource to patch.
+     * @param patch   The patch to apply.
+     * @param ifMatch Optional ETag for a conditional PATCH.
      * @return [SolidNetworkResponse.Success] with [Unit] on success.
      */
     suspend fun patch(
         webid: String,
         uri: URI,
         patch: N3Patch,
+        ifMatch: String? = null,
     ): SolidNetworkResponse<Unit>
 
     /**
@@ -118,21 +126,30 @@ interface SolidResourceManager {
      *
      * Use this overload when the patch document has already been serialised to a `text/n3`
      * string (e.g. when transporting a patch over AIDL IPC and reconstructing it on the
-     * service side).  Prefer [patch] with a typed [N3Patch] when building patches in-process.
+     * service side). Prefer [patch] with a typed [N3Patch] when building patches in-process.
+     *
+     * Pass [ifMatch] (the ETag from a previous [read] or [head] call) to issue a conditional
+     * PATCH that fails with 412 if the resource was modified in the meantime.
      *
      * @param webid     The WebID of the authenticated user making the request.
      * @param uri       The URI of the RDF resource to patch.
      * @param n3Body    The full `text/n3` patch document body.
+     * @param ifMatch   Optional ETag for a conditional PATCH.
      * @return [SolidNetworkResponse.Success] with [Unit] on success.
      */
     suspend fun patchRaw(
         webid: String,
         uri: URI,
         n3Body: String,
+        ifMatch: String? = null,
     ): SolidNetworkResponse<Unit>
 
     /**
-     * Deletes a resource from the pod.
+     * Deletes a resource or container from the pod.
+     *
+     * When [resource] is a container (or its URI ends with `/`), all contained resources
+     * are deleted recursively before the container itself is removed.
+     *
      * @param webid The WebID of the authenticated user making the request.
      * @param resource The resource to delete.
      * @return [SolidNetworkResponse.Success] with the deleted resource.
@@ -143,24 +160,17 @@ interface SolidResourceManager {
     ): SolidNetworkResponse<T>
 
     /**
-     * Deletes a resource from the pod.
+     * Deletes a resource or container from the pod by URI.
+     *
+     * When [resourceUri] ends with `/`, the target is treated as a container and all
+     * contained resources are deleted recursively before the container itself is removed.
+     *
      * @param webid The WebID of the authenticated user making the request.
-     * @param resourceUri The uri of the resource to delete.
-     * @return [SolidNetworkResponse.Success]
+     * @param resourceUri The URI of the resource or container to delete.
+     * @return [SolidNetworkResponse.Success] with `true` on success.
      */
     suspend fun delete(
         webid: String,
         resourceUri: URI,
-    ): SolidNetworkResponse<Boolean>
-
-    /**
-     * Recursively deletes a container and all of its contents.
-     * @param webid The WebID of the authenticated user making the request.
-     * @param containerUri The URI of the LDP container to delete.
-     * @return [SolidNetworkResponse.Success] with `true` on success.
-     */
-    suspend fun deleteContainer(
-        webid: String,
-        containerUri: URI
     ): SolidNetworkResponse<Boolean>
 }
