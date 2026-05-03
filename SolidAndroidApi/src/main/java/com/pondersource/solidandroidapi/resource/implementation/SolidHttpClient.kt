@@ -183,6 +183,28 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         }
     }
 
+    suspend fun copy(
+        webId: String,
+        sourceUri: URI,
+        destinationUri: URI,
+    ): SolidNetworkResponse<Boolean> {
+        return try {
+            val response = executeAuthenticated(
+                method = "COPY",
+                webId = webId,
+                uri = sourceUri,
+                additionalHeaders = mapOf("Destination" to destinationUri.toString()),
+            )
+            if (response.isSuccessful()) {
+                SolidNetworkResponse.Success(true)
+            } else {
+                SolidNetworkResponse.Error(response.statusCode, response.body)
+            }
+        } catch (e: Exception) {
+            SolidNetworkResponse.Exception(e)
+        }
+    }
+
     private suspend fun executeAuthenticated(
         method: String,
         webId: String,
@@ -193,10 +215,12 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         body: ByteArray? = null,
         ifMatch: String? = null,
         ifNoneMatchStar: Boolean = false,
+        additionalHeaders: Map<String, String> = emptyMap(),
     ): SolidRawResponse {
         val authHeaders = buildAuthHeaders(webId, method, uri.toString())
         val extraHeaders = buildMap {
             putAll(authHeaders)
+            putAll(additionalHeaders)
             if (ifMatch != null) put(HTTPHeaderName.IF_MATCH, if (ifMatch == "*") "*" else "\"$ifMatch\"")
             if (ifNoneMatchStar) put(HTTPHeaderName.IF_NONE_MATCH, "*")
         }
@@ -219,6 +243,7 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
 
             val retryHeaders = buildMap {
                 putAll(buildAuthHeaders(webId, method, uri.toString()))
+                putAll(additionalHeaders)
                 if (ifMatch != null) put(HTTPHeaderName.IF_MATCH, if (ifMatch == "*") "*" else "\"$ifMatch\"")
                 if (ifNoneMatchStar) put(HTTPHeaderName.IF_NONE_MATCH, "*")
             }
