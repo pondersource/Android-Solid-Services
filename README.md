@@ -1,34 +1,23 @@
+[![solidandroidclient](https://img.shields.io/maven-central/v/com.pondersource.solidandroidclient/solidandroidclient.svg?label=solidandroidclient)](https://central.sonatype.com/artifact/com.pondersource.solidandroidclient/solidandroidclient)
+[![solidandroidapi](https://img.shields.io/maven-central/v/com.pondersource.solidandroidapi/solidandroidapi.svg?label=solidandroidapi)](https://central.sonatype.com/artifact/com.pondersource.solidandroidapi/solidandroidapi)
+[![Docs](https://img.shields.io/badge/docs-site-blueviolet)](https://androidsolidservices.erfangholami.com)
+[![License](https://img.shields.io/github/license/pondersource/Android-Solid-Services)](LICENSE)
+
 This project consists of three parts:
 
 - [Android Solid Services app](#android-solid-services-app)
 - [Solid Android Client library](#solid-android-client-library)
 - [Solid Android API library](#solid-android-api-library)
 
-## What's New in v0.3.1
+## What's New in v0.4.0
 
-- Fix saving accounts bug
-
-## What's New in v0.3.0
-
-- **Multi-account support**: Log in with multiple Solid accounts and switch between them from the
-  Settings page.
-- **Suspend functions**: All resource and contacts data module methods are now Kotlin `suspend`
-  functions instead of callback-based, for cleaner coroutine integration.
-- **Unified result types**: Resource operations use `SolidNetworkResponse<T>` (sealed class with
-  `Success`, `Error`, `Exception`) and contacts data module uses `DataModuleResult<T>` for
-  consistent error handling.
-- **Structured exceptions**: A new `SolidException` sealed class hierarchy provides typed
-  exceptions (`SolidAppNotFoundException`, `SolidServiceConnectionException`,
-  `SolidNotLoggedInException`, `SolidResourceException`, etc.).
-- **DPoP authentication**: Proper DPoP (Demonstration of Proof-of-Possession) token support for
-  authenticated requests.
-- **kotlinx.serialization**: Replaced Gson with kotlinx.serialization for better Kotlin
-  compatibility.
-- **JVM 17**: Upgraded project JVM target from 11 to 17.
-- **Compile SDK 36**: Updated compile SDK from 35 to 36.
-- **CI/CD**: Added GitHub Actions workflows for publishing libraries and the application.
-- **Internal API encapsulation**: Implementation classes are now `internal`, exposing only the
-  public SDK surface.
+- **`head()` resource metadata** — fetch ETag, Content-Type, WAC-Allow, and other headers via HTTP HEAD without downloading the resource body.
+- **N3 Patch support** — `patch()` and the new `N3Patch` type (DSL builder + diff factory) enable atomic partial updates to RDF resources.
+- **Conditional writes** — `update()` now accepts an `ifMatch` ETag for optimistic-concurrency protection.
+- **Delete by URI** — `delete(webid, uri)` removes a resource without reading it first.
+- **DPoP algorithm negotiation** — the token generator now picks the best algorithm the server supports, improving pod compatibility.
+- **Removed Inrupt Java Client** — replaced with a custom `SolidHttpClient`; significantly lighter dependency footprint.
+- **Bug fixes** — DPoP nonce race condition, WebID parsing, contacts DC namespace, ETag casing.
 
 ## Android Solid Services app
 
@@ -55,8 +44,8 @@ In the root directory of the project run command:
 You can find the generated ```.apk``` file in the path:
 `./app/build/outputs/apk/debug`
 
-You can open it for instance with Android Studio. It will take a while for the emulator to start up
-but then you'll be presented with a login screen
+You can open it for instance with Android Studio. It will take a while for the emulator to start up, 
+but then you'll be presented with a login screen,
 and you can log in to your pod there. Here are some screenshots from the application:
 |![Screenshot_20260414_00260](https://github.com/user-attachments/assets/9afe2f9d-f4a3-4e05-ae77-ab6e13febf84)|![Screenshot_20241218_152854](https://github.com/user-attachments/assets/543b2d9e-2f51-481f-b50d-934ece61172f)|![Screenshot_20260414_002657](https://github.com/user-attachments/assets/3deabd3a-d907-407a-9fbb-b27e26882206)|![Screenshot_20241218_152952](https://github.com/user-attachments/assets/b6df9725-321d-4572-b9fa-07cf28de3e9a)|
 |-|-|-|-|
@@ -69,10 +58,15 @@ data module).
 You can add this library to your android project by adding this line to your module-level
 ```build.gradle.kts``` file:
 
-```gradle
+```kotlin
+// build.gradle.kts (module level)
+android {
+    defaultConfig {
+        manifestPlaceholders["appAuthRedirectScheme"] = "YOUR_APP_PACKAGE_NAME"
+    }
+}
 dependencies {
-    ...
-    implementation("com.pondersource.solidandroidclient:solidandroidclient:0.3.1")
+    implementation("com.pondersource.solidandroidclient:solidandroidclient:0.4.0")
 }
 ```
 
@@ -90,13 +84,14 @@ solidSignInClient.authServiceConnectionState().collect { hasConnected ->
         //Auth service has connected
         
         //This code returns your account if you already have access, null if you don't have access.
-        val account = solidSignInClient.getAccount()
+        //You need to pass the webid you want to check
+        val account = solidSignInClient.getAccount(SAVED_WEBID ?: "")
         
         if (account == null) {
-            solidSignInClient.requestLogin { granted, exception ->
+            solidSignInClient.requestLogin { webid, exception ->
                 if (exception == null) {
-                    if (granted == true) {
-                        //User gave access grant to your app
+                    if (!webid.isNullOrEmpty()) {
+                        //User gave access grant to your app and you need to save webid locally for future calls
                     } else {
                         //User declined your access grant request
                     }
@@ -112,9 +107,9 @@ solidSignInClient.authServiceConnectionState().collect { hasConnected ->
 ```
 
 After this step you can request for resources or data modules.
-Resources must inherit from ```com.pondersource.shared.resource.Resource``` or for better
-implementation, ```com.pondersource.shared.RDFSource``` or
-```com.pondersource.shared.NonRDFSource```.
+Resources must inherit from ```com.pondersource.shared.domain.resource.SolidResource``` or for better
+implementation, ```com.pondersource.shared.domain.SolidRDFResource``` or
+```com.pondersource.shared.domain.SolidNonRDFResource```.
 Depending on your data class, you can choose one. NonRDFSource is used for raw files and resources
 without structure such as .txt, image files, etc. However, RDFSource is used for data classes in RDF
 format (common in Solid ecosystem).
@@ -134,16 +129,16 @@ resourceClient.resourceServiceConnectionState().collect { hasConnected ->
 
 try {
     //Read
-    val resource = resourceClient.read(RESOURCE_URL, YOUR_CLASS::class.java)
+    val resource = resourceClient.read(SAVED_WEBID, RESOURCE_URL, YOUR_CLASS::class.java)
 
     //Create
-    val created = resourceClient.create(RESOURCE_OBJ)
+    val created = resourceClient.create(SAVED_WEBID, RESOURCE_OBJ)
 
     //Update - for already existing resource
-    val updated = resourceClient.update(RESOURCE_OBJ)
+    val updated = resourceClient.update(SAVED_WEBID, RESOURCE_OBJ)
 
     //Delete - for already existing resource
-    val deleted = resourceClient.delete(RESOURCE_OBJ)
+    val deleted = resourceClient.delete(SAVED_WEBID, RESOURCE_OBJ)
 } catch (e: SolidException) {
     // Handle error
 }
@@ -162,10 +157,10 @@ contactsDataModule.contactsDataModuleServiceConnectionState().collect { hasConne
     }
 }
 
-val addressBooks = contactsDataModule.getAddressBooks()
-val addressBook = contactsDataModule.getAddressBook(ADDRESSBOOK_URI)
-val contact = contactsDataModule.getContact(CONTACT_URI)
-val group = contactsDataModule.getGroup(GROUP_URI)
+val addressBooks = contactsDataModule.getAddressBooks(SAVED_WEBID)
+val addressBook = contactsDataModule.getAddressBook(SAVED_WEBID, ADDRESSBOOK_URI)
+val contact = contactsDataModule.getContact(SAVED_WEBID, CONTACT_URI)
+val group = contactsDataModule.getGroup(SAVED_WEBID, GROUP_URI)
 //Check the module class for more functions on address books, contacts and groups.
 
 ```
@@ -180,10 +175,15 @@ This library is used in the Android Solid Services app to interact with Solid. I
 problem with installing the app or want to connect to Solid directly you can add it to your android
 project by adding this line to your module level ```build.gradle.kts``` file.
 
-```gradle
+```kotlin
+// build.gradle.kts (module level)
+android {
+    defaultConfig {
+        manifestPlaceholders["appAuthRedirectScheme"] = "YOUR_APP_PACKAGE_NAME"
+    }
+}
 dependencies {
-    ...
-    implementation("com.pondersource.solidandroidapi:solidandroidapi:0.3.1")
+    implementation("com.pondersource.solidandroidapi:solidandroidapi:0.4.0")
 }
 ```
 
@@ -191,8 +191,8 @@ or if you are using another building system,
 check [here](https://central.sonatype.com/artifact/com.pondersource.solidandroidapi/solidandroidapi).
 
 For authentication, you can use:
-```com.pondersource.solidandroidapi.AuthenticatorImplementation.getInstance(context)```.
-There are couple of steps to authenticate user with OpenID Connect protocol (with DPoP support) such
+```com.pondersource.solidandroidapi.auth.Authenticator.getInstance(context)```.
+There are couples of steps to authenticate user with OpenID Connect protocol (with DPoP support) such
 as register your app to OpenID and then ask for the intent to transfer the user to browser to enter
 their username/password of the selected IDP. For a better understanding please refer to Android
 Solid Services app codes.
@@ -202,8 +202,8 @@ what have been explained in [Solid Android Client](#solid-android-client-library
 difference that you need to get the class instance with:
 
 ```kotlin
-val resourceManager = com.pondersource.solidandroidapi.SolidResourceManagerImplementation.getInstance(context)
-val contactModule = com.pondersource.solidandroidapi.SolidContactsDataModuleImplementation.getInstance(context)
+val resourceManager = com.pondersource.solidandroidapi.resource.SolidResourceManager.getInstance(authenticator)
+val contactModule = com.pondersource.solidandroidapi.datamodule.contacts.SolidContactsDataModule.getInstance(resourceManager)
 ```
 
 ---
