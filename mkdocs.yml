@@ -39,6 +39,7 @@ nav:
       - Android Solid Services App: app.md
       - Solid Android Client Library: client-library.md
   - Architecture: architecture.md
+  - API Reference: api/index.html
   - Releases: release.md
 
 plugins:

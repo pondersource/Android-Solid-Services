@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.vanniktech.maven.publish)
+    alias(libs.plugins.jetbrains.dokka)
     id("kotlin-parcelize")
     `maven-publish`
 }

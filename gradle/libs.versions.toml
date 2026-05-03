@@ -37,6 +37,7 @@ lifecycleRuntime = "2.10.0"
 vanniktechMavenPublish = "0.36.0"
 jjwt = "0.13.0"
 binaryCompatibilityValidator = "0.18.1"
+dokka = "2.2.0"
 
 [libraries]
 jetbrains-kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
@@ -143,5 +144,6 @@ google-protobuf = { id = "com.google.protobuf", version.ref = "googleProtobuf" }
 
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }
 kotlinx-binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
+jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 
 [bundles]

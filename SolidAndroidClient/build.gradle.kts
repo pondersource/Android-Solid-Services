@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.compose.compiler)
     alias(libs.plugins.vanniktech.maven.publish)
+    alias(libs.plugins.jetbrains.dokka)
     `maven-publish`
 }
 

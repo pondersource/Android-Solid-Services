@@ -20,6 +20,7 @@ plugins {
     alias(libs.plugins.google.protobuf) apply false
     alias(libs.plugins.vanniktech.maven.publish) apply false
     alias(libs.plugins.kotlinx.binary.compatibility.validator)
+    alias(libs.plugins.jetbrains.dokka) apply false
 }
 
 apiValidation {
