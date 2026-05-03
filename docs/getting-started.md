@@ -13,7 +13,7 @@
     ```kotlin
     // build.gradle.kts (module level)
     dependencies {
-        implementation("com.pondersource.solidandroidclient:solidandroidclient:0.3.1")
+        implementation("com.pondersource.solidandroidclient:solidandroidclient:0.4.0")
     }
     ```
 
@@ -24,7 +24,7 @@
     ```kotlin
     // build.gradle.kts (module level)
     dependencies {
-        implementation("com.pondersource.solidandroidapi:solidandroidapi:0.3.1")
+        implementation("com.pondersource.solidandroidapi:solidandroidapi:0.4.0")
     }
     ```
 

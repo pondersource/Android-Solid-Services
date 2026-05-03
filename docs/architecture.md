@@ -62,8 +62,9 @@ Common types shared across all modules. Published implicitly as a transitive dep
 | Resource model    | `Resource` → `RDFSource` / `NonRDFSource` → `SolidRDFSource` / `SolidNonRDFSource` / `SolidContainer` |
 | Response type     | `SolidNetworkResponse<T>` — sealed class: `Success`, `Error`, `Exception`                             |
 | Data module types | `AddressBook`, `AddressBookList`, `Contact`, `FullContact`, `NewContact`, `FullGroup`                 |
+| Patch type        | `N3Patch` — type-safe DSL and diff factory for [Solid N3 Patch](https://solidproject.org/TR/protocol#n3-patch) documents |
 | Vocabulary        | `LDP`, `VCARD`, `ACL`, `OWL`, `DC`, `RDFS`, `Solid` constants                                         |
-| AIDL parcelables  | Parcelable wrappers for cross-process data transfer                                                   |
+| AIDL parcelables  | Parcelable wrappers for cross-process data transfer (all definitions consolidated here)               |
 
 ### SolidAndroidApi (`com.pondersource.solidandroidapi`)
 
@@ -102,7 +103,7 @@ The host application. Users interact with this; third-party apps bind to its ser
 | Services       | `ASSAuthenticatorService`, `ASSResourceService`, `SolidDataModulesService` |
 | Persistence    | DataStore + Protocol Buffers                                               |
 | Auth           | `net.openid:appauth` + DPoP                                                |
-| Solid protocol | Inrupt Java Client SDK (`com.inrupt.client.*`)                             |
+| Solid protocol | Custom `SolidHttpClient` (OkHttp-based; Inrupt Java Client removed)        |
 
 ---
 
@@ -115,10 +116,11 @@ The host application. Users interact with this; third-party apps bind to its ser
 | Hilt                           | Dependency injection (app module only)       |
 | AIDL                           | Cross-process communication                  |
 | AppAuth (`net.openid:appauth`) | OpenID Connect                               |
-| Inrupt Java Client SDK         | Solid protocol                               |
+| `SolidHttpClient`              | Custom OkHttp-based Solid HTTP client (replaces Inrupt Java Client SDK) |
 | Titanium JSON-LD               | RDF, JSON-LD parsing                         |
 | DataStore + Protobuf           | Local persistence                            |
 | kotlinx.serialization          | JSON serialization (replaced Gson in v0.3.0) |
+| API Validator plugin           | Binary API compatibility enforcement via `.api` files |
 | Min SDK                        | 26 (Android 8.0)                             |
 | Target / Compile SDK           | 33 / 35                                      |
 | JVM target                     | 17                                           |

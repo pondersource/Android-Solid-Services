@@ -19,7 +19,7 @@ android {
     }
 }
 dependencies {
-    implementation("com.pondersource.solidandroidclient:solidandroidclient:0.3.1")
+    implementation("com.pondersource.solidandroidclient:solidandroidclient:0.4.0")
 }
 ```
 
@@ -104,12 +104,20 @@ Reads, creates, updates, and deletes resources on the user's Solid pod via IPC. 
 
 All methods are `suspend` functions. They throw a subclass of `SolidResourceException` on failure.
 
+!!! note "Multi-account"
+    Since v0.4.0, methods that operate on pod resources pass through the WebID of the target
+    account. Save the WebID from `getAccount()` after login and pass it to each call.
+
 ```kotlin
 // Emits connection state of the resource IPC service
 fun resourceServiceConnectionState(): Flow<Boolean>
 
 // Fetch the authenticated user's WebID document
 suspend fun getWebId(): WebId
+
+// Fetch HTTP headers only (no body) — returns SolidMetadata with ETag, Content-Type,
+// WAC-Allow, ACL link, Accept-Patch/Post, Last-Modified, and other Solid headers.
+suspend fun head(webId: String, resourceUrl: String): SolidNetworkResponse<SolidMetadata>
 
 // Read a resource. clazz must extend RDFSource or NonRDFSource.
 suspend fun <T : Resource> read(resourceUrl: String, clazz: Class<T>): T

@@ -31,14 +31,19 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - https://unpkg.com/mermaid@11/dist/mermaid.min.js
+
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - How It Works: concepts.md
   - Components:
       - Solid Android API Library: api-library.md
       - Android Solid Services App: app.md
       - Solid Android Client Library: client-library.md
   - Architecture: architecture.md
+  - Troubleshooting: troubleshooting.md
   - API Reference: api/index.html
   - Releases: release.md
 
@@ -48,7 +53,11 @@ plugins:
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite

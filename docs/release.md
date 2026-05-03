@@ -9,6 +9,75 @@ Library versions are published to Maven Central:
 
 ---
 
+## v0.4.0 — May 2026
+
+### New API — `SolidResourceManager`
+
+- **`head(webid, uri)`** — HTTP HEAD returns a `SolidMetadata` object (ETag, Content-Type, Content-Length, WAC-Allow, ACL link, Accept-Patch/Post, Last-Modified, and more) without transferring the resource body. Ideal for caching checks and permission discovery before a full read.
+- **`patch(webid, uri, patch)` / `patchRaw(webid, uri, n3Body)`** — N3 Patch support for atomic partial updates to RDF resources. The typed overload accepts an `N3Patch` value; the raw overload accepts a pre-serialised `text/n3` string.
+- **`update()` now accepts `ifMatch`** — pass the ETag from a prior `head` or `read` call for optimistic-concurrency protection (server returns 412 on version mismatch).
+- **`delete(webid, resourceUri: URI)`** — delete a resource by URI directly, without reading it first.
+
+### New Type — `N3Patch`
+
+Type-safe DSL and diff-based factory for building [Solid N3 Patch](https://solidproject.org/TR/protocol#n3-patch) documents:
+
+```kotlin
+// DSL builder
+val patch = N3Patch.build {
+    where(contactUri, VCARD.FN, variable = "oldName")
+    deleteVar(contactUri, VCARD.FN, variable = "oldName")
+    insertLiteral(contactUri, VCARD.FN, "Alice")
+}
+
+// Auto-diff from two resource states
+val patch = N3Patch.fromDiff(originalResource, modifiedResource)
+```
+
+### Authentication
+
+- **DPoP algorithm negotiation** — the DPoP generator now reads the `WWW-Authenticate` response header and selects the best algorithm the server supports; improves compatibility with different pod implementations.
+- **ID token verification** — new `IdTokenVerifier` validates claims in the received ID token.
+- **DPoP nonce conflict fix** — token refresh no longer races with an in-flight nonce update.
+- **WebID parsing fix** — correctly extracts the WebID string from the token response.
+- **Crash fixes** — multiple crash points removed from the token exchange and session handling paths.
+
+### Multi-account in `SolidAndroidClient`
+
+Third-party apps must now pass the target WebID on each resource and contacts call. This enables per-account IPC routing when the user has multiple Solid accounts logged in.
+
+### Resource Operations
+
+- **ETag on writes** — PUT requests now include `ETag` headers for optimistic concurrency.
+- **Special characters in URIs** — resource URIs containing spaces and other characters are now percent-encoded correctly.
+- **Unified delete** — `delete` and `deleteContainer` paths merged; redundant network round-trips removed.
+
+### Architecture
+
+- **Removed Inrupt Java Client library** — replaced with a custom `SolidHttpClient`; significantly leaner dependency footprint.
+- **API binary compatibility enforcement** — API Validator plugin added to all modules; the public surface is tracked via `.api` files to prevent accidental breakage.
+- **AIDL consolidated in `Shared`** — all parcelable definitions moved to the `Shared` module; no more duplication across modules.
+- **ProGuard + minification** — release builds of the ASS app are now minified.
+- **Extended vocabulary** — new RDF vocabulary constants added to the `Shared` module for broader developer use.
+
+### Bug Fixes
+
+- Fixed wrong Dublin Core namespace in the Contacts data module; old data using the incorrect namespace is still readable.
+- Fixed `ETag` header name casing.
+- Fixed granted apps not persisting across process restarts.
+
+### UI
+
+- ASS now shows a dialog prompting users to grant the overlay draw permission when it is missing.
+- Updated "Sign in with Solid" login screen.
+- UI strings moved to Android string resources.
+
+### Dependencies
+
+- Updated several library versions across all modules.
+
+---
+
 ## v0.3.1 — April 2026
 
 - Fix saving accounts bug.

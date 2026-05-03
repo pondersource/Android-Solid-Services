@@ -20,7 +20,7 @@ android {
     }
 }
 dependencies {
-    implementation("com.pondersource.solidandroidapi:solidandroidapi:0.3.1")
+    implementation("com.pondersource.solidandroidapi:solidandroidapi:0.4.0")
 }
 ```
 
@@ -139,6 +139,14 @@ Convenience methods: `getOrThrow()`, `getOrNull()`, `getOrDefault(default)`.
 ### Methods
 
 ```kotlin
+// Fetch HTTP headers only (no body) — returns SolidMetadata with ETag, Content-Type,
+// WAC-Allow, ACL link, Accept-Patch/Post, Last-Modified, and other Solid headers.
+// Ideal for caching checks and permission discovery before a full read.
+suspend fun head(
+    webid: String,
+    uri: URI,
+): SolidNetworkResponse<SolidMetadata>
+
 // Read a resource from the pod
 suspend fun <T : Resource> read(
     webid: String,    // WebID of the authenticated user
@@ -146,29 +154,71 @@ suspend fun <T : Resource> read(
     clazz: Class<T>,  // expected type (must extend RDFSource or NonRDFSource)
 ): SolidNetworkResponse<T>
 
-// Create a new resource on the pod
+// Create a new resource on the pod (conditional PUT — fails if the URI already exists)
 suspend fun <T : Resource> create(
     webid: String,
     resource: T,      // identifier on the resource determines the target URI
 ): SolidNetworkResponse<T>
 
-// Replace an existing resource
+// Replace an existing resource. Pass ifMatch (an ETag from head/read) for
+// optimistic-concurrency protection — the server returns 412 on version mismatch.
 suspend fun <T : Resource> update(
     webid: String,
     newResource: T,
+    ifMatch: String? = null,
 ): SolidNetworkResponse<T>
 
-// Delete a resource
+// Apply an N3 Patch to an RDF resource — atomic partial update, no full read required.
+// Use N3Patch.build { ... } or N3Patch.fromDiff(original, updated) to construct the patch.
+suspend fun patch(
+    webid: String,
+    uri: URI,
+    patch: N3Patch,
+    ifMatch: String? = null,
+): SolidNetworkResponse<Unit>
+
+// Apply a pre-serialised text/n3 patch body (e.g. when the patch crossed an IPC boundary).
+suspend fun patchRaw(
+    webid: String,
+    uri: URI,
+    n3Body: String,
+    ifMatch: String? = null,
+): SolidNetworkResponse<Unit>
+
+// Delete a resource by resource object (containers are deleted recursively)
 suspend fun <T : Resource> delete(
     webid: String,
     resource: T,
 ): SolidNetworkResponse<T>
 
-// Recursively delete an LDP container and all its contents
-suspend fun deleteContainer(
+// Delete a resource by URI directly — no prior read needed.
+// URIs ending with '/' are treated as containers and deleted recursively.
+suspend fun delete(
     webid: String,
-    containerUri: URI,
+    resourceUri: URI,
 ): SolidNetworkResponse<Boolean>
+```
+
+### N3Patch
+
+Type-safe DSL and diff factory for building [Solid N3 Patch](https://solidproject.org/TR/protocol#n3-patch) documents:
+
+```kotlin
+// DSL builder — no raw N3 strings needed
+val patch = N3Patch.build {
+    // bind the old value, then swap it atomically
+    where(contactUri, VCARD.FN, variable = "oldName")
+    deleteVar(contactUri, VCARD.FN, variable = "oldName")
+    insertLiteral(contactUri, VCARD.FN, "Alice")
+}
+
+// Diff factory — derive the patch automatically from two resource states
+val patch = N3Patch.fromDiff(originalResource, modifiedResource)
+
+// Convenience factories
+val patch = N3Patch.insert("<$s> <$p> <$o> .")
+val patch = N3Patch.delete("<$s> <$p> <$o> .")
+val patch = N3Patch.replace(inserts = "...", where = "...")
 ```
 
 ### Resource types
