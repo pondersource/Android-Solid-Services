@@ -19,7 +19,7 @@ android {
     }
 }
 dependencies {
-    implementation("com.erfangholami.androidsolidservices:client:0.4.0")
+    implementation("com.erfangholami.androidsolidservices:client:0.4.1")
 }
 ```
 

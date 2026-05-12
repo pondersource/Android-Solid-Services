@@ -79,7 +79,7 @@ mavenPublishing {
             variant = "release",
         )
     )
-    coordinates("com.erfangholami.androidsolidservices", "shared", "0.4.0")
+    coordinates("com.erfangholami.androidsolidservices", "shared", "0.4.1")
 
     pom {
         name.set("Android Solid Services - Shared")

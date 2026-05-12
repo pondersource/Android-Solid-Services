@@ -2,6 +2,36 @@
 
 All notable changes to this project are documented here.
 
+## [0.4.1] — May 2026
+
+Namespace migration. Source code, Maven coordinates, and Gradle module folders move under `com.erfangholami.androidsolidservices`. No source-level API changes.
+
+### Maven coordinates
+
+- `com.pondersource.solidandroidclient:solidandroidclient` → `com.erfangholami.androidsolidservices:client`
+- `com.pondersource.solidandroidapi:solidandroidapi` → `com.erfangholami.androidsolidservices:api`
+- `com.pondersource.shared:shared` → `com.erfangholami.androidsolidservices:shared`
+
+### Kotlin packages
+
+- `com.pondersource.androidsolidservices.*` → `com.erfangholami.androidsolidservices.*`
+- `com.pondersource.solidandroidapi.*` → `com.erfangholami.androidsolidservices.api.*`
+- `com.pondersource.solidandroidclient.*` → `com.erfangholami.androidsolidservices.client.*`
+- `com.pondersource.shared.*` → `com.erfangholami.androidsolidservices.shared.*`
+
+### Gradle modules
+
+- `SolidAndroidApi/` → `api/`
+- `SolidAndroidClient/` → `client/`
+
+### App-level changes (ASS)
+
+- `applicationId` is now `com.erfangholami.androidsolidservices`. Existing installs cannot auto-upgrade — users must uninstall the old build and install 0.4.1 fresh.
+- AccountManager `accountType` changed accordingly. Existing accounts on user devices will be orphaned.
+- `appAuthRedirectScheme` changed. Update any OAuth callback URIs registered with Solid identity providers.
+
+---
+
 ## [0.4.0] — May 2026
 
 ### New API — `SolidResourceManager`

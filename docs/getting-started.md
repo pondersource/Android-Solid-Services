@@ -13,7 +13,7 @@
     ```kotlin
     // build.gradle.kts (module level)
     dependencies {
-        implementation("com.erfangholami.androidsolidservices:client:0.4.0")
+        implementation("com.erfangholami.androidsolidservices:client:0.4.1")
     }
     ```
 
@@ -24,7 +24,7 @@
     ```kotlin
     // build.gradle.kts (module level)
     dependencies {
-        implementation("com.erfangholami.androidsolidservices:api:0.4.0")
+        implementation("com.erfangholami.androidsolidservices:api:0.4.1")
     }
     ```
 

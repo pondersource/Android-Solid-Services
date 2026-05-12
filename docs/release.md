@@ -4,8 +4,37 @@ All releases are published on the [GitHub Releases page](https://github.com/erfa
 
 Library versions are published to Maven Central:
 
-- [`solidandroidclient`](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client)
-- [`solidandroidapi`](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api)
+- [`client`](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client)
+- [`api`](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api)
+- [`shared`](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/shared)
+
+---
+
+## v0.4.1 — May 2026
+
+Namespace migration release. No new features; everything moves under `com.erfangholami.androidsolidservices`.
+
+### Maven coordinates
+
+The three published libraries now share one groupId with short artifact ids:
+
+| Previous coordinates                                       | New coordinates                                |
+|------------------------------------------------------------|------------------------------------------------|
+| `com.pondersource.solidandroidclient:solidandroidclient`   | `com.erfangholami.androidsolidservices:client` |
+| `com.pondersource.solidandroidapi:solidandroidapi`         | `com.erfangholami.androidsolidservices:api`    |
+| `com.pondersource.shared:shared`                           | `com.erfangholami.androidsolidservices:shared` |
+
+Update the dependency lines in your module-level `build.gradle.kts`.
+
+### Gradle modules and Kotlin packages
+
+The local Gradle module folders (`SolidAndroidApi/` → `api/`, `SolidAndroidClient/` → `client/`) and source packages (`com.pondersource.*` → `com.erfangholami.androidsolidservices.*`) were renamed to match the new coordinates. If you consume the libraries via Maven Central, this affects only your `import` statements; if you build this project from source, update local module paths in scripts and CI.
+
+### App-level changes (Android Solid Services host app)
+
+- `applicationId` is now `com.erfangholami.androidsolidservices`. The host app on existing devices cannot auto-upgrade — users have to uninstall the old build and install 0.4.1 fresh.
+- The AccountManager `accountType` changed to match. Existing Solid accounts on user devices will be orphaned and must be re-added.
+- The AppAuth redirect scheme changed. If you registered the OAuth callback with a specific Solid identity provider, update the redirect URI provider-side.
 
 ---
 
