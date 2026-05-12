@@ -4,13 +4,13 @@
 
 ```
 app  (com.erfangholami.androidsolidservices)
- ├── SolidAndroidApi   (com.erfangholami.androidsolidservices.api)
+ ├── api   (com.erfangholami.androidsolidservices.api)
  │    └── Shared       (com.erfangholami.androidsolidservices.shared)
- └── SolidAndroidClient (com.erfangholami.androidsolidservices.client)
+ └── client (com.erfangholami.androidsolidservices.client)
       └── Shared
 
 Third-party apps
- └── SolidAndroidClient
+ └── client
       └── Shared
 ```
 
@@ -32,7 +32,7 @@ Solid.getContactsDataModule()  SolidDataModulesService   (contacts, address book
 
 Each service is an Android **bound service**. The client libraries expose `Flow<Boolean>` connection state so apps can react to connect/disconnect events in real time.
 
-AIDL interface definitions live in `Shared/src/main/aidl/` (parcelable types) and `SolidAndroidClient/src/main/aidl/` (service contracts).
+AIDL interface definitions (both parcelable types and service contracts) live in `Shared/src/main/aidl/`.
 
 ---
 
@@ -66,7 +66,7 @@ Common types shared across all modules. Published implicitly as a transitive dep
 | Vocabulary        | `LDP`, `VCARD`, `ACL`, `OWL`, `DC`, `RDFS`, `Solid` constants                                         |
 | AIDL parcelables  | Parcelable wrappers for cross-process data transfer (all definitions consolidated here)               |
 
-### SolidAndroidApi (`com.erfangholami.androidsolidservices.api`)
+### api (`com.erfangholami.androidsolidservices.api`)
 
 Direct Solid server communication. Used internally by the ASS app and available as a standalone library.
 
@@ -79,7 +79,7 @@ Direct Solid server communication. Used internally by the ASS app and available 
 | `ProfileManager`                                                    | Persists and retrieves user profiles       |
 | `WebIdResolver`                                                     | Resolves OIDC issuer from a WebID document |
 
-### SolidAndroidClient (`com.erfangholami.androidsolidservices.client`)
+### client (`com.erfangholami.androidsolidservices.client`)
 
 IPC client library. No direct pod access — all calls are proxied through the ASS app.
 

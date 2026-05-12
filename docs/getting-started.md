@@ -44,7 +44,7 @@
     2. Open the downloaded `.apk` file and tap **Install**.
     3. Launch **Android Solid Services** and log in with your Solid pod credentials.
 
-    Once you're logged in, any app using the `SolidAndroidClient` library can request access to your pod through ASS.
+    Once you're logged in, any app using the `client` library can request access to your pod through ASS.
 
 === "Clone & Run Locally"
 

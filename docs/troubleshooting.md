@@ -81,10 +81,10 @@ The value must exactly match your application ID (e.g. `com.example.myapp`).
 
 **Cause:** The DPoP nonce returned by the server was not updated before a retry, or the refresh token was revoked.
 
-**Fix:** The client handles nonce rotation automatically. If you're calling `SolidAndroidApi` directly and see `401 Unauthorized`:
+**Fix:** The client handles nonce rotation automatically. If you're calling `api` directly and see `401 Unauthorized`:
 
 1. Check for a `DPoP-Nonce` header in the 401 response and call `authenticator.updateDPoPNonce(webId, nonce)`.
-2. Then retry the request — ASS does this automatically for you when using `SolidAndroidClient`.
+2. Then retry the request — ASS does this automatically for you when using `client`.
 
 If the token is fully revoked, call `getLastTokenResponse(webId, forceRefresh = true)` or re-authenticate.
 
@@ -166,7 +166,7 @@ If access should be granted, check the ACL/ACP policy on the pod server side.
 
 ## Build & Gradle
 
-### `NullPointerException` during Gradle configuration for `SolidAndroidApi`
+### `NullPointerException` during Gradle configuration for `api`
 
 **Cause:** The `key_generator_alias` property is missing from `gradle.properties`.
 

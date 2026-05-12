@@ -42,7 +42,7 @@ val patch = N3Patch.fromDiff(originalResource, modifiedResource)
 - **WebID parsing fix** — correctly extracts the WebID string from the token response.
 - **Crash fixes** — multiple crash points removed from the token exchange and session handling paths.
 
-### Multi-account in `SolidAndroidClient`
+### Multi-account in `client`
 
 Third-party apps must now pass the target WebID on each resource and contacts call. This enables per-account IPC routing when the user has multiple Solid accounts logged in.
 
@@ -132,7 +132,7 @@ Initial public release.
 - **WebID** — `getWebId()` exposed as an IPC service.
 - **Access grants** — permission dialog in ASS when a third-party app requests access; grants tracked in the Settings page.
 - **ASS app** — initial Jetpack-based UI with login, settings, and access grant management.
-- **Client library** — first version of `SolidAndroidClient` connecting to ASS over AIDL.
+- **Client library** — first version of `client` connecting to ASS over AIDL.
 
 ---
 

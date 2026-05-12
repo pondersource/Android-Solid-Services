@@ -9,7 +9,7 @@ This page walks through how Android Solid Services works at runtime — from a u
 ```mermaid
 graph TD
     subgraph "Your device"
-        A["Third-party app<br/>(uses SolidAndroidClient)"]
+        A["Third-party app<br/>(uses client)"]
         B["Android Solid Services<br/>(host app)"]
     end
     C["Solid Pod Server<br/>(CSS, ESS, etc.)"]
@@ -76,12 +76,12 @@ If the server returns a `DPoP-Nonce` header, ASS incorporates it into the next p
 
 ## IPC: How Your App Calls ASS
 
-The `SolidAndroidClient` library binds to three Android services inside the ASS app:
+The `client` library binds to three Android services inside the ASS app:
 
 ```mermaid
 sequenceDiagram
     participant App as Your App
-    participant Client as SolidAndroidClient
+    participant Client as client
     participant Binder as ASS AIDL Service
     participant RM as SolidResourceManager
     participant Pod as Solid Pod
@@ -143,7 +143,7 @@ For `update()` and `patch()`, passing an `ifMatch` ETag from a prior `head()` or
 
 ## Direct API Mode (no host app)
 
-If you use `SolidAndroidApi` directly (no ASS host app), the flow is the same — but your app owns the auth state:
+If you use `api` directly (no ASS host app), the flow is the same — but your app owns the auth state:
 
 ```mermaid
 graph LR

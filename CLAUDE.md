@@ -41,11 +41,10 @@ Four Gradle modules with a layered dependency chain:
 
 ```
 app (Android application)
- ├── SolidAndroidApi   (direct Solid server interaction)
- ├── SolidAndroidClient (IPC client library for third-party apps)
- │    └── Shared
- └── SolidAndroidApi
-      └── Shared        (common types, AIDL definitions, RDF/resource models)
+ ├── api    (direct Solid server interaction)
+ │    └── Shared (common types, AIDL definitions, RDF/resource models)
+ └── client (IPC client library for third-party apps)
+      └── Shared
 ```
 
 ### Shared (`com.erfangholami.androidsolidservices.shared`)
@@ -55,7 +54,7 @@ Common data types and AIDL interface definitions shared across all modules:
 - **Vocabulary constants**: RDF vocabulary classes in `shared/vocab/` (LDP, VCARD, ACL, OWL, etc.)
 - **AIDL parcelable definitions** for cross-process data transfer
 
-### SolidAndroidApi (`com.erfangholami.androidsolidservices.api`)
+### api (`com.erfangholami.androidsolidservices.api`)
 Library for direct Solid server communication. Published to Maven Central as `com.erfangholami.androidsolidservices:api`.
 - `Authenticator`/`AuthenticatorImplementation` - OpenID Connect auth with DPoP support
 - `SolidResourceManager`/`SolidResourceManagerImplementation` - CRUD operations on Solid resources
@@ -63,7 +62,7 @@ Library for direct Solid server communication. Published to Maven Central as `co
 - `DPoPGenerator`, `DPopClientSecretBasic` - DPoP proof generation for authenticated requests
 - Uses Inrupt Java Client libraries for Solid protocol interaction
 
-### SolidAndroidClient (`com.erfangholami.androidsolidservices.client`)
+### client (`com.erfangholami.androidsolidservices.client`)
 IPC client library for third-party apps. Published to Maven Central as `com.erfangholami.androidsolidservices:client`.
 - `Solid` - Entry point: `Solid.getSignInClient()`, `Solid.getResourceClient()`, `Solid.getContactsDataModule()`
 - AIDL interfaces (`IASSAuthenticatorService`, `IASSResourceService`, `IASSContactsModuleInterface`) define the IPC contract
@@ -78,7 +77,7 @@ The Android Solid Services application itself:
 
 ## Key Technical Details
 
-- **IPC mechanism**: Android AIDL (Android Interface Definition Language) for cross-app communication. AIDL files in `Shared/src/main/aidl/` and `SolidAndroidClient/src/main/aidl/` define the service contracts.
+- **IPC mechanism**: Android AIDL (Android Interface Definition Language) for cross-app communication. AIDL files in `Shared/src/main/aidl/` define the service contracts.
 - **Auth flow**: OpenID Connect with DPoP (Demonstration of Proof-of-Possession) tokens. Uses `net.openid:appauth` library.
 - **RDF handling**: Inrupt Java Client SDK (`com.inrupt.client.*`) for Solid protocol operations and RDF parsing.
 - **DI**: Hilt (app module only). Modules in `app/.../di/`.
