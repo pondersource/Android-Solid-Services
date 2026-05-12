@@ -169,7 +169,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
     testImplementation(libs.junit)
 
-    implementation(project(":SolidAndroidApi"))
-    implementation(project(":SolidAndroidClient"))
+    implementation(project(":api"))
+    implementation(project(":client"))
 
 }
