@@ -47,8 +47,8 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SIGNING_PASSWORD }}
 
-      - name: Publish SolidAndroidApi to Maven Central
-        run: ./gradlew :SolidAndroidApi:publishAndReleaseToMavenCentral --no-configuration-cache -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.java.installations.fromEnv=JAVA_HOME_17_X64
+      - name: Publish API to Maven Central
+        run: ./gradlew :api:publishAndReleaseToMavenCentral --no-configuration-cache -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.java.installations.fromEnv=JAVA_HOME_17_X64
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
@@ -56,8 +56,8 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SIGNING_PASSWORD }}
 
-      - name: Publish SolidAndroidClient to Maven Central
-        run: ./gradlew :SolidAndroidClient:publishAndReleaseToMavenCentral --no-configuration-cache -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.java.installations.fromEnv=JAVA_HOME_17_X64
+      - name: Publish Client to Maven Central
+        run: ./gradlew :client:publishAndReleaseToMavenCentral --no-configuration-cache -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.java.installations.fromEnv=JAVA_HOME_17_X64
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
@@ -82,10 +82,10 @@ jobs:
           mkdir -p release-artifacts
           cp Shared/build/outputs/aar/Shared-release.aar \
              release-artifacts/Shared-${{ steps.version.outputs.version }}.aar
-          cp SolidAndroidApi/build/outputs/aar/SolidAndroidApi-release.aar \
-             release-artifacts/SolidAndroidApi-${{ steps.version.outputs.version }}.aar
-          cp SolidAndroidClient/build/outputs/aar/SolidAndroidClient-release.aar \
-             release-artifacts/SolidAndroidClient-${{ steps.version.outputs.version }}.aar
+          cp api/build/outputs/aar/api-release.aar \
+             release-artifacts/api-${{ steps.version.outputs.version }}.aar
+          cp client/build/outputs/aar/client-release.aar \
+             release-artifacts/client-${{ steps.version.outputs.version }}.aar
           cp app/build/outputs/apk/release/app-release.apk \
              release-artifacts/AndroidSolidServices-${{ steps.version.outputs.version }}.apk
 
