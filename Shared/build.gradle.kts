@@ -82,7 +82,7 @@ mavenPublishing {
     coordinates("com.erfangholami.androidsolidservices", "shared", "0.4.0")
 
     pom {
-        name.set("SolidAndroidShared")
+        name.set("Android Solid Services - Shared")
         description.set("A set of classes needed for SolidAndroidServices and it's dependencies.")
         inceptionYear.set("2026")
         url.set("https://github.com/erfangholami/Android-Solid-Services/")

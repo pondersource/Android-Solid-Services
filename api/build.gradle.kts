@@ -96,7 +96,7 @@ mavenPublishing {
     coordinates("com.erfangholami.androidsolidservices", "api", "0.4.0")
 
     pom {
-        name.set("SolidAndroidApi")
+        name.set("Android Solid Services - API")
         description.set("Connecting with Solid server in Android ecosystem for doing authentication, resource management and interacting with data modules.")
         inceptionYear.set("2026")
         url.set("https://github.com/erfangholami/Android-Solid-Services/")

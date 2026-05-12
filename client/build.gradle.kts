@@ -103,7 +103,7 @@ mavenPublishing {
     coordinates("com.erfangholami.androidsolidservices", "client", "0.4.0")
 
     pom {
-        name.set("SolidAndroidClient")
+        name.set("Android Solid Services - Client")
         description.set("An Android library to connect to Solid pods without authentication and based on connecting to Android Solid Services app as a single source of truth.")
         inceptionYear.set("2026")
         url.set("https://github.com/erfangholami/Android-Solid-Services/")
