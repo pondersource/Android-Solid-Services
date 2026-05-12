@@ -12,7 +12,7 @@ plugins {
 }
 
 android {
-    namespace = "com.pondersource.shared"
+    namespace = "com.erfangholami.androidsolidservices.shared"
     compileSdk = 36
 
     defaultConfig {
@@ -79,13 +79,13 @@ mavenPublishing {
             variant = "release",
         )
     )
-    coordinates("com.pondersource.shared", "shared", "0.4.0")
+    coordinates("com.erfangholami.androidsolidservices", "shared", "0.4.0")
 
     pom {
         name.set("SolidAndroidShared")
         description.set("A set of classes needed for SolidAndroidServices and it's dependencies.")
         inceptionYear.set("2026")
-        url.set("https://github.com/pondersource/Android-Solid-Services/")
+        url.set("https://github.com/erfangholami/Android-Solid-Services/")
         licenses {
             license {
                 name.set("MIT License")
@@ -101,9 +101,9 @@ mavenPublishing {
             }
         }
         scm {
-            url.set("https://github.com/pondersource/Android-Solid-Services/")
-            connection.set("scm:git:git://github.com/pondersource/Android-Solid-Services.git")
-            developerConnection.set("scm:git:ssh://git@github.com/pondersource/Android-Solid-Services.git")
+            url.set("https://github.com/erfangholami/Android-Solid-Services/")
+            connection.set("scm:git:git://github.com/erfangholami/Android-Solid-Services.git")
+            developerConnection.set("scm:git:ssh://git@github.com/erfangholami/Android-Solid-Services.git")
         }
     }
 

@@ -1,7 +1,7 @@
-[![solidandroidclient](https://img.shields.io/maven-central/v/com.pondersource.solidandroidclient/solidandroidclient.svg?label=solidandroidclient)](https://central.sonatype.com/artifact/com.pondersource.solidandroidclient/solidandroidclient)
-[![solidandroidapi](https://img.shields.io/maven-central/v/com.pondersource.solidandroidapi/solidandroidapi.svg?label=solidandroidapi)](https://central.sonatype.com/artifact/com.pondersource.solidandroidapi/solidandroidapi)
+[![client](https://img.shields.io/maven-central/v/com.erfangholami.androidsolidservices/client.svg?label=client)](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client)
+[![api](https://img.shields.io/maven-central/v/com.erfangholami.androidsolidservices/api.svg?label=api)](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api)
 [![Docs](https://img.shields.io/badge/docs-site-blueviolet)](https://androidsolidservices.erfangholami.com)
-[![License](https://img.shields.io/github/license/pondersource/Android-Solid-Services)](LICENSE)
+[![License](https://img.shields.io/github/license/erfangholami/Android-Solid-Services)](LICENSE)
 
 This project consists of three parts:
 
@@ -27,7 +27,7 @@ management and contacts data modules on the already-logged-in users' pod.
 The app supports multiple Solid accounts — you can log in with different pod providers and switch
 between them from the Settings page.
 You can download the app
-from [here](https://github.com/pondersource/Android-Solid-Services/releases) at the moment.
+from [here](https://github.com/erfangholami/Android-Solid-Services/releases) at the moment.
 
 ### How to use locally
 
@@ -66,12 +66,12 @@ android {
     }
 }
 dependencies {
-    implementation("com.pondersource.solidandroidclient:solidandroidclient:0.4.0")
+    implementation("com.erfangholami.androidsolidservices:client:0.4.0")
 }
 ```
 
 or if you are using another building system,
-check [here](https://central.sonatype.com/artifact/com.pondersource.solidandroidclient/solidandroidclient).
+check [here](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client).
 
 All the requests are handled by Android Inter-process Communication with Android Solid Services app.
 Before using any service you check if the service is already connected and then do your requests.
@@ -107,9 +107,9 @@ solidSignInClient.authServiceConnectionState().collect { hasConnected ->
 ```
 
 After this step you can request for resources or data modules.
-Resources must inherit from ```com.pondersource.shared.domain.resource.SolidResource``` or for better
-implementation, ```com.pondersource.shared.domain.SolidRDFResource``` or
-```com.pondersource.shared.domain.SolidNonRDFResource```.
+Resources must inherit from ```com.erfangholami.androidsolidservices.shared.domain.resource.SolidResource``` or for better
+implementation, ```com.erfangholami.androidsolidservices.shared.domain.SolidRDFResource``` or
+```com.erfangholami.androidsolidservices.shared.domain.SolidNonRDFResource```.
 Depending on your data class, you can choose one. NonRDFSource is used for raw files and resources
 without structure such as .txt, image files, etc. However, RDFSource is used for data classes in RDF
 format (common in Solid ecosystem).
@@ -183,15 +183,15 @@ android {
     }
 }
 dependencies {
-    implementation("com.pondersource.solidandroidapi:solidandroidapi:0.4.0")
+    implementation("com.erfangholami.androidsolidservices:api:0.4.0")
 }
 ```
 
 or if you are using another building system,
-check [here](https://central.sonatype.com/artifact/com.pondersource.solidandroidapi/solidandroidapi).
+check [here](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api).
 
 For authentication, you can use:
-```com.pondersource.solidandroidapi.auth.Authenticator.getInstance(context)```.
+```com.erfangholami.androidsolidservices.api.auth.Authenticator.getInstance(context)```.
 There are couples of steps to authenticate user with OpenID Connect protocol (with DPoP support) such
 as register your app to OpenID and then ask for the intent to transfer the user to browser to enter
 their username/password of the selected IDP. For a better understanding please refer to Android
@@ -202,8 +202,8 @@ what have been explained in [Solid Android Client](#solid-android-client-library
 difference that you need to get the class instance with:
 
 ```kotlin
-val resourceManager = com.pondersource.solidandroidapi.resource.SolidResourceManager.getInstance(authenticator)
-val contactModule = com.pondersource.solidandroidapi.datamodule.contacts.SolidContactsDataModule.getInstance(resourceManager)
+val resourceManager = com.erfangholami.androidsolidservices.api.resource.SolidResourceManager.getInstance(authenticator)
+val contactModule = com.erfangholami.androidsolidservices.api.datamodule.contacts.SolidContactsDataModule.getInstance(resourceManager)
 ```
 
 ---

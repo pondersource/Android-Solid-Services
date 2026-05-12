@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Common errors and how to fix them. If your issue isn't listed here, [open an issue on GitHub](https://github.com/pondersource/Android-Solid-Services/issues) — include your Android version, library version, and the full exception message.
+Common errors and how to fix them. If your issue isn't listed here, [open an issue on GitHub](https://github.com/erfangholami/Android-Solid-Services/issues) — include your Android version, library version, and the full exception message.
 
 ---
 
@@ -10,7 +10,7 @@ Common errors and how to fix them. If your issue isn't listed here, [open an iss
 
 **Cause:** The Android Solid Services host app is not installed on the device.
 
-**Fix:** Have the user install ASS from the [GitHub Releases page](https://github.com/pondersource/Android-Solid-Services/releases) before your app makes any IPC call.
+**Fix:** Have the user install ASS from the [GitHub Releases page](https://github.com/erfangholami/Android-Solid-Services/releases) before your app makes any IPC call.
 
 ```kotlin
 try {
@@ -198,4 +198,4 @@ Run `./gradlew dependencies` to inspect the full dependency tree.
 ---
 
 !!! question "Still stuck?"
-    [Open an issue](https://github.com/pondersource/Android-Solid-Services/issues) with your Android version, library version (`0.x.x`), the full stack trace, and steps to reproduce. The more detail you include, the faster we can help.
+    [Open an issue](https://github.com/erfangholami/Android-Solid-Services/issues) with your Android version, library version (`0.x.x`), the full stack trace, and steps to reproduce. The more detail you include, the faster we can help.

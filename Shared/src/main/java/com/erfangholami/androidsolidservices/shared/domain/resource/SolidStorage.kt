@@ -1,0 +1,56 @@
+package com.erfangholami.androidsolidservices.shared.domain.resource
+
+import com.apicatalog.jsonld.http.media.MediaType
+import com.erfangholami.androidsolidservices.shared.domain.util.getOwnerUri
+import com.erfangholami.androidsolidservices.shared.domain.util.getStorageDescriptionUri
+import com.erfangholami.androidsolidservices.shared.vocab.PIM
+import com.erfangholami.androidsolidservices.shared.vocab.RDF
+import com.erfangholami.androidsolidservices.shared.vocab.Solid
+import okhttp3.Headers
+import java.net.URI
+
+/**
+ * Represents a Solid pod storage root container.
+ *
+ * A storage is an LDP BasicContainer that carries
+ * `rdf:type pim:Storage` and is advertised via
+ * `Link: rel="type" <http://www.w3.org/ns/pim/space#Storage>`.
+ *
+ * Spec: https://solidproject.org/TR/protocol — Storage
+ */
+public class SolidStorage : SolidContainer {
+
+    public constructor(identifier: URI) : this(identifier, null, null)
+
+    public constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
+            this(identifier, MediaType.JSON_LD, quads, headers)
+
+    public constructor(
+        identifier: URI,
+        mediaType: MediaType,
+        quads: List<RdfQuad>?,
+        headers: Headers?
+    ) : super(identifier, mediaType, quads, headers)
+
+    public fun getOwner(): URI? {
+        val fromDataset = findPropertyForSubject(getIdentifier().toString(), Solid.OWNER)
+            ?.let { runCatching { URI.create(it) }.getOrNull() }
+        if (fromDataset != null) return fromDataset
+        return getHeaders().getOwnerUri()
+    }
+
+    public fun getStorageDescriptionUri(): URI? {
+        val fromDataset =
+            findPropertyForSubject(getIdentifier().toString(), Solid.STORAGE_DESCRIPTION)
+                ?.let { runCatching { URI.create(it) }.getOrNull() }
+        if (fromDataset != null) return fromDataset
+        return getHeaders().getStorageDescriptionUri()
+    }
+
+    public fun isStorageType(): Boolean =
+        quads.any {
+            it.subject == getIdentifier().toString() &&
+                    it.predicate == RDF.TYPE &&
+                    it.`object` == PIM.STORAGE_TYPE
+        }
+}

@@ -11,7 +11,7 @@ plugins {
 }
 
 android {
-    namespace = "com.pondersource.solidandroidclient"
+    namespace = "com.erfangholami.androidsolidservices.client"
     compileSdk = 36
 
     defaultConfig {
@@ -100,13 +100,13 @@ mavenPublishing {
             variant = "release",
         )
     )
-    coordinates("com.pondersource.solidandroidclient", "solidandroidclient", "0.4.0")
+    coordinates("com.erfangholami.androidsolidservices", "client", "0.4.0")
 
     pom {
         name.set("SolidAndroidClient")
         description.set("An Android library to connect to Solid pods without authentication and based on connecting to Android Solid Services app as a single source of truth.")
         inceptionYear.set("2026")
-        url.set("https://github.com/pondersource/Android-Solid-Services/")
+        url.set("https://github.com/erfangholami/Android-Solid-Services/")
         licenses {
             license {
                 name.set("MIT License")
@@ -122,9 +122,9 @@ mavenPublishing {
             }
         }
         scm {
-            url.set("https://github.com/pondersource/Android-Solid-Services/")
-            connection.set("scm:git:git://github.com/pondersource/Android-Solid-Services.git")
-            developerConnection.set("scm:git:ssh://git@github.com/pondersource/Android-Solid-Services.git")
+            url.set("https://github.com/erfangholami/Android-Solid-Services/")
+            connection.set("scm:git:git://github.com/erfangholami/Android-Solid-Services.git")
+            developerConnection.set("scm:git:ssh://git@github.com/erfangholami/Android-Solid-Services.git")
         }
     }
 

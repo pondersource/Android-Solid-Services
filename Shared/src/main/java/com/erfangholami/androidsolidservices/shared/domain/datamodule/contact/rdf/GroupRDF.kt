@@ -1,0 +1,83 @@
+package com.erfangholami.androidsolidservices.shared.domain.datamodule.contact.rdf
+
+import com.apicatalog.jsonld.http.media.MediaType
+import com.erfangholami.androidsolidservices.shared.domain.datamodule.contact.Contact
+import com.erfangholami.androidsolidservices.shared.domain.resource.RdfQuad
+import com.erfangholami.androidsolidservices.shared.domain.resource.SolidRDFResource
+import com.erfangholami.androidsolidservices.shared.vocab.OWL
+import com.erfangholami.androidsolidservices.shared.vocab.RDF
+import com.erfangholami.androidsolidservices.shared.vocab.VCARD
+import com.erfangholami.androidsolidservices.shared.vocab.XSD
+import okhttp3.Headers
+import java.net.URI
+
+public class GroupRDF : SolidRDFResource {
+
+    public constructor(
+        identifier: URI,
+        mediaType: MediaType? = null,
+        quads: List<RdfQuad>? = null,
+        headers: Headers? = null
+    ) : super(identifier, mediaType ?: MediaType.JSON_LD, quads, headers)
+
+    init {
+        addQuad(getIdentifier().toString(), RDF.TYPE, VCARD.GROUP)
+    }
+
+    public fun getTitle(): String =
+        quads.find {
+            it.subject == getIdentifier().toString() && it.predicate == VCARD.FN
+        }!!.`object`
+
+    public fun setTitle(title: String) {
+        addQuadLiteral(getIdentifier().toString(), VCARD.FN, title, XSD.STRING)
+    }
+
+    public fun setIncludesInAddressBook(addressBookUri: String) {
+        addQuad(addressBookUri, VCARD.INCLUDES_GROUP, getIdentifier().toString())
+    }
+
+    public fun getContacts(): List<Contact> {
+        val members = quads
+            .filter { it.predicate == VCARD.HAS_MEMBER }
+            .map { triple ->
+                val sameAs = quads.find {
+                    it.predicate == OWL.SAME_AS && it.subject == triple.`object`
+                }
+                sameAs?.`object` ?: triple.`object`
+            }
+
+        return members.map { memberUri ->
+            val name = quads.find {
+                it.subject == memberUri && it.predicate == VCARD.FN
+            }!!.`object`
+            Contact(memberUri, name)
+        }
+    }
+
+    public fun addMember(contact: ContactRDF) {
+        addQuad(
+            getIdentifier().toString(),
+            VCARD.HAS_MEMBER,
+            contact.getIdentifier().toString(),
+            maxNumber = Int.MAX_VALUE
+        )
+        addQuadLiteral(contact.getIdentifier().toString(), VCARD.FN, contact.getFullName(), XSD.STRING)
+    }
+
+    public fun removeMember(contactURI: URI): Boolean {
+        val contactStr = contactURI.toString()
+        val member = quads.find {
+            it.subject == getIdentifier().toString() &&
+                    it.predicate == VCARD.HAS_MEMBER &&
+                    it.`object` == contactStr
+        } ?: return false
+
+        val memberNameQuads = quads.filter {
+            it.subject == contactStr && it.predicate == VCARD.FN
+        }
+        quads.remove(member)
+        quads.removeAll(memberNameQuads)
+        return true
+    }
+}

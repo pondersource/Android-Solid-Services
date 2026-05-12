@@ -11,7 +11,7 @@ All notable changes to this project are documented here.
 - `update()` now accepts `ifMatch` — pass the ETag from a prior `head` or `read` call for optimistic-concurrency protection (server returns 412 on version mismatch).
 - `delete(webid, resourceUri: URI)` — delete a resource by URI directly, without reading it first.
 
-### New Type — `N3Patch` (`com.pondersource.shared.domain.crud`)
+### New Type — `N3Patch` (`com.erfangholami.androidsolidservices.shared.domain.crud`)
 
 Type-safe DSL and diff-based factory for building Solid N3 Patch documents:
 

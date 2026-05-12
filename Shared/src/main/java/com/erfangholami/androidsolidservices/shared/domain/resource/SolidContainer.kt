@@ -1,0 +1,124 @@
+package com.erfangholami.androidsolidservices.shared.domain.resource
+
+import android.os.Parcel
+import android.os.Parcelable
+import com.apicatalog.jsonld.http.media.MediaType
+import com.erfangholami.androidsolidservices.shared.domain.util.encodeUriString
+import com.erfangholami.androidsolidservices.shared.vocab.DC
+import com.erfangholami.androidsolidservices.shared.vocab.LDP
+import com.erfangholami.androidsolidservices.shared.vocab.RDF
+import com.erfangholami.androidsolidservices.shared.vocab.RDFS
+import com.erfangholami.androidsolidservices.shared.vocab.STAT
+import okhttp3.Headers
+import java.net.URI
+
+/**
+ * Represents an LDP BasicContainer resource.
+ * Parses contained resource references and their optional server-supplied
+ * metadata (size, modified, mtime) from the quad store.
+ *
+ * Spec: https://solidproject.org/TR/protocol — Container resources
+ */
+public open class SolidContainer : SolidRDFResource {
+
+    private val containerRes = arrayListOf<SolidSourceReference>()
+
+    public constructor(identifier: URI) : this(identifier, null)
+
+    public constructor(identifier: URI, quads: List<RdfQuad>?) :
+            this(identifier, quads, null)
+
+    public constructor(identifier: URI, mediaType: MediaType, quads: List<RdfQuad>?) :
+            this(identifier, mediaType, quads, null)
+
+    public constructor(identifier: URI, quads: List<RdfQuad>?, headers: Headers?) :
+            this(identifier, MediaType.JSON_LD, quads, headers)
+
+    public constructor(
+        identifier: URI,
+        mediaType: MediaType,
+        quads: List<RdfQuad>?,
+        headers: Headers?
+    ) : super(identifier, mediaType, quads, headers) {
+        parseContainedResources()
+    }
+
+    protected constructor(inParcel: Parcel) : super(inParcel) {
+        parseContainedResources()
+        val enriched = inParcel.createTypedArrayList(SolidSourceReference.CREATOR)
+        if (enriched != null) {
+            containerRes.clear()
+            containerRes.addAll(enriched)
+        }
+    }
+
+    private fun parseContainedResources() {
+        val containerUri = getIdentifier().toString()
+        quads
+            .filter { it.predicate == LDP.CONTAINS && iriMatches(it.subject, containerUri) }
+            .forEach { containsQuad ->
+                val rawIri = containsQuad.`object`
+
+                val types = quads
+                    .filter { it.subject == rawIri && it.predicate == RDF.TYPE }
+                    .map { it.`object` }
+
+                val size = quads
+                    .find { it.subject == rawIri && it.predicate == STAT.SIZE }
+                    ?.`object`?.toLongOrNull()
+
+                val modified = quads
+                    .find { it.subject == rawIri && it.predicate == DC.MODIFIED }
+                    ?.`object`
+
+                val mtime = quads
+                    .find { it.subject == rawIri && it.predicate == STAT.MTIME }
+                    ?.`object`?.toLongOrNull()
+
+                containerRes.add(
+                    SolidSourceReference(
+                        identifier = encodeIriIfNeeded(rawIri),
+                        types = types,
+                        size = size,
+                        modified = modified,
+                        mtime = mtime,
+                    )
+                )
+            }
+    }
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        super.writeToParcel(dest, flags)
+        dest.writeTypedList(containerRes)
+    }
+
+    public companion object {
+        @JvmField
+        public val CREATOR: Parcelable.Creator<SolidContainer> = object : Parcelable.Creator<SolidContainer> {
+            override fun createFromParcel(parcel: Parcel): SolidContainer = SolidContainer(parcel)
+            override fun newArray(size: Int): Array<SolidContainer?> = arrayOfNulls(size)
+        }
+
+        private fun iriMatches(a: String, b: String): Boolean {
+            if (a == b) return true
+            return encodeIriIfNeeded(a) == encodeIriIfNeeded(b)
+        }
+
+        private fun encodeIriIfNeeded(iri: String): String =
+            encodeUriString(iri).toString()
+    }
+
+    public fun getContained(): List<SolidSourceReference> = containerRes
+
+    public fun enrichContained(refs: List<SolidSourceReference>) {
+        containerRes.clear()
+        containerRes.addAll(refs)
+    }
+
+    public fun hasLabel(): Boolean = getLabel() != null
+
+    public fun getLabel(): String? =
+        quads.find {
+            it.subject == getIdentifier().toString() && it.predicate == RDFS.LABEL
+        }?.`object`
+}

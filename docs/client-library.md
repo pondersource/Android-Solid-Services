@@ -19,11 +19,11 @@ android {
     }
 }
 dependencies {
-    implementation("com.pondersource.solidandroidclient:solidandroidclient:0.4.0")
+    implementation("com.erfangholami.androidsolidservices:client:0.4.0")
 }
 ```
 
-[View on Maven Central](https://central.sonatype.com/artifact/com.pondersource.solidandroidclient/solidandroidclient)
+[View on Maven Central](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client)
 
 ---
 

@@ -11,10 +11,10 @@ plugins {
 }
 
 android {
-    namespace = "com.pondersource.androidsolidservices"
+    namespace = "com.erfangholami.androidsolidservices"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.pondersource.androidsolidservices"
+        applicationId = "com.erfangholami.androidsolidservices"
         minSdk = 26
         targetSdk = 33
         versionCode = 6
@@ -22,7 +22,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        manifestPlaceholders["appAuthRedirectScheme"] = "com.pondersource.androidsolidservices"
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.erfangholami.androidsolidservices"
     }
 
     val keystorePath = System.getenv("RELEASE_KEYSTORE_PATH")

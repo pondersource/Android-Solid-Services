@@ -35,7 +35,7 @@ The third-party app never handles tokens or pod credentials directly. ASS perfor
 
 ## Installation
 
-Download the latest APK from the [GitHub Releases page](https://github.com/pondersource/Android-Solid-Services/releases) or [build it from source](getting-started.md).
+Download the latest APK from the [GitHub Releases page](https://github.com/erfangholami/Android-Solid-Services/releases) or [build it from source](getting-started.md).
 
 ## Technology Stack
 

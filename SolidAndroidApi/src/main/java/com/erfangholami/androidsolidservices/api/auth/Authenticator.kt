@@ -1,0 +1,131 @@
+package com.erfangholami.androidsolidservices.api.auth
+
+import android.content.Context
+import android.content.Intent
+import com.erfangholami.androidsolidservices.shared.domain.profile.Profile
+import com.erfangholami.androidsolidservices.api.auth.implementation.AuthenticatorImplementation
+import kotlinx.coroutines.flow.StateFlow
+import net.openid.appauth.AuthorizationException
+import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.TokenResponse
+
+/**
+ * Manages OpenID Connect authentication with Solid pods on behalf of one or more users.
+ *
+ * Each user is identified by their WebID. Multiple users can be signed in simultaneously;
+ * the "active" user is the one whose session is currently selected.
+ *
+ * Obtain an instance via [Authenticator.getInstance].
+ */
+public interface Authenticator {
+
+    public companion object {
+        /**
+         * Returns the application-scoped singleton [Authenticator].
+         * @param context Any [Context]; the application context is used internally.
+         */
+        public fun getInstance(context: Context): Authenticator =
+            AuthenticatorImplementation.getInstance(context)
+    }
+
+    /** Emits the currently active [Profile], or `null` if no user is active. */
+    public val activeProfileFlow: StateFlow<Profile?>
+    /** Emits the list of all currently signed-in profiles. */
+    public val loggedInProfilesFlow: StateFlow<List<Profile>>
+    /** Emits `true` when at least one user is fully authorized. */
+    public val isAuthorizedFlow: StateFlow<Boolean>
+    /** Emits the WebID of the active user, or `null` if no user is active. */
+    public val activeWebIdFlow: StateFlow<String?>
+
+    /**
+     * Builds an [Intent] that launches the Solid OIDC login flow.
+     *
+     * @param webId Optional WebID to pre-fill; pass `null` to let the user enter it.
+     * @param oidcIssuer Optional OIDC issuer URL to pre-fill; pass `null` to discover from [webId].
+     * @param appName The display name shown to the user on the authorization page.
+     * @param redirectUri The URI the OIDC provider redirects to after authorization.
+     * @return A pair of (intent, error): if successful, the intent is non-null; otherwise
+     *   the error string describes what went wrong.
+     */
+    public suspend fun createAuthenticationIntent(
+        webId: String? = null,
+        oidcIssuer: String? = null,
+        appName: String,
+        redirectUri: String,
+    ): Pair<Intent?, String?>
+
+    /**
+     * Completes the authorization flow after the OIDC provider redirects back to the app.
+     *
+     * Pass the [AuthorizationResponse] and [AuthorizationException] received in the redirect
+     * Activity's `onActivityResult`. Returns the authorized WebID on success, or `null`
+     * if authorization was denied or the response was empty.
+     */
+    public suspend fun submitAuthorizationResponse(
+        authResponse: AuthorizationResponse?,
+        authException: AuthorizationException?,
+    ): String?
+
+    /**
+     * Returns an [Intent] that launches the Solid OIDC logout / session termination flow.
+     *
+     * @param webId The WebID of the user to sign out.
+     * @param logoutRedirectUrl The URI the OIDC provider redirects to after logout.
+     * @return A pair of (intent, error).
+     */
+    public suspend fun getTerminationSessionIntent(
+        webId: String,
+        logoutRedirectUrl: String,
+    ): Pair<Intent?, String?>
+
+    /**
+     * Returns the most recent [TokenResponse] for [webId], refreshing the token if expired.
+     *
+     * @param forceRefresh If `true`, forces a token refresh even if the current token is valid.
+     * @return The token response, or `null` if no session exists for [webId].
+     */
+    public suspend fun getLastTokenResponse(
+        webId: String,
+        forceRefresh: Boolean = false,
+    ): TokenResponse?
+
+    /**
+     * Returns HTTP authorization headers (Bearer token + DPoP proof) for a request.
+     *
+     * @param webId The WebID of the user making the request.
+     * @param httpMethod The HTTP method of the request (e.g. "GET", "PUT").
+     * @param uri The full URI of the target resource.
+     * @return A map of header name → value to add to the outgoing request.
+     */
+    public suspend fun getAuthHeaders(
+        webId: String,
+        httpMethod: String,
+        uri: String,
+    ): Map<String, String>
+
+    /**
+     * Updates the DPoP nonce for [webId] after receiving a `DPoP-Nonce` response header.
+     *
+     * Pods may rotate the nonce on every response; callers must update it before the next
+     * authenticated request, otherwise the server will reject the DPoP proof.
+     */
+    public fun updateDPoPNonce(webId: String, nonce: String)
+
+    /** Returns `true` if at least one user is fully authorized. */
+    public fun isUserAuthorized(): Boolean
+    /** Returns all currently signed-in profiles. */
+    public fun getAllLoggedInProfiles(): List<Profile>
+    /** Returns the profile for [webId]. Throws if not found. */
+    public fun getProfile(webId: String): Profile
+    /** Returns the currently active profile. Throws if no user is active. */
+    public fun getActiveProfile(): Profile
+
+    /** Returns the WebID of the active user, or `null` if no user is active. */
+    public suspend fun getActiveWebId(): String?
+    /** Sets the active user to [webId]. */
+    public suspend fun setActiveWebId(webId: String)
+    /** Removes the profile for [webId] and signs that user out. */
+    public suspend fun removeProfile(webId: String)
+    /** Signs out all users and removes all stored profiles. */
+    public suspend fun removeAllProfiles()
+}

@@ -13,7 +13,7 @@
     ```kotlin
     // build.gradle.kts (module level)
     dependencies {
-        implementation("com.pondersource.solidandroidclient:solidandroidclient:0.4.0")
+        implementation("com.erfangholami.androidsolidservices:client:0.4.0")
     }
     ```
 
@@ -24,13 +24,13 @@
     ```kotlin
     // build.gradle.kts (module level)
     dependencies {
-        implementation("com.pondersource.solidandroidapi:solidandroidapi:0.4.0")
+        implementation("com.erfangholami.androidsolidservices:api:0.4.0")
     }
     ```
 
     For other build systems (Maven, etc.) see the Maven Central pages:
-    [solidandroidclient](https://central.sonatype.com/artifact/com.pondersource.solidandroidclient/solidandroidclient) ·
-    [solidandroidapi](https://central.sonatype.com/artifact/com.pondersource.solidandroidapi/solidandroidapi)
+    [client](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client) ·
+    [api](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api)
 
     Once added, head to the [Solid Android Client](client-library.md) or [Solid Android API](api-library.md) docs for usage.
 
@@ -38,7 +38,7 @@
 
     ## Install Android Solid Services
 
-    Download the latest pre-built APK from the [GitHub Releases page](https://github.com/pondersource/Android-Solid-Services/releases).
+    Download the latest pre-built APK from the [GitHub Releases page](https://github.com/erfangholami/Android-Solid-Services/releases).
 
     1. On your Android device, enable **Install from unknown sources** in Settings if needed.
     2. Open the downloaded `.apk` file and tap **Install**.
@@ -56,7 +56,7 @@
     ## Clone
 
     ```sh
-    git clone https://github.com/pondersource/Android-Solid-Services.git
+    git clone https://github.com/erfangholami/Android-Solid-Services.git
     cd Android-Solid-Services
     ```
 
@@ -100,4 +100,4 @@
 ---
 
 !!! question "Something not working?"
-    Please [open an issue on GitHub](https://github.com/pondersource/Android-Solid-Services/issues). Include your Android/JDK version and the error output — it helps us fix things faster.
+    Please [open an issue on GitHub](https://github.com/erfangholami/Android-Solid-Services/issues). Include your Android/JDK version and the error output — it helps us fix things faster.

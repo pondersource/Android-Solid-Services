@@ -48,28 +48,28 @@ app (Android application)
       └── Shared        (common types, AIDL definitions, RDF/resource models)
 ```
 
-### Shared (`com.pondersource.shared`)
+### Shared (`com.erfangholami.androidsolidservices.shared`)
 Common data types and AIDL interface definitions shared across all modules:
 - **Resource model**: `Resource` -> `RDFSource`/`NonRDFSource` -> `SolidRDFSource`/`SolidNonRDFSource`/`SolidContainer`
 - **Data modules**: Contact data models (`AddressBook`, `Contact`, `Group`) with RDF serialization classes
 - **Vocabulary constants**: RDF vocabulary classes in `shared/vocab/` (LDP, VCARD, ACL, OWL, etc.)
 - **AIDL parcelable definitions** for cross-process data transfer
 
-### SolidAndroidApi (`com.pondersource.solidandroidapi`)
-Library for direct Solid server communication. Published to Maven Central as `com.pondersource.solidandroidapi:solidandroidapi`.
+### SolidAndroidApi (`com.erfangholami.androidsolidservices.api`)
+Library for direct Solid server communication. Published to Maven Central as `com.erfangholami.androidsolidservices:api`.
 - `Authenticator`/`AuthenticatorImplementation` - OpenID Connect auth with DPoP support
 - `SolidResourceManager`/`SolidResourceManagerImplementation` - CRUD operations on Solid resources
 - `SolidContactsDataModule`/`SolidContactsDataModuleImplementation` - Contacts data module
 - `DPoPGenerator`, `DPopClientSecretBasic` - DPoP proof generation for authenticated requests
 - Uses Inrupt Java Client libraries for Solid protocol interaction
 
-### SolidAndroidClient (`com.pondersource.solidandroidclient`)
-IPC client library for third-party apps. Published to Maven Central as `com.pondersource.solidandroidclient:solidandroidclient`.
+### SolidAndroidClient (`com.erfangholami.androidsolidservices.client`)
+IPC client library for third-party apps. Published to Maven Central as `com.erfangholami.androidsolidservices:client`.
 - `Solid` - Entry point: `Solid.getSignInClient()`, `Solid.getResourceClient()`, `Solid.getContactsDataModule()`
 - AIDL interfaces (`IASSAuthenticatorService`, `IASSResourceService`, `IASSContactsModuleInterface`) define the IPC contract
 - Communicates with the main app via Android bound services
 
-### app (`com.pondersource.androidsolidservices`)
+### app (`com.erfangholami.androidsolidservices`)
 The Android Solid Services application itself:
 - **UI**: Jetpack Compose with MVVM pattern, Hilt DI, Navigation Compose
 - **Services**: `ASSAuthenticatorService`, `ASSResourceService`, `SolidDataModulesService` - bound services that third-party apps connect to via AIDL

@@ -1,11 +1,11 @@
 # Releases
 
-All releases are published on the [GitHub Releases page](https://github.com/pondersource/Android-Solid-Services/releases).
+All releases are published on the [GitHub Releases page](https://github.com/erfangholami/Android-Solid-Services/releases).
 
 Library versions are published to Maven Central:
 
-- [`solidandroidclient`](https://central.sonatype.com/artifact/com.pondersource.solidandroidclient/solidandroidclient)
-- [`solidandroidapi`](https://central.sonatype.com/artifact/com.pondersource.solidandroidapi/solidandroidapi)
+- [`solidandroidclient`](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client)
+- [`solidandroidapi`](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api)
 
 ---
 
@@ -137,4 +137,4 @@ Initial public release.
 ---
 
 !!! question "Found a bug or want to request a feature?"
-    Please [open an issue on GitHub](https://github.com/pondersource/Android-Solid-Services/issues). Include your device/emulator Android version, library version, and any relevant error output.
+    Please [open an issue on GitHub](https://github.com/erfangholami/Android-Solid-Services/issues). Include your device/emulator Android version, library version, and any relevant error output.

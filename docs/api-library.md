@@ -20,11 +20,11 @@ android {
     }
 }
 dependencies {
-    implementation("com.pondersource.solidandroidapi:solidandroidapi:0.4.0")
+    implementation("com.erfangholami.androidsolidservices:api:0.4.0")
 }
 ```
 
-[View on Maven Central](https://central.sonatype.com/artifact/com.pondersource.solidandroidapi/solidandroidapi)
+[View on Maven Central](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api)
 
 ---
 

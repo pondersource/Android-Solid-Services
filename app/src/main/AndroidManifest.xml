@@ -41,6 +41,9 @@
         <service
             android:name=".services.SolidDataModulesService"
             android:exported="true" />
+        <service
+            android:name=".services.ASSSharingService"
+            android:exported="true" />
 
         <activity
             android:name=".ui.ProfileSelectionActivity"

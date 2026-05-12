@@ -3,10 +3,10 @@
 ## Module Dependency Graph
 
 ```
-app  (com.pondersource.androidsolidservices)
- ├── SolidAndroidApi   (com.pondersource.solidandroidapi)
- │    └── Shared       (com.pondersource.shared)
- └── SolidAndroidClient (com.pondersource.solidandroidclient)
+app  (com.erfangholami.androidsolidservices)
+ ├── SolidAndroidApi   (com.erfangholami.androidsolidservices.api)
+ │    └── Shared       (com.erfangholami.androidsolidservices.shared)
+ └── SolidAndroidClient (com.erfangholami.androidsolidservices.client)
       └── Shared
 
 Third-party apps
@@ -53,7 +53,7 @@ Multi-account state (profiles, tokens) is persisted with **DataStore + Protocol 
 
 ## Module Breakdown
 
-### Shared (`com.pondersource.shared`)
+### Shared (`com.erfangholami.androidsolidservices.shared`)
 
 Common types shared across all modules. Published implicitly as a transitive dependency.
 
@@ -66,7 +66,7 @@ Common types shared across all modules. Published implicitly as a transitive dep
 | Vocabulary        | `LDP`, `VCARD`, `ACL`, `OWL`, `DC`, `RDFS`, `Solid` constants                                         |
 | AIDL parcelables  | Parcelable wrappers for cross-process data transfer (all definitions consolidated here)               |
 
-### SolidAndroidApi (`com.pondersource.solidandroidapi`)
+### SolidAndroidApi (`com.erfangholami.androidsolidservices.api`)
 
 Direct Solid server communication. Used internally by the ASS app and available as a standalone library.
 
@@ -79,7 +79,7 @@ Direct Solid server communication. Used internally by the ASS app and available 
 | `ProfileManager`                                                    | Persists and retrieves user profiles       |
 | `WebIdResolver`                                                     | Resolves OIDC issuer from a WebID document |
 
-### SolidAndroidClient (`com.pondersource.solidandroidclient`)
+### SolidAndroidClient (`com.erfangholami.androidsolidservices.client`)
 
 IPC client library. No direct pod access — all calls are proxied through the ASS app.
 
@@ -91,7 +91,7 @@ IPC client library. No direct pod access — all calls are proxied through the A
 | `SolidContactsDataModule`  | Contacts IPC client                                                                |
 | `SolidException` hierarchy | Typed exceptions for all failure modes                                             |
 
-### app (`com.pondersource.androidsolidservices`)
+### app (`com.erfangholami.androidsolidservices`)
 
 The host application. Users interact with this; third-party apps bind to its services.
 
