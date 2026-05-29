@@ -217,43 +217,47 @@ internal class SolidHttpClient(private val auth: Authenticator? = null) {
         ifNoneMatchStar: Boolean = false,
         additionalHeaders: Map<String, String> = emptyMap(),
     ): SolidRawResponse {
-        val authHeaders = buildAuthHeaders(webId, method, uri.toString())
-        val extraHeaders = buildMap {
-            putAll(authHeaders)
-            putAll(additionalHeaders)
-            if (ifMatch != null) put(HTTPHeaderName.IF_MATCH, if (ifMatch == "*") "*" else "\"$ifMatch\"")
-            if (ifNoneMatchStar) put(HTTPHeaderName.IF_NONE_MATCH, "*")
-        }
+        // Up to 3 attempts so a single call can absorb a token-refresh AND a follow-up
+        // DPoP-nonce rotation. Force-refresh the access token at most once per call: if a
+        // refreshed token still gets a non-nonce 401, surface it.
+        var lastResponse: SolidRawResponse? = null
+        var didForceRefresh = false
 
-        var response = send(method, uri, contentType, accept, linkHeader, body, extraHeaders)
-
-        response.headers[HTTPHeaderName.DPOP_NONCE]?.let { nonce ->
-            requireAuth().updateDPoPNonce(webId, nonce)
-        }
-
-        if (response.statusCode == 401) {
-            val wwwAuth = response.headers[HTTPHeaderName.WWW_AUTHENTICATE] ?: ""
-            val isPureNonceChallenge = wwwAuth.contains("use_dpop_nonce", ignoreCase = true) &&
-                    !wwwAuth.contains("invalid_token", ignoreCase = true) &&
-                    !wwwAuth.contains("expired_token", ignoreCase = true)
-
-            if (!isPureNonceChallenge) {
-                requireAuth().getLastTokenResponse(webId, forceRefresh = true)
-            }
-
-            val retryHeaders = buildMap {
+        repeat(MAX_AUTH_ATTEMPTS) {
+            val attemptHeaders = buildMap {
                 putAll(buildAuthHeaders(webId, method, uri.toString()))
                 putAll(additionalHeaders)
                 if (ifMatch != null) put(HTTPHeaderName.IF_MATCH, if (ifMatch == "*") "*" else "\"$ifMatch\"")
                 if (ifNoneMatchStar) put(HTTPHeaderName.IF_NONE_MATCH, "*")
             }
-            response = send(method, uri, contentType, accept, linkHeader, body, retryHeaders)
+
+            val response = send(method, uri, contentType, accept, linkHeader, body, attemptHeaders)
             response.headers[HTTPHeaderName.DPOP_NONCE]?.let { nonce ->
                 requireAuth().updateDPoPNonce(webId, nonce)
             }
-        }
+            lastResponse = response
 
-        return response
+            if (response.statusCode != 401) return response
+
+            val wwwAuth = response.headers[HTTPHeaderName.WWW_AUTHENTICATE] ?: ""
+            val isPureNonceChallenge = wwwAuth.contains("use_dpop_nonce", ignoreCase = true) &&
+                    !wwwAuth.contains("invalid_token", ignoreCase = true) &&
+                    !wwwAuth.contains("expired_token", ignoreCase = true)
+
+            if (isPureNonceChallenge) {
+                return@repeat
+            }
+            if (didForceRefresh) {
+                return response
+            }
+            requireAuth().getLastTokenResponse(webId, forceRefresh = true)
+            didForceRefresh = true
+        }
+        return lastResponse!!
+    }
+
+    private companion object {
+        const val MAX_AUTH_ATTEMPTS = 3
     }
 
     private suspend fun buildAuthHeaders(

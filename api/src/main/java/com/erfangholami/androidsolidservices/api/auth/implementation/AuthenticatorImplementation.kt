@@ -3,6 +3,7 @@ package com.erfangholami.androidsolidservices.api.auth.implementation
 import android.content.Context
 import android.content.Intent
 import android.util.Base64
+import android.util.Log
 import androidx.core.net.toUri
 import com.erfangholami.androidsolidservices.shared.domain.network.HTTPHeaderName
 import com.erfangholami.androidsolidservices.shared.domain.profile.Profile
@@ -44,6 +45,8 @@ import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 
+
+private const val AUTH_LOG_TAG = "Authenticator"
 
 internal class AuthenticatorImplementation private constructor(
     context: Context,
@@ -234,7 +237,15 @@ internal class AuthenticatorImplementation private constructor(
         profileManager.awaitInit()
         val profile = profileManager.getProfileOrNull(webId) ?: return null
         checkTokenAndRefresh(webId, profile, forceRefresh)
-        return profileManager.getProfileOrNull(webId)?.authState?.lastTokenResponse
+        val updated = profileManager.getProfileOrNull(webId) ?: return null
+        // AppAuth's AuthState.update(null, exception) does not clear lastTokenResponse, so a
+        // failed refresh leaves the old (now-expired) access token in place. Returning it would
+        // let callers attach a dead bearer to the next request, yielding the 401 the user sees
+        // after long inactivity. Refuse to hand back a token that is either marked unauthorized
+        // (AppAuth recorded an OAuth token error) or has already passed its expiration.
+        if (!updated.authState.isAuthorized) return null
+        if (isAccessTokenHardExpired(updated)) return null
+        return updated.authState.lastTokenResponse
     }
 
     override suspend fun getAuthHeaders(
@@ -382,6 +393,14 @@ internal class AuthenticatorImplementation private constructor(
             if (!forceRefresh && !needsTokenRefresh(currentProfile)) return@withLock
 
             val (tokenResponse, exception) = requestToken(currentProfile, isRefresh = true)
+            if (tokenResponse == null) {
+                Log.w(
+                    AUTH_LOG_TAG,
+                    "Token refresh failed for $webId: " +
+                        "error=${exception?.error}, desc=${exception?.errorDescription}",
+                    exception,
+                )
+            }
             val updatedAuthState = deepCopyAuthState(currentProfile.authState)
             updatedAuthState.update(tokenResponse, exception)
             profileManager.writeProfile(webId, currentProfile.copy(authState = updatedAuthState))
@@ -392,6 +411,12 @@ internal class AuthenticatorImplementation private constructor(
         val expirationTime =
             profile.authState.lastTokenResponse?.accessTokenExpirationTime ?: return true
         return (System.currentTimeMillis() + 280_000L) > expirationTime
+    }
+
+    private fun isAccessTokenHardExpired(profile: Profile): Boolean {
+        val expirationTime =
+            profile.authState.lastTokenResponse?.accessTokenExpirationTime ?: return true
+        return System.currentTimeMillis() >= expirationTime
     }
 
     private fun getUserInfoFromIdToken(idToken: String): UserInfo {
