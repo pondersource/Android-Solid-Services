@@ -6,7 +6,7 @@
 
     There are two libraries depending on your use case:
 
-    **Option A — Solid Android Client** (recommended for most apps)
+    **Option A — Android Solid Services Client** (recommended for most apps)
 
     Your app talks to the Android Solid Services host app via IPC. Users log in once in ASS; your app reuses their session.
 
@@ -17,7 +17,7 @@
     }
     ```
 
-    **Option B — Solid Android API** (direct Solid access, no host app required)
+    **Option B — Android Solid Services API** (direct Solid access, no host app required)
 
     Your app communicates with the Solid pod server directly, managing its own auth.
 
@@ -32,7 +32,7 @@
     [client](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client) ·
     [api](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api)
 
-    Once added, head to the [Solid Android Client](client-library.md) or [Solid Android API](api-library.md) docs for usage.
+    Once added, head to the [Android Solid Services Client](client-library.md) or [Android Solid Services API](api-library.md) docs for usage.
 
 === "Download the App"
 

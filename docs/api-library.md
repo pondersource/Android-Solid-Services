@@ -1,6 +1,6 @@
-# Solid Android API Library
+# Android Solid Services API Library
 
-The **Solid Android API** library lets your app communicate with a Solid pod server directly — no Android Solid Services host app required. It handles OpenID Connect authentication with DPoP and exposes interfaces for resource management and the Contacts data module.
+The **Android Solid Services API** library lets your app communicate with a Solid pod server directly — no Android Solid Services host app required. It handles OpenID Connect authentication with DPoP and exposes interfaces for resource management and the Contacts data module.
 
 **Use this when:**
 
@@ -8,7 +8,7 @@ The **Solid Android API** library lets your app communicate with a Solid pod ser
 - The Android Solid Services host app is unavailable or not applicable
 - You need fine-grained control over auth flows and token management
 
-**Otherwise, prefer the [Solid Android Client](client-library.md)** — it offloads auth and IPC to the host app.
+**Otherwise, prefer the [Android Solid Services Client](client-library.md)** — it offloads auth and IPC to the host app.
 
 ## Installation
 

@@ -3,7 +3,7 @@ site_url: https://androidsolidservices.erfangholami.com
 site_description: Single Solid sign-in for the Android ecosystem — SDK and app for accessing Solid pods.
 site_author: Erfan Gholami
 repo_name: Android-Solid-Services
-repo_url: https://github.com/pondersource/Android-Solid-Services
+repo_url: https://github.com/erfangholami/Android-Solid-Services
 
 theme:
   name: material
@@ -39,9 +39,9 @@ nav:
   - Getting Started: getting-started.md
   - How It Works: concepts.md
   - Components:
-      - Solid Android API Library: api-library.md
+      - Android Solid Services API Library: api-library.md
       - Android Solid Services App: app.md
-      - Solid Android Client Library: client-library.md
+      - Android Solid Services Client Library: client-library.md
   - Architecture: architecture.md
   - Troubleshooting: troubleshooting.md
   - API Reference: api/index.html

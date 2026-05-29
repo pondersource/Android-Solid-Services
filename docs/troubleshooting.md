@@ -173,7 +173,7 @@ If access should be granted, check the ACL/ACP policy on the pod server side.
 **Fix:** Add it to your project's `gradle.properties`:
 
 ```properties
-key_generator_alias="SolidAndroidApiKeyGenAlias"
+key_generator_alias="AndroidSolidServicesApiKeyGenAlias"
 ```
 
 ---

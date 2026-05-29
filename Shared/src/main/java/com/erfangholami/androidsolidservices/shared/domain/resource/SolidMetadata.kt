@@ -41,8 +41,7 @@ import java.net.URI
  * - [isStorage] — Solid Protocol: derived from `Link: rel="type" <pim:Storage>`
  *
  * The packaging of these fields into a single class is an implementation
- * convenience (not defined by any Solid spec), following the same pattern
- * used by the Inrupt Java Client SDK.
+ * convenience and is not defined by any Solid spec.
  */
 public data class SolidMetadata(
     /** URI of the WAC/ACP access-control resource. From `Link: rel="acl"`. */

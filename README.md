@@ -6,8 +6,8 @@
 This project consists of three parts:
 
 - [Android Solid Services app](#android-solid-services-app)
-- [Solid Android Client library](#solid-android-client-library)
-- [Solid Android API library](#solid-android-api-library)
+- [Android Solid Services Client library](#android-solid-services-client-library)
+- [Android Solid Services API library](#android-solid-services-api-library)
 
 ## What's New in v0.4.0
 
@@ -50,7 +50,7 @@ and you can log in to your pod there. Here are some screenshots from the applica
 |![Screenshot_20260414_00260](https://github.com/user-attachments/assets/9afe2f9d-f4a3-4e05-ae77-ab6e13febf84)|![Screenshot_20241218_152854](https://github.com/user-attachments/assets/543b2d9e-2f51-481f-b50d-934ece61172f)|![Screenshot_20260414_002657](https://github.com/user-attachments/assets/3deabd3a-d907-407a-9fbb-b27e26882206)|![Screenshot_20241218_152952](https://github.com/user-attachments/assets/b6df9725-321d-4572-b9fa-07cf28de3e9a)|
 |-|-|-|-|
 
-## Solid Android Client library
+## Android Solid Services Client library
 
 This android library has the responsibility to check your app already has access grant, request to
 access the pod resources, resource management requests and access data modules (currently Contacts
@@ -169,7 +169,7 @@ For seeing some examples, you can refer
 to [Solid Contacts app](https://github.com/pondersource/Solid-Contacts) which works with Solid
 Contacts data module based on this library.
 
-## Solid Android API library
+## Android Solid Services API library
 
 This library is used in the Android Solid Services app to interact with Solid. In case you have any
 problem with installing the app or want to connect to Solid directly you can add it to your android
@@ -198,7 +198,7 @@ their username/password of the selected IDP. For a better understanding please r
 Solid Services app codes.
 
 After authenticating successfully, you can interact with Solid resources and data modules similar to
-what have been explained in [Solid Android Client](#solid-android-client-library) section with the
+what have been explained in [Android Solid Services Client](#android-solid-services-client-library) section with the
 difference that you need to get the class instance with:
 
 ```kotlin

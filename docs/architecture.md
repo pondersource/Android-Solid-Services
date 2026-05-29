@@ -122,5 +122,5 @@ The host application. Users interact with this; third-party apps bind to its ser
 | kotlinx.serialization          | JSON serialization (replaced Gson in v0.3.0) |
 | API Validator plugin           | Binary API compatibility enforcement via `.api` files |
 | Min SDK                        | 26 (Android 8.0)                             |
-| Target / Compile SDK           | 33 / 35                                      |
+| Target / Compile SDK           | 33 / 36                                      |
 | JVM target                     | 17                                           |

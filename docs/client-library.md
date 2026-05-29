@@ -1,13 +1,13 @@
-# Solid Android Client Library
+# Android Solid Services Client Library
 
-The **Solid Android Client** library lets third-party Android apps plug into the Solid ecosystem by talking to the Android Solid Services host app over IPC. Your app never handles tokens or pod credentials — ASS does that for you.
+The **Android Solid Services Client** library lets third-party Android apps plug into the Solid ecosystem by talking to the Android Solid Services host app over IPC. Your app never handles tokens or pod credentials — ASS does that for you.
 
 **Use this when:**
 
 - You're building an app that works alongside the Android Solid Services host app
 - You want the user's Solid session managed centrally (single sign-in)
 
-**Otherwise, see the [Solid Android API](api-library.md)** if you need direct Solid server access.
+**Otherwise, see the [Android Solid Services API](api-library.md)** if you need direct Solid server access.
 
 ## Installation
 

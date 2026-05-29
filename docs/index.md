@@ -30,8 +30,8 @@ Despite Solid's growing adoption, the Android ecosystem had no native way to int
 | Component                                         | Role                                              | Published                                                                                                     |
 |---------------------------------------------------|---------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
 | [Android Solid Services App](app.md)              | Host app — manages accounts, exposes IPC services | [GitHub Releases](https://github.com/erfangholami/Android-Solid-Services/releases)                            |
-| [Solid Android API Library](api-library.md)       | Direct Solid server communication                 | [Maven Central](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api)       |
-| [Solid Android Client Library](client-library.md) | IPC client for third-party apps                   | [Maven Central](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client) |
+| [Android Solid Services API Library](api-library.md)       | Direct Solid server communication                 | [Maven Central](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/api)       |
+| [Android Solid Services Client Library](client-library.md) | IPC client for third-party apps                   | [Maven Central](https://central.sonatype.com/artifact/com.erfangholami.androidsolidservices/client) |
 
 ## Found a Bug? Have a Question?
 

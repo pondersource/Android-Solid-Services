@@ -30,6 +30,9 @@ Namespace migration. Source code, Maven coordinates, and Gradle module folders m
 - AccountManager `accountType` changed accordingly. Existing accounts on user devices will be orphaned.
 - `appAuthRedirectScheme` changed. Update any OAuth callback URIs registered with Solid identity providers.
 
+### Sharing 
+Add basic classes for sharing resources
+
 ---
 
 ## [0.4.0] — May 2026
@@ -63,7 +66,7 @@ val patch = N3Patch.fromDiff(originalResource, modifiedResource)
 - Fixed incorrect WebID extraction from the token response.
 - Removed several crash points from the token exchange and session handling paths.
 
-### Multi-account in `client`
+### Multi-account in `SolidAndroidClient`
 
 Third-party apps must now pass the target WebID on resource and contacts calls. This enables correct IPC routing when the user has multiple Solid accounts active.
 
@@ -148,4 +151,4 @@ Initial public release.
 - `SolidContainer` support for listing and navigating containers.
 - `getWebId()` exposed as an IPC service.
 - Permission dialog and access grant management in the ASS app.
-- First version of the `client` library.
+- First version of the `SolidAndroidClient` library (renamed to `client` in v0.4.1).
